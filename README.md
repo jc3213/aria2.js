@@ -2,11 +2,11 @@
 ### HTML
 ```HTML
 <script src="https://raw.githubusercontent.com/jc3213/aria2.js/main/aria2.js"
-        integrity="sha256-x9Xlp9IO/8Qu6vkkaE5DZXUZK/Mz4RD2yAGiVRtYqQQ=" crossorigin="anonymous"></script>
+        integrity="sha256-/NyeHAvLqSqeD6YbfeQacGIUFZ9FPn46kWmPNmlEInU=" crossorigin="anonymous"></script>
 ```
 ### TamperMonkey
 ```javascript
-// @require https://raw.githubusercontent.com/jc3213/aria2.js/main/aria2.js#sha256-x9Xlp9IO/8Qu6vkkaE5DZXUZK/Mz4RD2yAGiVRtYqQQ=
+// @require https://raw.githubusercontent.com/jc3213/aria2.js/main/aria2.js#sha256-/NyeHAvLqSqeD6YbfeQacGIUFZ9FPn46kWmPNmlEInU=
 ```
 ## Syntax
 ```javascript
