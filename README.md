@@ -1,12 +1,12 @@
 ## How to Use
 ### HTML
 ```HTML
-<script src="https://raw.githubusercontent.com/jc3213/aria2.js/main/aria2_0.3.8.js"
-        integrity="sha256-KwVLV5qt8DpHLL6YkOe+aWMFb92cWtTVuc9ccbT7xTM=" crossorigin="anonymous"></script>
+<script src="https://raw.githubusercontent.com/jc3213/aria2.js/main/aria2_0.3.10.js"
+        integrity="sha256-BMZovADoJ6OKcNrw1YxIG4iKLGT6tSEYinNfA+aN0qg=" crossorigin="anonymous"></script>
 ```
 ### TamperMonkey
 ```javascript
-// @require https://raw.githubusercontent.com/jc3213/aria2.js/main/aria2_0.3.8.js#sha256-KwVLV5qt8DpHLL6YkOe+aWMFb92cWtTVuc9ccbT7xTM=
+// @require https://raw.githubusercontent.com/jc3213/aria2.js/main/aria2_0.3.10.js#sha256-BMZovADoJ6OKcNrw1YxIG4iKLGT6tSEYinNfA+aN0qg=
 ```
 ## Syntax
 ```javascript
