@@ -21,10 +21,9 @@ class Aria2WebSocket {
     }
     disconnect () {
         this.socket.then((ws) => new Promise(resolve, reject) => {
-            ws.onclose = null;
+            ws.onclose = (event) => resolve(ws);;
             ws.onerror = reject;
             ws.close();
-            resolve(ws);
         }));
     }
     set onmessage (callback) {
