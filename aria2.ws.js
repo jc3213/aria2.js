@@ -6,7 +6,6 @@ class Aria2WebSocket {
         this.connect();
     }
     connect () {
-        this.socket?.then( (ws) => ws.close() );
         this.socket = new Promise((resolve, reject) => {
             let ws = new WebSocket(this.jsonrpc);
             ws.onopen = (event) => resolve(ws);
@@ -19,6 +18,14 @@ class Aria2WebSocket {
                 this._onclose(event);
             };
         });
+    }
+    disconnect () {
+        this.socket.then((ws) => new Promise(resolve, reject) => {
+            ws.onclose = null;
+            ws.onerror = reject;
+            ws.close();
+            resolve(ws);
+        }));
     }
     set onmessage (callback) {
         this._onmessage = typeof callback === 'function' ? callback : () => null;
