@@ -165,16 +165,16 @@ async function aria2WebsocketNotification(response) {
     switch (response.method) {
         case 'aria2.onBtDownloadComplete':
             break;
-       case 'aria2.onDownloadStart':
+        case 'aria2.onDownloadStart':
             console.log("The session #" + gid + " has started");
             if (session.waiting[gid]) {
                 delete session.waiting[gid];
                 session.active[gid] = result;
             }
             break;
-       case 'aria2.onDownloadComplete':
+        case 'aria2.onDownloadComplete':
             console.log("The session #" + gid + " has completed");
-       default:
+        default:
             if (session.active[gid]) {
                 delete session.active[gid];
                 switch (result.status) {
