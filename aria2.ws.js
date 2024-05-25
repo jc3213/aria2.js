@@ -20,23 +20,19 @@ class Aria2WebSocket {
         });
     }
     disconnect () {
-        this.socket.then((ws) => new Promise(resolve, reject) => {
-            ws.onclose = (event) => resolve(ws);;
-            ws.onerror = reject;
-            ws.close();
-        }));
+        this.socket.then( (ws) => ws.close() );
     }
     set onmessage (callback) {
         this._onmessage = typeof callback === 'function' ? callback : () => null;
     }
     get onmessage () {
-        return this._onmessage;
+        return this._onmessage.toString() === '() => null' ? null : this._onmessage;
     }
     set onclose (callback) {
         this._onclose = typeof callback === 'function' ? callback : () => null;
     }
     get onclose () {
-        return this._onclose;
+        return this._onclose.toString() === '() => null' ? null : this._onclose;
     }
     send (...messages) {
         return this.socket.then((ws) => new Promise((resolve, reject) => {
