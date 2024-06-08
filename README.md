@@ -27,14 +27,6 @@ let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret"); // Requires 0.4
 - [onmessage](#onmessage)
 - [onclose](#onclose)
 
-## Method
-- [call](#call)
-    - Use `WebSocket` or `HTTP Post` based on [scheme](#scheme)
-- [send](#call)
-    - Use `WebSocket` method only
-- [post](#call)
-    - Use `HTTP Post` method only
-
 ### scheme
 ```javascript
 console.log(aria2.scheme); // current scheme
@@ -91,6 +83,14 @@ aria2.onclose = callback; // set new message event listener
     - `function`, (event) => void
     - returns `${callback}`
     - It will run when WebSocket connection is closed
+
+## Method
+- [call](#call)
+    - Use `WebSocket` or `HTTP Post` based on [scheme](#scheme)
+- [send](#call)
+    - Use `WebSocket` method only
+- [post](#call)
+    - Use `HTTP Post` method only
 
 ### call
 ```javascript
