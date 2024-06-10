@@ -1,8 +1,10 @@
 class Aria2XMLRequest {
-    constructor (url, secret) {
-        this.jsonrpc = url;
-        this.secret = secret;
-        this.params = secret ? ['token:' + secret] : [];
+    constructor (...args) {
+        let path = args.join('#').match(/^(https?:\/\/[^#]+)#?(.*)$/);
+        if (!path) { throw new Error('Invalid JSON-RPC entry: "' + args.join('", "') + '"'); }
+        this.jsonrpc = path[1];
+        this.secret = path[2];
+        this.params = this.secret ? ['token:' + this.secret] : [];
     }
     get (...messages) {
         return fetch(this.jsonrpc + '?params=' + btoa(unescape(encodeURIComponent(this.json(messages))))).then(this.result);

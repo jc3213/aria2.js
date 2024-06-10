@@ -1,8 +1,10 @@
 class Aria2WebSocket {
-    constructor (url, secret) {
-        this.jsonrpc = url;
-        this.secret = secret;
-        this.params = secret ? ['token:' + secret] : [];
+    constructor (...args) {
+        let path = args.join('#').match(/^(wss?:\/\/[^#]+)#?(.*)$/);
+        if (!path) { throw new Error('Invalid JSON-RPC entry: "' + args.join('", "') + '"'); }
+        this.jsonrpc = path[1];
+        this.secret = path[2];
+        this.params = this.secret ? ['token:' + this.secret] : [];
         this.connect();
     }
     connect () {
