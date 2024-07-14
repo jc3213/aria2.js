@@ -6,11 +6,11 @@ class Aria2XMLRequest {
         this.secret = path[2];
         this.params = this.secret ? ['token:' + this.secret] : [];
     }
-    get (...messages) {
-        return fetch(this.jsonrpc + '?params=' + btoa(unescape(encodeURIComponent(this.json(messages))))).then(this.result);
+    get (...args) {
+        return fetch(this.jsonrpc + '?params=' + btoa(unescape(encodeURIComponent(this.json(args))))).then(this.result);
     }
-    post (...messages) {
-        return fetch(this.jsonrpc, {method: 'POST', body: this.json(messages)}).then(this.result);
+    post (...args) {
+        return fetch(this.jsonrpc, {method: 'POST', body: this.json(args)}).then(this.result);
     }
     result (response) {
         if (response.ok) { return response.json(); } throw new Error(response.statusText);
