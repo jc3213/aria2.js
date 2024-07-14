@@ -36,11 +36,11 @@ class Aria2WebSocket {
     get onclose () {
         return this._onclose.toString() === '() => null' ? null : this._onclose;
     }
-    send (...messages) {
+    send (...args) {
         return this.socket.then((ws) => new Promise((resolve, reject) => {
             ws.resolve = resolve;
             ws.onerror = reject;
-            ws.send( JSON.stringify( array.map( ({method, params = []}) => ({id: '', jsonrpc: '2.0', method, params: [...this.params, ...params]}) ) ) );
+            ws.send( JSON.stringify( args.map( ({method, params = []}) => ({id: '', jsonrpc: '2.0', method, params: [...this.params, ...params]}) ) ) );
         }));
     }
 }
