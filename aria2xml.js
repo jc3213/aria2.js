@@ -15,7 +15,7 @@ class Aria2XMLRequest {
     result (response) {
         if (response.ok) { return response.json(); } throw new Error(response.statusText);
     }
-    json (array) {
-        return JSON.stringify(array.map( ({method, params = []}) => ({ id: '', jsonrpc: '2.0', method, params: [...this.params, ...params] }) ));
+    json (args) {
+        return JSON.stringify(args.map( ({method, params = []}) => ({ id: '', jsonrpc: '2.0', method, params: [...this.params, ...params] }) ));
     }
 }
