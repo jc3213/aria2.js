@@ -7,7 +7,7 @@ class Aria2XMLRequest {
         this.params = this.secret ? ['token:' + this.secret] : [];
     }
     get (...args) {
-        return fetch(this.jsonrpc + '?params=' + btoa(unescape(encodeURIComponent(this.json(args))))).then(this.result);
+        return fetch(this.jsonrpc + '?params=' + btoa( unescape( encodeURIComponent(this.json(args)) ) )).then(this.result);
     }
     post (...args) {
         return fetch(this.jsonrpc, {method: 'POST', body: this.json(args)}).then(this.result);
@@ -16,6 +16,6 @@ class Aria2XMLRequest {
         if (response.ok) { return response.json(); } throw new Error(response.statusText);
     }
     json (args) {
-        return JSON.stringify(args.map( ({method, params = []}) => ({ id: '', jsonrpc: '2.0', method, params: [...this.params, ...params] }) ));
+        return JSON.stringify( args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [...this.params, ...params] }) ) );
     }
 }
