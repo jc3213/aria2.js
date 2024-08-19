@@ -7,17 +7,19 @@ class Aria2WebSocket {
         this.params = this.secret ? ['token:' + this.secret] : [];
         this.connect();
     }
+    timeout = 10000;
     connect () {
         this.socket = new Promise((resolve, reject) => {
             let ws = new WebSocket(this.jsonrpc);
             ws.onopen = (event) => resolve(ws);
             ws.onmessage = (event) => {
                 let response = JSON.parse(event.data);
-                response.method ? this._onmessage(response) : ws.resolve(response);
+                if (!response.method) { ws.resolve(response); }
+                else if (typeof this._onmessage === 'function') { this._onmessage(response); }
             };
             ws.onclose = (event) => {
-                if (!event.wasClean) { setTimeout(() => this.connect(), 5000); }
-                this._onclose(event);
+                if (!event.wasClean) { setTimeout(() => this.connect(), this.timeout); }
+                if (typeof this._onclose === 'function') { this._onclose?.listener(event); }
             };
         });
     }
@@ -25,18 +27,16 @@ class Aria2WebSocket {
         this.socket.then( (ws) => ws.close() );
     }
     set onmessage (callback) {
-        this._atmessage = typeof callback === 'function';
-        this._onmessage = this._atmessage ? callback : () => null;
+        this._onmessage = typeof callback === 'function' ? callback : null;
     }
     get onmessage () {
-        return this._atmessage ? this._onmessage : null;
+        return this._onmessage;
     }
     set onclose (callback) {
-        this._atclose = typeof callback === 'function';
-        this._onclose = this._atclose ? callback : () => null;
+        this._onclose = typeof callback === 'function' ? callback : null;
     }
     get onclose () {
-        return this._atclose ? this._onclose : null;
+        return this._onclose;
     }
     send (...args) {
         return this.socket.then((ws) => new Promise((resolve, reject) => {
