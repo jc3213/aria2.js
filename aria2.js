@@ -3,7 +3,7 @@ class Aria2 {
         let path = args.join('#').match(/^(https?|wss?)(?:#|:\/\/)([^#]+)#?(.*)$/);
         if (!path) { throw new Error('Invalid JSON-RPC entry: "' + args.join('", "') + '"'); }
         this.jsonrpc = {};
-        this.timeout = this.retry = 5;
+        this.timeout = this.retry = 10;
         this.scheme = path[1];
         this.url = path[2];
         this.secret = path[3];
@@ -24,8 +24,6 @@ class Aria2 {
         this.jsonrpc.url = url;
         this.jsonrpc.path = this.jsonrpc.scheme + '://' + url;
         this.jsonrpc.ws = this.jsonrpc.path.replace('http', 'ws');
-        this.disconnect();
-        this.connect();
     }
     get url () {
         return this.jsonrpc.url;
@@ -60,14 +58,14 @@ class Aria2 {
                 response.method ? this.jsonrpc.onmessage(response) : ws.resolve(response);
             };
             ws.onclose = (event) => {
-                if (!event.wasClean && this.jsonrpc.trial < this.jsonrpc.retry) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
+                if (!event.wasClean && this.jsonrpc.trial < this.jsonrpc.retry) { console.log(this.jsonrpc.trial); setTimeout(() => this.connect(), this.jsonrpc.timeout); }
                 this.jsonrpc.onclose(event);
                 this.jsonrpc.trial ++;
             };
         });
     }
     disconnect () {
-        this.socket?.then( (ws) => ws.close() );
+        return this.socket?.then( (ws) => ws.close() );
     }
     set onmessage (callback) {
         this.jsonrpc.onmessage = typeof callback === 'function' ? callback : () => null;
