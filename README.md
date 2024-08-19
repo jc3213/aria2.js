@@ -182,7 +182,7 @@ function aria2ClientInitiate() {
         stopped.result.forEach((result) => session.stopped[result.gid] = session.all[result.gid] = result);
         update = setInterval(aria2UpdateStats, 10000);
     }).catch((error) => {
-        retry = setTimeout(aria2JsonrpcInitiate, 5000);
+        retry = setTimeout(aria2ClientInitiate, 5000);
     });
 }
 
