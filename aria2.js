@@ -40,7 +40,7 @@ class Aria2 {
         this.jsonrpc.trial = 0;
     }
     get retry () {
-        return this.jsonrpc.retry;
+        return this.jsonrpc.retry === Infinity ? 0 : this.jsonrpc.retry;
     }
     set timeout (number) {
         this.jsonrpc.time = number;
