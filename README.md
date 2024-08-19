@@ -119,7 +119,7 @@ aria2.timeout = timeout; // set timeout
 - Requires 0.7.0~
 - timeout
     - `number`: integer, time period between retries
-    - `10`: Default, equivalent to 10000 millisecond
+    - `10`: Default, equivalent to **10000** millisecond
     - returns `${timeout}`
 
 ### onmessage
