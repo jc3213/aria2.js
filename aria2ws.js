@@ -40,7 +40,7 @@ class Aria2WebSocket {
         return this.socket.then((ws) => new Promise((resolve, reject) => {
             ws.resolve = resolve;
             ws.onerror = reject;
-            ws.send( JSON.stringify( args.flat().map( ({ method, params = [] }) => ({id: '', jsonrpc: '2.0', method, params: [...this.params, ...params]}) ) ) );
+            ws.send( JSON.stringify( args.map( ({ method, params = [] }) => ({id: '', jsonrpc: '2.0', method, params: [...this.params, ...params]}) ) ) );
         }));
     }
 }
