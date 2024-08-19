@@ -6,6 +6,7 @@ class Aria2XMLRequest {
         this.secret = path[2];
         this.params = this.secret ? ['token:' + this.secret] : [];
     }
+    version = '0.4.0';
     get (...args) {
         return fetch(this.jsonrpc + '?params=' + btoa( unescape( encodeURIComponent(this.json(args)) ) )).then(this.result);
     }

@@ -7,6 +7,7 @@ class Aria2WebSocket {
         this.params = this.secret ? ['token:' + this.secret] : [];
         this.connect();
     }
+    version = '0.7.0';
     timeout = 10000;
     connect () {
         this.socket = new Promise((resolve, reject) => {
