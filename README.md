@@ -20,10 +20,56 @@ let aria2 = new Aria2("http", "localhost:6800/jsonrpc", "mysecret"); // Requires
 let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret"); // Requires 0.4.0~
 ```
 
+## Method
+- [connect](#connect)
+- [disconnect](#disconnect)
+- [call](#call)
+    - Use `WebSocket` or `HTTP Post` based on [scheme](#scheme)
+- [send](#call)
+    - Use `WebSocket` method only
+- [post](#call)
+    - Use `HTTP Post` method only
+
+### connect
+```javascript
+aria2.connect();
+```
+- Requires 0.7.0~
+- Connect to aria2 `WebSocket` service manually
+- This is automatically done before 0.7.0
+
+### connect
+```javascript
+aria2.disconnect();
+```
+- Requires 0.7.0~
+- disconnect from aria2 `WebSocket` service manually
+- This is automatically done before 0.7.0
+```javascript
+aria2.url = newUrl;
+aria2.disconnect();
+aria2.connect();
+```
+
+### call
+```javascript
+let response = aria2.call( { method, params } );
+let response = aria2.call( { method, params }, { method, params }, ..., { method, params } );
+let response = aria2.call( [ { method, params }, ..., { method, params } ], { method, params } );
+```
+- response
+    - `Promise` object, return an array that contains the response from jsonrpc if fulfilled
+- method **required**
+    - Read [RPC method calls](https://aria2.github.io/manual/en/html/aria2c.html#methods)
+- params **optional**
+    - JSON-RPC method call parameters
+
 ## Getter & Setter
 - [scheme](#scheme)
 - [url](#url)
 - [secret](#secret)
+- [retry](#retry)
+- [timeout](#timeout)
 - [onmessage](#onmessage)
 - [onclose](#onclose)
 
@@ -57,8 +103,30 @@ aria2.secret = secret; // set new secret token
 ```
 - Requires 0.3.0~
 - secret
-    - `string`, secret token of aria2 json-rpc
+    - `string`, secret token
     - returns `${secret}`
+
+### retry
+```javascript
+console.log(aria2.retry); // current retry times
+aria2.retry = retry; // set retry times
+```
+- Requires 0.7.0~
+- retry
+    - `number`: integer, maximum retries to connect **WebSocket**
+    - `10`: Default, set to `0` for infinite retries
+    - returns `${retry}`
+ 
+### timeout
+```javascript
+console.log(aria2.timeout); // current timeout
+aria2.timeout = timeout; // set timeout
+```
+- Requires 0.7.0~
+- timeout
+    - `number`: integer, time period between retries
+    - `10`: Default, equivalent to 10000 millisecond
+    - returns `${timeout}`
 
 ### onmessage
 ```javascript
@@ -70,7 +138,7 @@ aria2.onmessage = callback; // set new message event listener
 - callback
     - `function`, (response) => void
     - returns `${callback}`
-    - Used for JSON-RPC over WebSocket notifications
+    - Used for JSON-RPC over **WebSocket** notifications
 
 ### onclose
 ```javascript
@@ -82,27 +150,7 @@ aria2.onclose = callback; // set new message event listener
 - callback
     - `function`, (event) => void
     - returns `${callback}`
-    - It will run when WebSocket connection is closed
-
-## Method
-- [call](#call)
-    - Use `WebSocket` or `HTTP Post` based on [scheme](#scheme)
-- [send](#call)
-    - Use `WebSocket` method only
-- [post](#call)
-    - Use `HTTP Post` method only
-
-### call
-```javascript
-let response = aria2.call( { method, params } );
-let response = aria2.call( { method, params }, { method, params }, ..., { method, params } );
-```
-- response
-    - `Promise` object, return an array that contains the response from jsonrpc if fulfilled
-- method **required**
-    - Read [RPC method calls](https://aria2.github.io/manual/en/html/aria2c.html#methods)
-- params **optional**
-    - JSON-RPC method call parameters
+    - It will run when **WebSocket** connection is closed
 
 ### Code Sample
 ```javascript
@@ -111,6 +159,8 @@ let session = {};
 let retry;
 let update;
 let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
+aria2.retry = 0;
+aria2.connect();
 aria2.onmessage = aria2WebsocketNotification;
 aria2.onclose = aria2ClientInitiate;
 aria2ClientInitiate();
