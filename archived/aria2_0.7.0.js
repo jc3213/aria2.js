@@ -2,14 +2,14 @@ class Aria2 {
     constructor (...args) {
         let path = args.join('#').match(/^(https?|wss?)(?:#|:\/\/)([^#]+)#?(.*)$/);
         if (!path) { throw new Error('Invalid JSON-RPC entry: "' + args.join('", "') + '"'); }
-        this.jsonrpc = {};
-        this.timeout = this.retry = 10;
         this.scheme = path[1];
         this.url = path[2];
         this.secret = path[3];
+        this.retry = this.timeout = 10;
         this.onmessage = this.onclose = null;
     }
     version = '0.7.0';
+    jsonrpc = {};
     set scheme (scheme) {
         this.call = { 'http': this.post, 'https': this.post, 'ws': this.send, 'wss': this.send }[ scheme ];
         if (!this.call) { throw new Error('Invalid JSON-RPC scheme: "' + scheme + '" is not supported!'); }
@@ -36,7 +36,7 @@ class Aria2 {
         return this.jsonrpc.secret;
     }
     set retry (number) {
-        this.jsonrpc.retry = number;
+        this.jsonrpc.retry = number === 0 ? Infinity : number;
         this.jsonrpc.trial = 0;
     }
     get retry () {
@@ -58,7 +58,7 @@ class Aria2 {
                 response.method ? this.jsonrpc.onmessage(response) : ws.resolve(response);
             };
             ws.onclose = (event) => {
-                if (!event.wasClean && this.jsonrpc.trial < this.jsonrpc.retry) { console.log(this.jsonrpc.trial); setTimeout(() => this.connect(), this.jsonrpc.timeout); }
+                if (!event.wasClean && this.jsonrpc.trial < this.jsonrpc.retry) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
                 this.jsonrpc.onclose(event);
                 this.jsonrpc.trial ++;
             };
