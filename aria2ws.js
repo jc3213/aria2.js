@@ -25,16 +25,18 @@ class Aria2WebSocket {
         this.socket.then( (ws) => ws.close() );
     }
     set onmessage (callback) {
-        this._onmessage = typeof callback === 'function' ? callback : () => null;
+        this._atmessage = typeof callback === 'function';
+        this._onmessage = this._atmessage ? callback : () => null;
     }
     get onmessage () {
-        return this._onmessage.toString() === '() => null' ? null : this._onmessage;
+        return this._atmessage ? this._onmessage : null;
     }
     set onclose (callback) {
-        this._onclose = typeof callback === 'function' ? callback : () => null;
+        this._atclose = typeof callback === 'function';
+        this._onclose = this._atclose ? callback : () => null;
     }
     get onclose () {
-        return this._onclose.toString() === '() => null' ? null : this._onclose;
+        return this._atclose ? this._onclose : null;
     }
     send (...args) {
         return this.socket.then((ws) => new Promise((resolve, reject) => {
