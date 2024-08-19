@@ -55,7 +55,6 @@ aria2.connect();
 ```javascript
 let response = aria2.call( { method, params } );
 let response = aria2.call( { method, params }, { method, params }, ..., { method, params } );
-let response = aria2.call( [ { method, params }, ..., { method, params } ], { method, params } );
 ```
 - response
     - `Promise` object, return an array that contains the response from jsonrpc if fulfilled
