@@ -154,7 +154,6 @@ let retry;
 let update;
 let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
 aria2.retry = 0;
-aria2.connect();
 aria2.onmessage = aria2WebsocketNotification;
 aria2.onclose = aria2ClientInitiate;
 aria2ClientInitiate();
