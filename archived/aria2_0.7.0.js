@@ -24,6 +24,8 @@ class Aria2 {
         this.jsonrpc.url = url;
         this.jsonrpc.path = this.jsonrpc.scheme + '://' + url;
         this.jsonrpc.ws = this.jsonrpc.path.replace('http', 'ws');
+        this.disconnect();
+        this.connect();
     }
     get url () {
         return this.jsonrpc.url;
@@ -65,7 +67,7 @@ class Aria2 {
         });
     }
     disconnect () {
-        return this.socket?.then( (ws) => ws.close() );
+        this.socket?.then( (ws) => ws.close() );
     }
     set onmessage (callback) {
         this.jsonrpc.atmessage = typeof callback === 'function';

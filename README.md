@@ -35,21 +35,16 @@ let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret"); // Requires 0.4
 aria2.connect();
 ```
 - Requires 0.2.0~
-- Connect to aria2 `WebSocket` service manually
-- This is automatically done before 0.7.0
+- Connect to aria2 `WebSocket` service
+- It will connect to `WebSocket` when you change [url](#url)
 
 ### connect
 ```javascript
 aria2.disconnect();
 ```
 - Requires 0.2.0~
-- disconnect from aria2 `WebSocket` service manually
-- This is automatically done before 0.7.0
-```javascript
-aria2.url = newUrl;
-aria2.disconnect();
-aria2.connect();
-```
+- disconnect from aria2 `WebSocket` service
+- If you disconnect manually, it will not retry for reconnection
 
 ### call
 ```javascript
