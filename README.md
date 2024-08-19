@@ -36,15 +36,15 @@ aria2.connect();
 ```
 - Requires 0.2.0~
 - Connect to aria2 `WebSocket` service
-- It will connect to `WebSocket` when you change [url](#url)
+- It will connect automatically when you set the [url](#url) property
 
 ### connect
 ```javascript
 aria2.disconnect();
 ```
 - Requires 0.2.0~
-- disconnect from aria2 `WebSocket` service
-- If you disconnect manually, it will not retry for reconnection
+- Disconnect from aria2 `WebSocket` service
+- It will not retry to connect, if you disconnect manually
 
 ### call
 ```javascript
