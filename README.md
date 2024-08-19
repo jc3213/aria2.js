@@ -34,7 +34,7 @@ let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret"); // Requires 0.4
 ```javascript
 aria2.connect();
 ```
-- Requires 0.7.0~
+- Requires 0.2.0~
 - Connect to aria2 `WebSocket` service manually
 - This is automatically done before 0.7.0
 
@@ -42,7 +42,7 @@ aria2.connect();
 ```javascript
 aria2.disconnect();
 ```
-- Requires 0.7.0~
+- Requires 0.2.0~
 - disconnect from aria2 `WebSocket` service manually
 - This is automatically done before 0.7.0
 ```javascript
