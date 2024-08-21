@@ -201,7 +201,6 @@ async function aria2PurgeDownload() {
 }
 
 async function aria2WebsocketNotification(response) {
-    if (!response.method) { return; }
     let gid = response.params[0].gid;
     let res = await aria2.call({method: 'aria2.tellStatus', params: [gid]});
     let result = res[0].result;
