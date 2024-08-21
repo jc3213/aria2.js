@@ -1,6 +1,7 @@
 let aria2c = {};
 let jsonrpc = {};
 let manager = {};
+let version = '0.1';
 let initFailed;
 let syncPeriod;
 
@@ -8,10 +9,10 @@ self.addEventListener('message', (event) => {
     let {action, params} = event.data;
     switch (action) {
         case 'aria2c-setup':
-            webWorker(params);
+            workerInit(params);
             break;
-        case 'aria2c-purge':
-            sessionPurge();
+        case 'aria2c-version':
+            workerVersion();
             break;
         case 'aria2c-manager':
             jsonrpcManager();
@@ -22,10 +23,13 @@ self.addEventListener('message', (event) => {
         case 'aria2c-session':
             sessionStatus(params);
             break;
+        case 'aria2c-purge':
+            sessionPurge();
+            break;
     }
 });
 
-function webWorker({jsonrpc, secret, interval = 10}) {
+function workerInit({jsonrpc, secret, interval = 10}) {
     aria2c.url = jsonrpc;
     aria2c.interval = interval * 1000;
     aria2c.params = secret ? ['token:' + secret] : [];
@@ -34,6 +38,9 @@ function webWorker({jsonrpc, secret, interval = 10}) {
     initiator();
 }
 
+function workerVersion() {
+    self.postMessage({action: 'aria2c-jsonrpc-status', params: version});
+}
 
 function workerOpen(jsonrpc) {
     return new Promise((resolve) => {
@@ -63,12 +70,12 @@ function workerMessage(...args) {
     });
 }
 
-function jsonrpcStatus() {
-    self.postMessage({action: 'aria2c-jsonrpc-status', params: jsonrpc});
-}
-
 function jsonrpcManager() {
     self.postMessage({action: 'aria2c-manager-status', params: manager});
+}
+
+function jsonrpcStatus() {
+    self.postMessage({action: 'aria2c-jsonrpc-status', params: jsonrpc});
 }
 
 async function sessionPurge() {
@@ -113,7 +120,7 @@ function initiator(interval) {
         let [global, version, stats, active, waiting, stopped] = response;
         jsonrpc.options = global.result;
         jsonrpc.version = version.result;
-        manager.stat = stats.result;
+        jsonrpc.stats = stats.result;
         active.result.forEach((result) => manager.active[result.gid] = manager.all[result.gid] = result);
         waiting.result.forEach((result) => manager.waiting[result.gid] = manager.all[result.gid] = result);
         stopped.result.forEach((result) => manager.stopped[result.gid] = manager.all[result.gid] = result);
@@ -123,7 +130,7 @@ function initiator(interval) {
 
 async function syncActiveStatus() {
     let [stats, active] = await aria2c.call({method: 'aria2.getGlobalStat'}, {method: 'aria2.tellActive'});
-    manager.stat = stats.result;
+    jsonrpc.stats = stats.result;
     active.result.forEach((result) => manager.active[result.gid] = manager.all[result.gid] = result);
 }
 
