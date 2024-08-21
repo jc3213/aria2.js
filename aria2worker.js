@@ -59,7 +59,7 @@ function workerOpen(jsonrpc) {
         ws.onerror = (event) => jsonrpcError(event.error);
         ws.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            response.method ? notifications : ws.resolve(response);
+            response.method ? notifications(response) : ws.resolve(response);
         };
         ws.onclose = (event) => {
             setTimeout(() => {
@@ -134,28 +134,20 @@ function initiator(interval) {
         manager.active = active.result.map((result) => session.active[result.gid] = session.all[result.gid] = result);
         manager.waiting = waiting.result.map((result) => session.waiting[result.gid] = session.all[result.gid] = result);
         manager.stopped = stopped.result.map((result) => session.stopped[result.gid] = session.all[result.gid] = result);
-        update = setInterval(syncActiveStatus, aria2c.interval);
+        update = setInterval(synchronizer, aria2c.interval);
     });
 }
 
-async function syncActiveStatus() {
-    aria2c.call([
-        {method: 'aria2.getGlobalStat'},
-        {method: 'aria2.tellActive'},
-        {method: 'aria2.tellWaiting', params: [0, 999]},
-        {method: 'aria2.tellStopped', params: [0, 999]}
-    ]).then(([stats, active, waiting, stopped]) => {
-        manager.stats = stats.result.map((result) => session.active[result.gid] = session.all[result.gid] = result);
-        manager.active = active.result;
-        manager.waiting = waiting.result;
-        manager.stopped = stopped.result;
-    });
+async function synchronizer() {
+    let [stats, active] = await aria2c.call([ {method: 'aria2.getGlobalStat'}, {method: 'aria2.tellActive'} ]);
+    manager.stats = stats.result;
+    manager.active = active.result.map((result) => session.active[result.gid] = session.all[result.gid] = result);
 }
 
 async function notifications({method, params}) {
     let gid = params[0].gid;
-    let res = await aria2.call({method: 'aria2.tellStatus', params: [gid]});
-    let result = res[0].result;
+    let response = await aria2c.call([ {method: 'aria2.tellStatus', params: [gid]} ]);
+    let result = response[0].result;
     session.all[gid] = result;
     switch (method) {
         case 'aria2.onBtDownloadComplete':
@@ -163,27 +155,45 @@ async function notifications({method, params}) {
         case 'aria2.onDownloadStart':
             sessionStart(result);
             if (session.waiting[gid]) {
-                delete session.waiting[gid];
-                session.active[gid] = result;
+                removeSession('waiting', gid);
+            }
+            if (!session.active[gid]) {
+                addSession('active', gid, result);
             }
             break;
         case 'aria2.onDownloadComplete':
             sessionComplete(result);
         default:
             if (session.active[gid]) {
-                delete session.active[gid];
+                removeSession('active', gid)
                 switch (result.status) {
                     case 'waiting':
                     case 'paused':
-                        session.waiting[gid] = result;
+                        addSession('waiting', gid, result);
                         break;
                     case 'complete':
                     case 'removed':
                     case 'error':
-                        session.stopped[gid] = result;
+                        addSession('stopped', gid, result);
                         break;
                 }
             }
             break;
     }
+}
+
+function addSession(type, gid, result) {
+    let stat = 'num' + type[0].toUpperCase() + type.slice(1);
+    session[type][gid] = result;
+    manager[type].push(result);
+    manager.stats[stat] ++;
+    manager.stats[stat] += '';
+}
+
+function removeSession(type, gid) {
+    let stat = 'num' + type[0].toUpperCase() + type.slice(1);
+    delete session[type][gid];
+    manager[type].splice(manager[type].findIndex((result) => result[gid]), 1);
+    manager.stats[stat] --;
+    manager.stats[stat] += '';
 }
