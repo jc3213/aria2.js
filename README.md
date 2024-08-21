@@ -209,9 +209,9 @@ async function aria2WebsocketNotification(response) {
             break;
         case 'aria2.onDownloadStart':
             console.log("The session #" + gid + " has started");
+            session.active[gid] = result;
             if (session.waiting[gid]) {
                 delete session.waiting[gid];
-                session.active[gid] = result;
             }
             break;
         case 'aria2.onDownloadComplete':
