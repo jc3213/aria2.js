@@ -33,9 +33,9 @@ self.addEventListener('message', (event) => {
     }
 });
 
-function rpcCall(args) {
+function rpcCall(array) {
     return new Promise(async (resolve, reject) => {
-        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [...aria2c.params, ...params] }) );
+        let json = array.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [...aria2c.params, ...params] }) );
         let ws = await aria2c.websocket;
         ws.resolve = resolve;
         ws.onerror = (event) => jsonrpcError(event.error);
@@ -71,21 +71,19 @@ function workerOpen(jsonrpc) {
 }
 
 function workerStatus() {
-    self.postMessage({action: 'aria2c-manager-status', params: {manager, version}});
+    self.postMessage({action: 'aria2c-manager-status', result: {manager, version}});
 }
 
 async function workerReponse(params) {
-    let json = params.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [...aria2c.params, ...params] }) );
-    let response = await aria2c.call(json);
-    self.postMessage({action: 'aria2-call-response', params: response});
+    self.postMessage({action: 'aria2-call-response', result: await aria2c.call(params)});
 }
 
 function jsonrpcStatus() {
-    self.postMessage({action: 'aria2c-jsonrpc-status', params: jsonrpc});
+    self.postMessage({action: 'aria2c-jsonrpc-status', result: jsonrpc});
 }
 
 async function sessionPurge() {
-    let response = await aria2c.call([{method: 'aria2.sessionPurgeResult'}]);
+    let response = await aria2c.call([ {method: 'aria2.sessionPurgeResult'} ]);
     manager.all = {...manager.active, ...manager.waiting};
     manager.stopped = {};
     jsonrpc.stat['numStopped'] = '0';
@@ -98,15 +96,15 @@ async function sessionRemove(gid) {
 
 async function sessionStatus(gid) {
     let [status, options] = await aria2c.call([ {method: 'aria2.tellStatus', params: [gid]}, {method: 'aria2.getOption', params: [gid]} ]);
-    self.postMessage({action: 'aria2c-session-status', params: {status: status.result, options: options.result}});
+    self.postMessage({action: 'aria2c-session-status', result: {status: status.result, options: options.result}});
 }
 
-function sessionStart(params) {
-    self.postMessage({action: 'aria2c-session-start', params});
+function sessionStart(result) {
+    self.postMessage({action: 'aria2c-session-start', result});
 }
 
-function sessionComplete(params) {
-    self.postMessage({action: 'aria2c-session-complete', params});
+function sessionComplete(result) {
+    self.postMessage({action: 'aria2c-session-complete', result});
 }
 
 function jsonrpcError(error) {
