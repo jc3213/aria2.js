@@ -20,7 +20,7 @@ class Aria2WebSocket {
             };
             ws.onclose = (event) => {
                 if (!event.wasClean) { setTimeout(() => this.connect(), this.timeout); }
-                if (typeof this._onclose === 'function') { this._onclose?.listener(event); }
+                if (typeof this._onclose === 'function') { this._onclose(event); }
             };
         });
     }
