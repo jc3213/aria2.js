@@ -8,6 +8,7 @@ class Aria2 {
         this.secret = path[3];
         this.onmessage = this.onclose = null;
     }
+    version = '0.6.0';
     set scheme (scheme) {
         this.call = { 'http': this.post, 'https': this.post, 'ws': this.send, 'wss': this.send }[ scheme ];
         if (!this.call) { throw new Error('Invalid JSON-RPC scheme: "' + scheme + '" is not supported!'); }

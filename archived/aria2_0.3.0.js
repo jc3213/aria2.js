@@ -4,6 +4,7 @@ class Aria2 {
         this.url = url;
         this.secret = secret;
     }
+    version = '0.3.0';
     set scheme (scheme) {
         this.call = { 'http': this.post, 'https': this.post, 'ws': this.send, 'wss': this.send }[ scheme ];
         if (!this.call) { throw new Error('Invalid method: ' + scheme + ' is not supported!'); }
