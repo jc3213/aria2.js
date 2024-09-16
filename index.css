@@ -1,0 +1,137 @@
+body {
+    width: 1280px;
+    margin: 8px auto;
+}
+
+textarea {
+    padding: 3px;
+    width: calc(100% - 12px);
+    resize: none;
+    border-width: 1px;
+    border-style: inset;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+body:not(.adduri) > #adduri, body:not(.setting) > #setting {
+    display: none;
+}
+
+body > #menu, #adduri, #setting {
+    border-width: 1px;
+    border-style: solid;
+    position: fixed;
+    z-index: 999999;
+}
+
+body > #menu {
+    border-width: 0px 1px 1px;
+    padding: 8px;
+    top: 0px;
+    width: 1262px;
+}
+
+#choose, #adduri, #setting {
+    top: 56px;
+}
+
+#choose {
+    left: calc(50% + 642px);
+}
+
+#choose::before {
+    content: var(--queue);
+    display: block;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#adduri, #setting {
+    right: calc(50% - 640px);
+    width: 600px;
+    padding: 8px;
+}
+
+#setting > :first-child {
+    margin-top: 0px;
+}
+
+#aria2_ver {
+    padding: 4px;
+    margin-right: 3px;
+}
+
+#aria2_ver::before {
+    content: "v";
+}
+
+#queue {
+    margin-top: 46px;
+}
+
+.adduri [data-bid="download_btn"], .setting [data-bid="options_btn"] {
+    border-style: inset;
+}
+
+.adduri [data-bid="download_btn"]:active, .setting [data-bid="options_btn"]:active {
+    border-style: outset;
+}
+
+.jsonrpc, .entries {
+    display: grid;
+    grid-column-gap: 3px;
+}
+
+.jsonrpc {
+    grid-template-columns: auto 1fr 1fr auto;
+}
+
+.entries {
+    grid-template-columns: 1fr auto auto 0px;
+}
+
+#adduri > :first-child {
+    margin: 0px 0px 5px;
+}
+
+#stats {
+    margin-right: 150px;
+    grid-template-columns: repeat(2, 1fr) repeat(3, 15%);
+}
+
+#stats > :nth-child(1)::before {
+    content: var(--download);
+}
+
+#stats > :nth-child(2)::before {
+    content: var(--upload);
+}
+
+#stats > :nth-child(3)::before {
+    content: var(--active);
+}
+
+#stats > :nth-child(4)::before {
+    content: var(--waiting);
+}
+
+#stats > :nth-child(5)::before {
+    content: var(--stopped);
+}
+
+.day:not(:empty)::after {
+    content: var(--day);
+}
+
+.hour:not(:empty)::after {
+    content: var(--hour);
+}
+
+.minute:not(:empty)::after {
+    content: var(--minute);
+}
+
+.second:not(:empty)::after {
+    content: var(--second);
+}
