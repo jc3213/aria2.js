@@ -7,13 +7,13 @@ i18nUser.value = localStorage.locale || navigator.language.slice(0, 2);
 i18nUser.addEventListener('change', (event) => i18nUserInterface(localStorage.locale = i18nUser.value));
 
 Promise.all([
-    import('./i18n/en.js'),
-    import('./i18n/zh.js')
-]).then(([en, zh]) => {
-    locale.en = en.locale;
-    locale.zh = zh.locale;
+    fetch('i18n/en.js'),
+    fetch('i18n/zh.js')
+]).then(async ([en, zh]) => {
+    locale.en = await en.json();
+    locale.zh = await zh.json();
     i18nUserInterface(i18nUser.value);
-})
+});
 
 function i18nUserInterface(lang) {
     var i18n = locale[lang] ?? locale.en;
