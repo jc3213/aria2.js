@@ -1,7 +1,7 @@
 ## Usage
 
 ### Download
-| [aria2 download utility](https://github.com/aria2/aria2/releases/latest) | [aria2c.cmd](https://github.com/jc3213/batchscript/tree/main/aria2c) | [aria2.js](https://github.com/jc3213/aria2.js) | [Try Task Manager](https://jc3213.github.io/aria2.js/) |
+| [aria2 download utility](https://github.com/aria2/aria2/releases/latest) | [aria2c.cmd](https://github.com/jc3213/batchscript/tree/main/aria2c) | [aria2.js](https://github.com/jc3213/aria2.js) | [Try Task Manager](https://jc3213.github.io/aria2.js/Manager) |
 | - | - | - | - |
 
 
