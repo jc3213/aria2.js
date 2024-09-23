@@ -7,8 +7,8 @@ i18nUser.value = localStorage.locale || navigator.language.slice(0, 2);
 i18nUser.addEventListener('change', (event) => i18nUserInterface(localStorage.locale = i18nUser.value));
 
 Promise.all([
-    fetch('i18n/en.js'),
-    fetch('i18n/zh.js')
+    fetch('i18n/en.json'),
+    fetch('i18n/zh.json')
 ]).then(async ([en, zh]) => {
     locale.en = await en.json();
     locale.zh = await zh.json();
