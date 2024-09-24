@@ -44,7 +44,7 @@ aria2.connect();
 - Connect to aria2 `WebSocket` service
 - It will connect automatically when you set the [url](#url) property
 
-### connect
+### disconnect
 ```javascript
 aria2.disconnect();
 ```
