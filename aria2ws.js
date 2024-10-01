@@ -31,13 +31,13 @@ class Aria2WebSocket {
         this._onmessage = typeof callback === 'function' ? callback : null;
     }
     get onmessage () {
-        return this._onmessage;
+        return null || this._onmessage;
     }
     set onclose (callback) {
         this._onclose = typeof callback === 'function' ? callback : null;
     }
     get onclose () {
-        return this._onclose;
+        return null || this._onclose;
     }
     send (...args) {
         return this.socket.then((ws) => new Promise((resolve, reject) => {
