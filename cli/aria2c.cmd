@@ -1,5 +1,5 @@
 @echo off
-IF NOT EXIST aria2c.session type NUL > aria2c.session
+if not exist aria2c.session type NUL > aria2c.session
 setlocal enabledelayedexpansion
 pushd %~dp0
 for /f "delims=" %%a in ('dir /s /b aria2c.exe') do (set aria2c=%%a)
