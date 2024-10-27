@@ -70,7 +70,7 @@ body > #menu {
     margin-top: 46px;
 }
 
-.adduri [data-bid="download_btn"], .setting [data-bid="options_btn"] {
+.adduri #download, .setting #options {
     border-style: inset;
 }
 
