@@ -7,7 +7,7 @@ class Aria2 {
         this.secret = path[3];
     }
     version = '0.8.0';
-    jsonrpc = { retries: 10, timeout: 10 };
+    jsonrpc = { retries: 10, timeout: 10000 };
     events = { onopen: null, onmessage: null, onclose: null };
     set scheme (scheme) {
         this.call = { 'http': this.post, 'https': this.post, 'ws': this.send, 'wss': this.send }[ scheme ];
@@ -48,7 +48,7 @@ class Aria2 {
         this.jsonrpc.timeout = this.jsonrpc.time * 1000;
     }
     get timeout () {
-        return isNaN(this.jsonrpc.timeout) ? 10 : this.jsonrpc.timeout | 0;
+        return isNaN(this.jsonrpc.time) ? 10 : this.jsonrpc.time | 0;
     }
     connect () {
         this.socket = new Promise((resolve, reject) => {
