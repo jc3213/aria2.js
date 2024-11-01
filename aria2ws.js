@@ -13,8 +13,8 @@ class Aria2WebSocket {
         this.socket = new Promise((resolve, reject) => {
             let ws = new WebSocket(this.jsonrpc);
             ws.onopen = (event) => {
+                this.alive = true;
                 if (typeof this._onopen === 'function') { this._onopen(event); }
-                this.connected = true;
                 resolve(ws);
             };
             ws.onmessage = (event) => {
@@ -23,6 +23,7 @@ class Aria2WebSocket {
                 else if (typeof this._onmessage === 'function') { this._onmessage(response); }
             };
             ws.onclose = (event) => {
+                this.alive = false;
                 if (!event.wasClean) { setTimeout(() => this.connect(), this.timeout); }
                 if (typeof this._onclose === 'function') { this._onclose(event); }
             };
