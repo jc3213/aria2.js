@@ -68,7 +68,8 @@ let response = aria2.call( { method, params }, { method, params }, ..., { method
 - [scheme](#scheme)
 - [url](#url)
 - [secret](#secret)
-- [retry](#retry)
+- [retry](#retry) *deprecated*
+- [retries](#retries)
 - [timeout](#timeout)
 - [onmessage](#onmessage)
 - [onclose](#onclose)
@@ -107,12 +108,14 @@ aria2.secret = secret; // set new secret token
     - returns `${secret}`
 
 ### retry
+- Introduced in 0.7.0, and renamed to [retries](#retries) since 0.8.0
+### retries
 ```javascript
-console.log(aria2.retry); // current retry times
-aria2.retry = retry; // set retry times
+console.log(aria2.retries); // current quota for retries
+aria2.retries = retries; // set quota for retries
 ```
-- Requires 0.7.0~
-- retry
+- Requires 0.8.0~
+- retries
     - `number`: integer, maximum retries to connect **WebSocket**
     - `10`: Default, set to `0` for infinite retries
     - returns `${retry}`
@@ -159,7 +162,7 @@ let session = {};
 let retry;
 let update;
 let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
-aria2.retry = 0;
+aria2.retries = 0;
 aria2.onmessage = aria2WebsocketNotification;
 aria2.onclose = aria2ClientInitiate;
 aria2ClientInitiate();
