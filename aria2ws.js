@@ -9,7 +9,6 @@ class Aria2WebSocket {
     }
     version = '0.8.0';
     timeout = 10000;
-    retries = Infinity;
     connect () {
         this.socket = new Promise((resolve, reject) => {
             let ws = new WebSocket(this.jsonrpc);
@@ -24,7 +23,7 @@ class Aria2WebSocket {
                 else if (typeof this._onmessage === 'function') { this._onmessage(response); }
             };
             ws.onclose = (event) => {
-                if (!event.wasClean && this.count < this.retries) { setTimeout(() => this.connect(), this.timeout); }
+                if (!event.wasClean) { setTimeout(() => this.connect(), this.timeout); }
                 if (typeof this._onclose === 'function') { this._onclose(event); }
             };
         });
