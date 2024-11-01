@@ -38,7 +38,7 @@ class Aria2 {
         return this.jsonrpc.secret;
     }
     set retries (number) {
-        this.jsonrpc.retries = isNaN(number) ? Infinity : number;
+        this.jsonrpc.retries = isNaN(number) || number === -1 ? Infinity : number;
     }
     get retries () {
         return isNaN(this.jsonrpc.retries) ? Infinity : this.jsonrpc.retries;
