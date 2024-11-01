@@ -60,7 +60,7 @@ class Aria2 {
             ws.onmessage = (event) => {
                 let response = JSON.parse(event.data);
                 if (!response.method) { ws.resolve(response); }
-                else if (typeof this.jsonrpc.events === 'function') { this.events.onmessage(response); }
+                else if (typeof this.events.onmessage === 'function') { this.events.onmessage(response); }
             };
             ws.onclose = (event) => {
                 if (!event.wasClean && this.jsonrpc.retry < this.jsonrpc.quota) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
