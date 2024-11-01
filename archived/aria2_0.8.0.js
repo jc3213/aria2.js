@@ -7,7 +7,7 @@ class Aria2 {
         this.secret = path[3];
     }
     version = '0.8.0';
-    jsonrpc = { retry: 10, timeout: 10000 };
+    jsonrpc = { quota: 10, timeout: 10000 };
     events = { onopen: null, onmessage: null, onclose: null };
     set scheme (scheme) {
         this.call = { 'http': this.post, 'https': this.post, 'ws': this.send, 'wss': this.send }[ scheme ];
@@ -23,7 +23,7 @@ class Aria2 {
         this.jsonrpc.url = url;
         this.jsonrpc.path = this.jsonrpc.scheme + '://' + url;
         this.jsonrpc.ws = this.jsonrpc.path.replace('http', 'ws');
-        this.jsonrpc.trial = 0;
+        this.jsonrpc.retry = 0;
         this.disconnect();
         this.connect();
     }
@@ -37,11 +37,11 @@ class Aria2 {
     get secret () {
         return this.jsonrpc.secret;
     }
-    set retry (number) {
-        this.jsonrpc.retry = isNaN(number) || number <= 0 ? Infinity : number;
+    set retries (number) {
+        this.jsonrpc.quota = isNaN(number) || number <= 0 ? Infinity : number;
     }
-    get retry () {
-        return this.jsonrpc.retry | 0;
+    get retries () {
+        return this.jsonrpc.quota | 0;
     }
     set timeout (number) {
         this.jsonrpc.timeout = isNaN(number) ? 10000 : number <= 3 ? 3000 : number * 1000;
@@ -53,8 +53,8 @@ class Aria2 {
         this.socket = new Promise((resolve, reject) => {
             let ws = new WebSocket(this.jsonrpc.ws);
             ws.onopen = (event) => {
-                this.connected = true;
                 if (typeof this.events.onopen === 'function') { this.events.onopen(event); }
+                this.connected = true;
                 resolve(ws);
             };
             ws.onmessage = (event) => {
@@ -63,10 +63,10 @@ class Aria2 {
                 else if (typeof this.jsonrpc.events === 'function') { this.events.onmessage(response); }
             };
             ws.onclose = (event) => {
-                if (!event.wasClean && this.jsonrpc.trial < this.jsonrpc.retry) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
+                if (!event.wasClean && this.jsonrpc.retry < this.jsonrpc.quota) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
                 if (typeof this.events.onclose === 'function') { this.events.onclose(event); }
                 this.connected = false;
-                this.jsonrpc.trial ++;
+                this.jsonrpc.retry ++;
             };
         });
     }

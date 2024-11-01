@@ -7,25 +7,36 @@ class Aria2WebSocket {
         this.params = this.secret ? ['token:' + this.secret] : [];
         this.connect();
     }
-    version = '0.7.0';
+    version = '0.8.0';
     timeout = 10000;
+    retries = Infinity;
     connect () {
         this.socket = new Promise((resolve, reject) => {
             let ws = new WebSocket(this.jsonrpc);
-            ws.onopen = (event) => resolve(ws);
+            ws.onopen = (event) => {
+                if (typeof this._onopen === 'function') { this._onopen(event); }
+                this.connected = true;
+                resolve(ws);
+            };
             ws.onmessage = (event) => {
                 let response = JSON.parse(event.data);
                 if (!response.method) { ws.resolve(response); }
                 else if (typeof this._onmessage === 'function') { this._onmessage(response); }
             };
             ws.onclose = (event) => {
-                if (!event.wasClean) { setTimeout(() => this.connect(), this.timeout); }
+                if (!event.wasClean && this.count < this.retries) { setTimeout(() => this.connect(), this.timeout); }
                 if (typeof this._onclose === 'function') { this._onclose(event); }
             };
         });
     }
     disconnect () {
         this.socket.then( (ws) => ws.close() );
+    }
+    set onopen (callback) {
+        this._onopen = typeof callback === 'function' ? callback : null;
+    }
+    get onopen () {
+        return typeof this._onopen === 'function' ? this._onopen : null;
     }
     set onmessage (callback) {
         this._onmessage = typeof callback === 'function' ? callback : null;
