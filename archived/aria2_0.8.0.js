@@ -77,7 +77,7 @@ class Aria2 {
         this.events.onopen = typeof callback === 'function' ? callback : null;
     }
     get onopen () {
-        return typeof this.events.onopen === 'function' ? this.events.onmessage : null;
+        return typeof this.events.onopen === 'function' ? this.events.onopen : null;
     }
     set onmessage (callback) {
         this.events.onmessage = typeof callback === 'function' ? callback : null;
