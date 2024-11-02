@@ -77,20 +77,21 @@ let response = aria2.call( { method, params }, { method, params }, ..., { method
 
 ### scheme
 ```javascript
-console.log(aria2.scheme); // current scheme
-aria2.scheme = scheme; // set new scheme
+aria2.scheme = scheme;
+console.log(aria2.scheme);
 ```
 - Requires 0.2.0~
+- schemes that decide the approach to JSON-RPC
 - scheme
     - `http`, `https`, `ws`, and `wss`
 
 ### url
 ```javascript
-console.log(aria2.url); // current url
-aria2.url = url; // set new url
+aria2.url = url;
+console.log(aria2.url);
 ```
 - Requires 0.3.0~
-- url
+- the url of JSON-RPC
     - `${hostname}:${port}/jsonrpc`
 - hostname
     - `www.example.com`
@@ -100,13 +101,13 @@ aria2.url = url; // set new url
 
 ### secret
 ```javascript
-console.log(aria2.secret); // current secret token
-aria2.secret = secret; // set new secret token
+aria2.secret = secret;
+console.log(aria2.secret);
 ```
 - Requires 0.3.0~
+- the secret token `secret=your-secret-token` in JSON-RPC configuration
 - secret
-    - `string`, secret token
-    - returns `${secret}`
+    - `string`
 
 ### retry
 - `10`: Default, use `0` for unlimited retries
@@ -115,25 +116,27 @@ aria2.secret = secret; // set new secret token
 
 ### retries
 ```javascript
-console.log(aria2.retries); // current quota for retries
-aria2.retries = retries; // set quota for retries
+aria2.retries = retries;
+console.log(aria2.retries);
 ```
 - Requires 0.8.0~
+- maximum retries when connection to JSON-RPC is closed
 - retries
-    - `number`: integer, maximum retries to connect **WebSocket**
-    - `10`: Default, use `-1` or other negative numbers for unlimited retries
-    - returns `${retry}`
+    - `integer`
+    - `10`: Default
+    - `-1` or other negative numbers for unlimited retries
  
 ### timeout
 ```javascript
-console.log(aria2.timeout); // current timeout
-aria2.timeout = timeout; // set timeout
+aria2.timeout = timeout;
+console.log(aria2.timeout);
 ```
 - Requires 0.7.0~
+- time interval between retries
 - timeout
-    - `number`: integer, time period between retries
+    - integer
     - `10`: Default, equivalent to **10000** millisecond
-    - returns `${timeout}`
+    - It is suggested to use numbers larger thant `3`
 
 ### onopen
 ```javascript
