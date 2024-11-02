@@ -113,8 +113,9 @@ function ParseOptions(nodes, json) {
     aria2Proxy = config.proxy;
     aria2Delay = config.interval;
     aria2RPC = new Aria2(config.scheme, config.jsonrpc, config.secret);
-    aria2RPC.onmessage = aria2WebSocket;
-    aria2RPC.onopen = aria2RPC.onclose = aria2ClientWorker;
+    aria2RPC.onopen = aria2ClientOpened;
+    aria2RPC.onclose = aria2ClientClosed;
+    aria2RPC.onmessage = aria2ClientMessage;
     var [global, version] = await aria2RPC.call({method: 'aria2.getGlobalOption'}, {method: 'aria2.getVersion'});
     var options = global.result;
     options['min-split-size'] = getFileSize(options['min-split-size']);
