@@ -71,8 +71,9 @@ let response = aria2.call( { method, params }, { method, params }, ..., { method
 - [retry](#retry) *deprecated*
 - [retries](#retries)
 - [timeout](#timeout)
-- [onmessage](#onmessage)
+- [onopen](#onopen)
 - [onclose](#onclose)
+- [onmessage](#onmessage)
 
 ### scheme
 ```javascript
@@ -134,85 +135,60 @@ aria2.timeout = timeout; // set timeout
     - `10`: Default, equivalent to **10000** millisecond
     - returns `${timeout}`
 
-### onmessage
+### onopen
 ```javascript
-console.log(aria2.onmessage); // current message event listener
-aria2.onmessage = callback; // set new message event listener
+aria2.onmessage = callback;
+console.log(aria2.onopen);
 ```
-- Requires 0.2.0~
-- Handle the event when `WebSocket` message is recieved
+- Requires 0.8.0~
+- Function callback that runs when JSON-RPC is connected
 - callback
-    - `function`, (response) => void
-    - returns `${callback}`
-    - Used for JSON-RPC over **WebSocket** notifications
+    - `function`, (event) => void
 
 ### onclose
 ```javascript
-console.log(aria2.onclose); // current message event listener
-aria2.onclose = callback; // set new message event listener
+aria2.onclose = callback;
+console.log(aria2.onclose);
 ```
 - Requires 0.5.0~
-- Handle the event when `WebSocket` connection is closed
+- Fcuntion callback that runs when JSON-RPC is closed
 - callback
     - `function`, (event) => void
-    - returns `${callback}`
-    - It will run when **WebSocket** connection is closed
+
+### onmessage
+```javascript
+aria2.onmessage = callback;
+console.log(aria2.onmessage);
+```
+- Requires 0.2.0~
+- Functon callback that runs when JSON-RPC sends messages
+- callback
+    - `function`, (response) => void
 
 ### Code Sample
 ```javascript
 let jsonrpc = {};
 let session = {};
-let retry;
 let update;
-let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
-aria2.retries = 0;
-aria2.onmessage = aria2WebsocketNotification;
-aria2.onclose = aria2ClientInitiate;
-aria2ClientInitiate();
 
-function aria2ClientInitiate() {
-    clearTimeout(retry);
-    clearInterval(update);
+let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
+aria2.retries = -1;
+aria2.onopen = async () => {
     session.all = {};
     session.active = {};
     session.waiting = {};
     session.stopped = {};
-    aria2.call(
-        {method: 'aria2.getGlobalOption'},
-        {method: 'aria2.getVersion'},
-        {method: 'aria2.getGlobalStat'},
-        {method: 'aria2.tellActive'},
-        {method: 'aria2.tellWaiting', params: [0, 999]},
-        {method: 'aria2.tellStopped', params: [0, 999]}
-    ).then((response) => {
-        let [global, version, stats, active, waiting, stopped] = response;
-        jsonrpc.options = global.result;
-        jsonrpc.version = version.result;
-        jsonrpc.stat = stats.result;
-        active.result.forEach((result) => session.active[result.gid] = session.all[result.gid] = result);
-        waiting.result.forEach((result) => session.waiting[result.gid] = session.all[result.gid] = result);
-        stopped.result.forEach((result) => session.stopped[result.gid] = session.all[result.gid] = result);
-        update = setInterval(aria2UpdateStats, 10000);
-    }).catch((error) => {
-        retry = setTimeout(aria2ClientInitiate, 5000);
-    });
-}
-
-async function aria2UpdateStats() {
-    let response = await aria2RPC.call({method: 'aria2.getGlobalStat'}, {method: 'aria2.tellActive'});
-    let [stats, active] = response;
+    let [global, version, stats, active, waiting, stopped] = await aria2.call( {method: 'aria2.getGlobalOption'}, {method: 'aria2.getVersion'}, {method: 'aria2.getGlobalStat'}, {method: 'aria2.tellActive'}, {method: 'aria2.tellWaiting', params: [0, 999]}, {method: 'aria2.tellStopped', params: [0, 999]} );
+    jsonrpc.options = global.result;
+    jsonrpc.version = version.result;
     jsonrpc.stat = stats.result;
     active.result.forEach((result) => session.active[result.gid] = session.all[result.gid] = result);
-}
-
-async function aria2PurgeDownload() {
-    let response = await aria2RPC.call({method: 'aria2.purgeDownloadResult'});
-    session.all = {...session.active, ...session.waiting};
-    session.stopped = {};
-    jsonrpc.stat['numStopped'] = '0';
-}
-
-async function aria2WebsocketNotification(response) {
+    waiting.result.forEach((result) => session.waiting[result.gid] = session.all[result.gid] = result);
+    stopped.result.forEach((result) => session.stopped[result.gid] = session.all[result.gid] = result);
+    update = setInterval(aria2UpdateStats, 10000);
+};
+aria2.onclose = () => clearInterval(update);
+aria2.onmessage = async (response) {
     let gid = response.params[0].gid;
     let res = await aria2.call({method: 'aria2.tellStatus', params: [gid]});
     let result = res[0].result;
@@ -245,5 +221,18 @@ async function aria2WebsocketNotification(response) {
             }
             break;
     }
+};
+
+async function aria2UpdateStats() {
+    let response = await aria2RPC.call({method: 'aria2.getGlobalStat'}, {method: 'aria2.tellActive'});
+    let [stats, active] = response;
+    jsonrpc.stat = stats.result;
+    active.result.forEach((result) => session.active[result.gid] = session.all[result.gid] = result);
 }
-```
+
+async function aria2PurgeDownload() {
+    let response = await aria2RPC.call({method: 'aria2.purgeDownloadResult'});
+    session.all = {...session.active, ...session.waiting};
+    session.stopped = {};
+    jsonrpc.stat['numStopped'] = '0';
+}
