@@ -111,6 +111,8 @@ function ParseOptions(nodes, json) {
 
 (async function () {
     aria2RPC = new Aria2(config.scheme, config.jsonrpc, config.secret);
+    aria2RPC.onmessage = aria2WebSocket;
+    aria2RPC.onopen = aria2RPC.onclose = aria2ClientWorker;
     aria2Proxy = config.proxy;
     aria2Delay = config.interval;
     var [global, version] = await aria2RPC.call({method: 'aria2.getGlobalOption'}, {method: 'aria2.getVersion'});
@@ -120,5 +122,4 @@ function ParseOptions(nodes, json) {
     options['max-upload-limit'] = getFileSize(options['max-upload-limit']);
     aria2Global = ParseOptions(download, options);
     document.querySelector('#aria2_ver').textContent = version.result.version;
-    aria2ClientWorker();
 })();
