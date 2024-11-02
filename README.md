@@ -134,13 +134,13 @@ console.log(aria2.timeout);
 - Requires 0.7.0~
 - time interval between retries
 - timeout
-    - integer
+    - `integer`
     - `10`: Default, equivalent to **10000** millisecond
-    - It is suggested to use numbers larger thant `3`
+    - It is recommended to use numbers larger thant `3`
 
 ### onopen
 ```javascript
-aria2.onmessage = callback;
+aria2.onopen = callback;
 console.log(aria2.onopen);
 ```
 - Requires 0.8.0~
