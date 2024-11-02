@@ -32,15 +32,15 @@ optionsBtn.addEventListener('click', (event) => {
 document.getElementById('commit').addEventListener('click', (event) => {
     options.forEach((entry) => { localStorage[entry.name] = config[entry.name] ?? entry.dataset.value; });
     if ('interval' in changes) {
-        clearInterval(aria2Alive);
-        aria2Interval = config.interval * 1000;
-        aria2Alive = setInterval(aria2ClientUpdate, aria2Interval);
+        clearInterval(aria2Interval);
+        aria2Period = config.interval * 1000;
+        aria2Interval = setInterval(aria2ClientUpdate, aria2Period);
     }
     if ('proxy' in changes) {
         aria2Proxy = config.proxy;
     }
     if ('scheme' in changes) {
-        aria2RPC.method = config.scheme;
+        aria2RPC.scheme = config.scheme;
     }
     if ('secret' in changes) {
         aria2RPC.secret = config.scheme;
@@ -110,7 +110,9 @@ function ParseOptions(nodes, json) {
 }
 
 (async function () {
-    aria2ClientSetup({jsonrpc: config.scheme + '://' + config.jsonrpc, secret: config.secret, interval: config.interval, proxy: config.proxy});
+    aria2RPC = new Aria2(config.scheme, config.jsonrpc, config.secret);
+    aria2Proxy = config.proxy;
+    aria2Delay = config.interval;
     var [global, version] = await aria2RPC.call({method: 'aria2.getGlobalOption'}, {method: 'aria2.getVersion'});
     var options = global.result;
     options['min-split-size'] = getFileSize(options['min-split-size']);
@@ -118,4 +120,5 @@ function ParseOptions(nodes, json) {
     options['max-upload-limit'] = getFileSize(options['max-upload-limit']);
     aria2Global = ParseOptions(download, options);
     document.querySelector('#aria2_ver').textContent = version.result.version;
+    aria2ClientWorker();
 })();
