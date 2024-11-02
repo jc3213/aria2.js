@@ -108,7 +108,10 @@ aria2.secret = secret; // set new secret token
     - returns `${secret}`
 
 ### retry
-- Introduced in 0.7.0, and renamed to [retries](#retries) since 0.8.0
+- `10`: Default, use `0` for unlimited retries
+- Introduced in 0.7.0
+- Deprecated and renamed to [retries](#retries) since 0.8.0
+
 ### retries
 ```javascript
 console.log(aria2.retries); // current quota for retries
@@ -117,7 +120,7 @@ aria2.retries = retries; // set quota for retries
 - Requires 0.8.0~
 - retries
     - `number`: integer, maximum retries to connect **WebSocket**
-    - `10`: Default, set to `0` for infinite retries
+    - `10`: Default, use `-1` or other negative numbers for unlimited retries
     - returns `${retry}`
  
 ### timeout
