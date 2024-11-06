@@ -8,19 +8,17 @@
         <link rel="stylesheet" href="index.css">
     </head>
     <body>
-        <div id="menu" class="flex">
-            <div id="stats">
-                <div class="download" data-sid="download"></div>
-                <div class="upload" data-sid="upload"></div>
-                <div data-sid="active">0</div>
-                <div data-sid="waiting">0</div>
-                <div data-sid="stopped">0</div>
-            </div>
+        <div id="menu">
+            <div class="download" data-sid="download"></div>
+            <div class="upload" data-sid="upload"></div>
+            <div data-sid="active">0</div>
+            <div data-sid="waiting">0</div>
+            <div data-sid="stopped">0</div>
             <select id="aria2_i18n">
                 <option value="en">English</option>
                 <option value="zh">简体中文</option>
             </select>
-            <div id="aria2_ver"></div>
+            <span id="aria2_ver"></span>
             <button id="download" i18n="popup_newdld">New Download</button>
             <button id="purge" i18n="popup_purge">Purge</button>
             <button id="options" i18n="popup_options">Options</button>
@@ -113,7 +111,6 @@
                 </div>
             </div>
         </div>
-        <hr>
         <div id="queue">
             <div id="active" data-tid="active"></div>
             <div id="waiting" data-tid="waiting"></div>

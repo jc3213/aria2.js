@@ -1,6 +1,6 @@
 body {
-    width: 1280px;
     margin: 8px auto;
+    width: 1280px;
 }
 
 textarea {
@@ -17,21 +17,25 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
     display: none;
 }
 
-body > #menu, #adduri, #setting {
-    border-width: 1px;
-    border-style: solid;
+#menu, #adduri, #setting {
     position: fixed;
     z-index: 999999;
 }
 
-body > #menu {
+#menu {
     border-width: 0px 1px 1px;
+    border-style: solid;
     padding: 8px;
     top: 0px;
     width: 1262px;
 }
 
-#choose, #adduri, #setting {
+#adduri, #setting {
+    border-width: 1px;
+    border-style: solid;
+}
+
+#queue, #choose, #adduri, #setting {
     top: 56px;
 }
 
@@ -66,10 +70,6 @@ body > #menu {
     content: "v";
 }
 
-#queue {
-    margin-top: 46px;
-}
-
 .adduri #download, .setting #options {
     border-style: inset;
 }
@@ -95,28 +95,23 @@ body > #menu {
     margin: 0px 0px 5px;
 }
 
-#stats {
-    margin-right: 150px;
-    grid-template-columns: repeat(2, 1fr) repeat(3, 15%);
-}
-
-#stats > :nth-child(1)::before {
+#menu > div:nth-child(1)::before {
     content: var(--download);
 }
 
-#stats > :nth-child(2)::before {
+#menu > div:nth-child(2)::before {
     content: var(--upload);
 }
 
-#stats > :nth-child(3)::before {
+#menu > div:nth-child(3)::before {
     content: var(--active);
 }
 
-#stats > :nth-child(4)::before {
+#menu > div:nth-child(4)::before {
     content: var(--waiting);
 }
 
-#stats > :nth-child(5)::before {
+#menu > div:nth-child(5)::before {
     content: var(--stopped);
 }
 
