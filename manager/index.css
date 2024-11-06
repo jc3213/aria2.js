@@ -5,12 +5,12 @@ body {
 
 textarea {
     padding: 3px;
-    width: calc(100% - 12px);
-    resize: none;
     border-width: 1px;
     border-style: inset;
     overflow-y: auto;
     overflow-x: hidden;
+    resize: none;
+    width: calc(100% - 12px);
 }
 
 body:not(.adduri) > #adduri, body:not(.setting) > #setting {
@@ -18,6 +18,7 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
 }
 
 #menu, #adduri, #setting {
+    padding: 8px;
     position: fixed;
     z-index: 999999;
 }
@@ -25,7 +26,6 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
 #menu {
     border-width: 0px 1px 1px;
     border-style: solid;
-    padding: 8px;
     top: 0px;
     width: 1262px;
 }
@@ -35,7 +35,7 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
     border-style: solid;
 }
 
-#queue, #choose, #adduri, #setting {
+#choose, #adduri, #setting {
     top: 56px;
 }
 
@@ -54,7 +54,6 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
 #adduri, #setting {
     right: calc(50% - 640px);
     width: 600px;
-    padding: 8px;
 }
 
 #setting > :first-child {
@@ -62,12 +61,16 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
 }
 
 #aria2_ver {
-    padding: 4px;
     margin-right: 3px;
+    padding: 4px;
 }
 
 #aria2_ver::before {
     content: "v";
+}
+
+#queue {
+    margin-top: 56px;
 }
 
 .adduri #download, .setting #options {
