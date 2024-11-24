@@ -41,16 +41,16 @@ let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret"); // Requires 0.4
 aria2.connect();
 ```
 - Requires 0.2.0~
-- Connect to aria2 `WebSocket` service
-- It will connect automatically when you set the [url](#url) property
+- Connect to `WebSocket` of JSON-RPC
+- It will connect when initiated or after [url](#url) property is changed
 
 ### disconnect
 ```javascript
 aria2.disconnect();
 ```
 - Requires 0.2.0~
-- Disconnect from aria2 `WebSocket` service
-- It will not retry to connect, if you disconnect manually
+- Disconnect `WebSocket` from JSON-RPC
+- It will not try to reconnect if `diconnect` event is fired
 
 ### call
 ```javascript
@@ -58,7 +58,7 @@ let response = aria2.call( { method, params } );
 let response = aria2.call( { method, params }, { method, params }, ..., { method, params } );
 ```
 - response
-    - `Promise` object, return an array that contains the response from jsonrpc if fulfilled
+    - `Promise` object, return an array that contains the response from JSON-RPC if fulfilled
 - method **required**
     - Read [RPC method calls](https://aria2.github.io/manual/en/html/aria2c.html#methods)
 - params **optional**
@@ -110,9 +110,9 @@ console.log(aria2.secret);
     - `string`
 
 ### retry
-- `10`: Default, use `0` for unlimited retries
+- `10`: Default
 - Introduced in 0.7.0
-- Deprecated and renamed to [retries](#retries) since 0.8.0
+- Use [retries](#retries) since 0.8.0
 
 ### retries
 ```javascript
