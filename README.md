@@ -136,7 +136,7 @@ console.log(aria2.timeout);
 - timeout
     - `integer`
     - `10`: Default, equivalent to **10000** millisecond
-    - It is recommended to use numbers larger thant `3`
+    - It is recommended to use numbers larger than `3`
 
 ### onopen
 ```javascript
