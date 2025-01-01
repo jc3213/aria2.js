@@ -11,7 +11,7 @@ class Aria2 {
     events = { onopen: null, onmessage: null, onclose: null };
     set scheme (scheme) {
         this.call = { 'http': this.post, 'https': this.post, 'ws': this.send, 'wss': this.send }[ scheme ];
-        if (!this.call) { throw new Error('Invalid JSON-RPC scheme: "' + scheme + '" is not supported!'); }
+        if (!this.call) { throw new Error('Unsupported JSON-RPC scheme: "' + scheme + '"'); }
         this.jsonrpc.scheme = scheme;
         this.jsonrpc.path = scheme + '://' + this.jsonrpc.url;
     }
