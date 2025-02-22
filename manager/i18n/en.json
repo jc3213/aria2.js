@@ -1,5 +1,5 @@
 {
-    "manager_title": "Aria2 Task Manager",
+    "manager_title": "Task Manager for aria2 over JSON-RPC",
     "common_default": "Default",
     "common_disabled": "Disabled",
     "common_save": "Save",
