@@ -9,7 +9,7 @@ self.addEventListener('message', (event) => {
     let {method, params} = event.data;
     switch (method) {
         case 'aria2.WebWorker':
-            jsonrpc(method, params);
+            jsonrpc(params);
             break;
         default:
             aria2c(method, params);
@@ -32,5 +32,5 @@ function jsonrpc(method, {jsonrpc, secret}) {
         aria2c.secret = secret;
         aria2c.params = ['token:' + secret];
     }
-    self.postMessage({method, version: aria2.version});
+    self.postMessage({ aria2c });
 }
