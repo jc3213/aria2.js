@@ -21,6 +21,7 @@ function i18nUserInterface(lang) {
         item.textContent = i18n[item.getAttribute('i18n')];
     });
     i18nCss.innerText = `:root {
+        --menu: "${i18n.popup_menu}";
         --download: "${i18n.popup_download}";
         --upload: "${i18n.popup_upload}";
         --active: "${i18n.popup_active}";
