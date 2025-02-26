@@ -48,7 +48,7 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
 
 #menu > div::before {
     display: inline-block;
-    margin-left: 10%;
+    margin-left: 8%;
     width: 40%;
 }
 
