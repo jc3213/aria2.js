@@ -22,12 +22,13 @@ function i18nUserInterface(lang) {
     });
     i18nCss.innerText = `:root {
         --menu: "${i18n.popup_menu}";
+        --queue: "${i18n.popup_queue}";
+        --about: "${i18n.popup_about}";
         --download: "${i18n.popup_download}";
         --upload: "${i18n.popup_upload}";
         --active: "${i18n.popup_active}";
         --waiting: "${i18n.popup_waiting}";
         --stopped: "${i18n.popup_stopped}";
-        --queue: "${i18n.popup_queue}";
         --day: "${i18n.time_day}";
         --hour: "${i18n.time_hour}";
         --minute: "${i18n.time_minute}";

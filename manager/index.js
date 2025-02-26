@@ -1,23 +1,11 @@
 var aria2Global = {};
 var changes = {};
 var config = {};
+
+var [,,, commitBtn, enterBtn, proxyBtn] = document.querySelectorAll('button[id]');
 var [setting, ...options] = document.querySelectorAll('#setting, #setting [name]');
 var [adduri, ...download]= document.querySelectorAll('#adduri, #adduri [name]');
 var [entry, uploader] = adduri.querySelectorAll('#entry, #uploader');
-
-document.addEventListener('click', (event) => {
-    switch (event.target.id) {
-        case 'proxy_btn':
-            event.target.previousElementSibling.value = localStorage.aria2Proxy || '';
-            break;
-        case 'enter_btn':
-            downloadSubmit();
-            break;
-        case 'commit_btn':
-            managerOptionsSave();
-            break;
-    }
-});
 
 downBtn.addEventListener('click', async (event) => {
     manager.toggle('adduri');
@@ -29,7 +17,7 @@ optionsBtn.addEventListener('click', (event) => {
     manager.remove('adduri');
 });
 
-document.getElementById('commit').addEventListener('click', (event) => {
+commitBtn.addEventListener('click', (event) => {
     options.forEach((entry) => { localStorage[entry.name] = config[entry.name] ?? entry.dataset.value; });
     if ('interval' in changes) {
         clearInterval(aria2Interval);
@@ -51,7 +39,7 @@ document.getElementById('commit').addEventListener('click', (event) => {
     changes = {};
 });
 
-async function downloadSubmit() {
+enterBtn.addEventListener('click', (event) => {
     var sessions = [];
     var urls = entry.value.match(/(https?:\/\/|ftp:\/\/|magnet:\?)[^\s\n]+/g);
     if (urls) {
@@ -60,13 +48,17 @@ async function downloadSubmit() {
     }
     entry.value = '';
     manager.remove('adduri');
-}
+});
+
+proxyBtn.addEventListener('click', (event) => {
+    event.target.previousElementSibling.value = localStorage.aria2Proxy || '';
+});
 
 uploader.addEventListener('change', async (event) => {
     var sessions = [];
     await Promise.all([...event.target.files].map(async (file) => {
         var type = file.name.slice(file.name.lastIndexOf('.') + 1);
-        var b64encode = await getFileData(file);
+        var b64encode = await promiseFileReader(file);
         var download = type === 'torrent' ? {method: 'aria2.addTorrent', params: [b64encode, [], aria2Global]} : {method: 'aria2.addMetalink', params: [b64encode, aria2Global]};
         sessions.push(download);
     }));
@@ -75,7 +67,7 @@ uploader.addEventListener('change', async (event) => {
     manager.remove('adduri');
 });
 
-function getFileData(file) {
+function promiseFileReader(file) {
     return new Promise((resolve) => {
         var reader = new FileReader();
         reader.onload = (event) => {
@@ -111,7 +103,7 @@ function ParseOptions(nodes, json) {
 
 (async function () {
     aria2Proxy = config.proxy;
-    aria2Delay = config.interval;
+    aria2Delay = config.interval * 1000;
     aria2RPC = new Aria2(config.scheme, config.jsonrpc, config.secret);
     aria2RPC.onopen = aria2ClientOpened;
     aria2RPC.onclose = aria2ClientClosed;
