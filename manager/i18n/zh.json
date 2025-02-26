@@ -18,7 +18,7 @@
     "popup_upload": "上传速度",
     "popup_active": "活跃",
     "popup_waiting": "等待",
-    "popup_stopped": "停止"
+    "popup_stopped": "停止",
     "queue_active": "正在下载",
     "queue_waiting": "等待队列",
     "queue_paused": "下载暂停",
