@@ -24,7 +24,7 @@
     "queue_paused": "下载暂停",
     "queue_complete": "已经完成",
     "queue_removed": "下载停止",
-    "queue_error": "发生错误",,
+    "queue_error": "发生错误",
     "task_submit": "确认",
     "task_referer": "引用页",
     "task_entry": "下载链接",
