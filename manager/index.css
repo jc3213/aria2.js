@@ -145,3 +145,7 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
 .second:not(:empty)::after {
     content: var(--second);
 }
+
+.flex {
+    line-height: 1.5;
+}
