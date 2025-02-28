@@ -146,6 +146,6 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
     content: var(--second);
 }
 
-.flex {
+.flex > * {
     line-height: 1.5;
 }
