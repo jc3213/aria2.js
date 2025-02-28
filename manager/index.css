@@ -52,11 +52,11 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
     width: 40%;
 }
 
-#choose {
+#filter {
     grid-area: 2 / 1 / 3 / 2;
 }
 
-#choose::before {
+#filter::before {
     content: var(--queue);
 }
 
