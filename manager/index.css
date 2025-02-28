@@ -146,6 +146,10 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
     content: var(--second);
 }
 
+.flex {
+    align-items: center;
+}
+
 .flex > * {
     line-height: 1.5;
 }
