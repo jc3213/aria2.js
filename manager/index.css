@@ -147,7 +147,7 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
 }
 
 .flex {
-    align-items: center;
+    white-space: nowrap;
 }
 
 .flex > * {
