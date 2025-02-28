@@ -110,23 +110,23 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
     border-style: outset;
 }
 
-#menu > div:nth-child(1)::before {
+[data-sid="download"]::before {
     content: var(--download);
 }
 
-#menu > div:nth-child(2)::before {
+[data-sid="upload"]::before {
     content: var(--upload);
 }
 
-#menu > div:nth-child(3)::before {
+[data-sid="active"]::before {
     content: var(--active);
 }
 
-#menu > div:nth-child(4)::before {
+[data-sid="waiting"]::before {
     content: var(--waiting);
 }
 
-#menu > div:nth-child(5)::before {
+[data-sid="stopped"]::before {
     content: var(--stopped);
 }
 
