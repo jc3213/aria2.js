@@ -1,4 +1,4 @@
-var aria2Global = {};
+var aria2Config = {};
 var changes = {};
 var config = {};
 
@@ -43,7 +43,7 @@ enterBtn.addEventListener('click', (event) => {
     var sessions = [];
     var urls = entry.value.match(/(https?:\/\/|ftp:\/\/|magnet:\?)[^\s\n]+/g);
     if (urls) {
-        urls.forEach((url) => sessions.push({url, options: aria2Global}));
+        urls.forEach((url) => sessions.push({url, options: aria2Config}));
         aria2RPC.call(...sessions);
     }
     entry.value = '';
@@ -59,7 +59,7 @@ uploader.addEventListener('change', async (event) => {
     await Promise.all([...event.target.files].map(async (file) => {
         var type = file.name.slice(file.name.lastIndexOf('.') + 1);
         var b64encode = await promiseFileReader(file);
-        var download = type === 'torrent' ? {method: 'aria2.addTorrent', params: [b64encode, [], aria2Global]} : {method: 'aria2.addMetalink', params: [b64encode, aria2Global]};
+        var download = type === 'torrent' ? {method: 'aria2.addTorrent', params: [b64encode, [], aria2Config]} : {method: 'aria2.addMetalink', params: [b64encode, aria2Config]};
         sessions.push(download);
     }));
     await aria2RPC.call(...sessions);
@@ -101,6 +101,5 @@ optionsEntries.forEach((entry) => {
     downloadEntries.forEach((entry) => {
         entry.value = aria2Config[entry.name] = options[entry.name];
     });
-    aria2Global = ParseOptions(download, options);
     document.querySelector('#aria2_ver').textContent = version.result.version;
 })();
