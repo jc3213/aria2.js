@@ -3,9 +3,9 @@ var changes = {};
 var config = {};
 
 var [,,, commitBtn, enterBtn, proxyBtn] = document.querySelectorAll('button[id]');
-var [setting, ...options] = document.querySelectorAll('#setting, #setting [name]');
-var [adduri, ...download]= document.querySelectorAll('#adduri, #adduri [name]');
-var [entry, uploader] = adduri.querySelectorAll('#entry, #uploader');
+var [optionsBtn, ...optionsEntries] = document.querySelectorAll('#setting, #setting [name]');
+var [downPane, ...downloadEntries]= document.querySelectorAll('#adduri, #adduri [name]');
+var [entryPane, uploader] = downPane.querySelectorAll('#entry, #uploader');
 
 downBtn.addEventListener('click', async (event) => {
     manager.toggle('adduri');
@@ -78,28 +78,13 @@ function promiseFileReader(file) {
     });
 }
 
-NodeList.prototype.disposition = function (json) {
-    return ParseOptions(this, json);
-}
-
-setting.addEventListener('change', (event) => {
+optionsBtn.addEventListener('change', (event) => {
     config[event.target.name] = changes[event.target.name] = event.target.value;
 });
 
-options.forEach((entry) => {
+optionsEntries.forEach((entry) => {
     config[entry.name] = entry.value = localStorage[entry.name] ?? entry.dataset.value;
 });
-
-function ParseOptions(nodes, json) {
-    var result = {};
-    nodes.forEach((node) => {
-        var value = json[node.name];
-        if (value) {
-            node.value = result[node.name] = value;
-        }
-    });
-    return result;
-}
 
 (async function () {
     aria2Proxy = config.proxy;
@@ -113,6 +98,9 @@ function ParseOptions(nodes, json) {
     options['min-split-size'] = getFileSize(options['min-split-size']);
     options['max-download-limit'] = getFileSize(options['max-download-limit']);
     options['max-upload-limit'] = getFileSize(options['max-upload-limit']);
+    downloadEntries.forEach((entry) => {
+        entry.value = aria2Config[entry.name] = options[entry.name];
+    });
     aria2Global = ParseOptions(download, options);
     document.querySelector('#aria2_ver').textContent = version.result.version;
 })();
