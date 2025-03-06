@@ -3,7 +3,7 @@ var changes = {};
 var config = {};
 
 var [,,, commitBtn, enterBtn, proxyBtn] = document.querySelectorAll('button[id]');
-var [optionsBtn, ...optionsEntries] = document.querySelectorAll('#setting, #setting [name]');
+var [optionsPane, ...optionsEntries] = document.querySelectorAll('#setting, #setting [name]');
 var [downPane, ...downloadEntries]= document.querySelectorAll('#adduri, #adduri [name]');
 var [entryPane, uploader] = downPane.querySelectorAll('#entry, #uploader');
 
@@ -78,7 +78,7 @@ function promiseFileReader(file) {
     });
 }
 
-optionsBtn.addEventListener('change', (event) => {
+optionsPane.addEventListener('change', (event) => {
     config[event.target.name] = changes[event.target.name] = event.target.value;
 });
 
