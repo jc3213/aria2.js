@@ -99,7 +99,7 @@ optionsEntries.forEach((entry) => {
     options['max-download-limit'] = getFileSize(options['max-download-limit']);
     options['max-upload-limit'] = getFileSize(options['max-upload-limit']);
     downloadEntries.forEach((entry) => {
-        entry.value = aria2Config[entry.name] = options[entry.name];
+        entry.value = aria2Config[entry.name] = options[entry.name] ?? '';
     });
     document.querySelector('#aria2_ver').textContent = version.result.version;
 })();
