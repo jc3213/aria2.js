@@ -63,6 +63,13 @@ let response = aria2.call( { method, params }, { method, params }, ..., { method
 - params **optional**
     - JSON-RPC method call parameters
 
+#### Code Sample
+```javascript
+let response = await aria2.call( { method: 'aria2.getVersion' } );
+let version = response[0].version;
+console.log(version) // the version of aria2c.exe;
+```
+
 ## Getter & Setter
 - [scheme](#scheme)
 - [url](#url)
