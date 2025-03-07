@@ -70,12 +70,11 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
 }
 
 #adduri, #setting {
+    grid-area: 1 / 2 / 2 / 3;
     height: fit-content;
-    left: 101.5%;
-    position: relative;
-    top: -646px;
+    position: absolute;
     width: 600px;
-    z-index: 999999;
+    z-index: 9;
 }
 
 #about {
