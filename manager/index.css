@@ -73,7 +73,7 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
     height: fit-content;
     left: 101.5%;
     position: relative;
-    top: -746px;
+    top: -646px;
     width: 600px;
     z-index: 999999;
 }
