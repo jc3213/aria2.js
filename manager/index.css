@@ -54,6 +54,10 @@ body:not(.setting) > #setting {
     content: var(--about);
 }
 
+#queue {
+    grid-area: 1 / 2 / 5 / 3;
+}
+
 #aria2_ver {
     margin-right: 3px;
     padding: 4px;
