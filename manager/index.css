@@ -1,6 +1,7 @@
 body {
     grid-template-rows: auto auto auto 1fr;
 }
+
 textarea {
     padding: 3px;
     border-width: 1px;
@@ -11,11 +12,15 @@ textarea {
     width: calc(100% - 12px);
 }
 
-body:not(.adduri) > #adduri, body:not(.setting) > #setting {
+body:not(.adduri) > #adduri,
+body:not(.setting) > #setting {
     display: none;
 }
 
-#menu, #about, #adduri, #setting {
+#menu,
+#about,
+#adduri,
+#setting {
     padding: 8px;
 }
 
@@ -23,7 +28,9 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
     margin-top: 0px;
 }
 
-#adduri, #setting, #about {
+#adduri,
+#setting,
+#about {
     border-width: 1px;
     border-style: solid;
 }
@@ -60,7 +67,8 @@ body:not(.adduri) > #adduri, body:not(.setting) > #setting {
     border-style: inset;
 }
 
-.adduri [data-bid="download_btn"]:active, .setting [data-bid="options_btn"]:active {
+.adduri [data-bid="download_btn"]:active,
+.setting [data-bid="options_btn"]:active {
     border-style: outset;
 }
 
