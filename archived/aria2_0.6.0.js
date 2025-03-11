@@ -35,6 +35,15 @@ class Aria2 {
     get secret () {
         return this.jsonrpc.secret;
     }
+    get onmessage () {
+        return this.jsonrpc.onmessage;
+    }
+    set onclose (callback) {
+        this.jsonrpc.onclose = typeof callback === 'function' ? callback : () => null;
+    }
+    get onclose () {
+        return this.jsonrpc.onclose;
+    }
     connect () {
         this.socket?.then( (ws) => ws.close() );
         this.socket = new Promise((resolve, reject) => {
@@ -52,15 +61,6 @@ class Aria2 {
     }
     set onmessage (callback) {
         this.jsonrpc.onmessage = typeof callback === 'function' ? callback : () => null;
-    }
-    get onmessage () {
-        return this.jsonrpc.onmessage;
-    }
-    set onclose (callback) {
-        this.jsonrpc.onclose = typeof callback === 'function' ? callback : () => null;
-    }
-    get onclose () {
-        return this.jsonrpc.onclose;
     }
     send (...args) {
         return this.socket.then((ws) => new Promise((resolve, reject) => {

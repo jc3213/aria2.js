@@ -9,6 +9,24 @@ class Aria2WebSocket {
     }
     version = '0.8.0';
     timeout = 10000;
+    set onopen (callback) {
+        this._onopen = typeof callback === 'function' ? callback : null;
+    }
+    get onopen () {
+        return typeof this._onopen === 'function' ? this._onopen : null;
+    }
+    set onmessage (callback) {
+        this._onmessage = typeof callback === 'function' ? callback : null;
+    }
+    get onmessage () {
+        return typeof this._onmessage === 'function' ? this._onmessage : null;
+    }
+    set onclose (callback) {
+        this._onclose = typeof callback === 'function' ? callback : null;
+    }
+    get onclose () {
+        return typeof this._onclose === 'function' ? this._onclose : null;
+    }
     connect () {
         this.socket = new WebSocket(this.jsonrpc);
         this.socket.onopen = (event) => {
@@ -29,24 +47,6 @@ class Aria2WebSocket {
     }
     disconnect () {
         this.socket?.close();
-    }
-    set onopen (callback) {
-        this._onopen = typeof callback === 'function' ? callback : null;
-    }
-    get onopen () {
-        return typeof this._onopen === 'function' ? this._onopen : null;
-    }
-    set onmessage (callback) {
-        this._onmessage = typeof callback === 'function' ? callback : null;
-    }
-    get onmessage () {
-        return typeof this._onmessage === 'function' ? this._onmessage : null;
-    }
-    set onclose (callback) {
-        this._onclose = typeof callback === 'function' ? callback : null;
-    }
-    get onclose () {
-        return typeof this._onclose === 'function' ? this._onclose : null;
     }
     send (...args) {
         return new Promise((resolve, reject) => {

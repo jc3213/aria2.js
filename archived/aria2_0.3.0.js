@@ -33,6 +33,14 @@ class Aria2 {
     get secret () {
         return this._secret;
     }
+    set onmessage (callback) {
+        if (typeof callback !== 'function') { return; }
+        if (this._onmessage === undefined) { this.websocket.then( (websocket) => websocket.addEventListener('message', (event) => this._onmessage(JSON.parse(event.data))) ); }
+        this._onmessage = callback;
+    }
+    get onmessage () {
+        return this._onmessage;
+    }
     connect () {
         this.websocket = new Promise((resolve, reject) => {
             const websocket = new WebSocket(this._jsonrpc.replace('http', 'ws'));
@@ -46,14 +54,6 @@ class Aria2 {
             websocket.onerror = (error) => reject(error);
             websocket.close();
         }));
-    }
-    set onmessage (callback) {
-        if (typeof callback !== 'function') { return; }
-        if (this._onmessage === undefined) { this.websocket.then( (websocket) => websocket.addEventListener('message', (event) => this._onmessage(JSON.parse(event.data))) ); }
-        this._onmessage = callback;
-    }
-    get onmessage () {
-        return this._onmessage;
     }
     send (...messages) {
         return this.websocket.then((websocket) => new Promise((resolve, reject) => {

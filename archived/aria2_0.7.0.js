@@ -48,6 +48,18 @@ class Aria2 {
     get timeout () {
         return this.jsonrpc.timeout / 1000 | 0;
     }
+    set onmessage (callback) {
+        this.jsonrpc.onmessage = typeof callback === 'function' ? callback : null;
+    }
+    get onmessage () {
+        return typeof this.jsonrpc.onmessage === 'function' ? this.jsonrpc.onmessage : null;
+    }
+    set onclose (callback) {
+        this.jsonrpc.onclose = typeof callback === 'function' ? callback : null;
+    }
+    get onclose () {
+        return typeof this.jsonrpc.onclose === 'function' ? this.jsonrpc.onclose : null;
+    }
     connect () {
         this.socket = new Promise((resolve, reject) => {
             let ws = new WebSocket(this.jsonrpc.ws);
@@ -66,18 +78,6 @@ class Aria2 {
     }
     disconnect () {
         this.socket?.then( (ws) => ws.close() );
-    }
-    set onmessage (callback) {
-        this.jsonrpc.onmessage = typeof callback === 'function' ? callback : null;
-    }
-    get onmessage () {
-        return typeof this.jsonrpc.onmessage === 'function' ? this.jsonrpc.onmessage : null;
-    }
-    set onclose (callback) {
-        this.jsonrpc.onclose = typeof callback === 'function' ? callback : null;
-    }
-    get onclose () {
-        return typeof this.jsonrpc.onclose === 'function' ? this.jsonrpc.onclose : null;
     }
     send (...args) {
         return this.socket.then((ws) => new Promise((resolve, reject) => {

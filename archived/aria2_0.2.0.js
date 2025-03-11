@@ -11,6 +11,9 @@ class Aria2 {
         if (!this.call) { throw new Error('Invalid method: ' + scheme + ' is not supported!'); }
         this.jsonrpc = scheme + '://' + this.url;
     }
+    set onmessage (callback) {
+        this.websocket.then( (websocket) => websocket.addEventListener('message', (event) => callback(JSON.parse(event.data))) );
+    }
     connect () {
         this.websocket = new Promise((resolve, reject) => {
             const websocket = new WebSocket(this.jsonrpc.replace('http', 'ws'));
@@ -20,9 +23,6 @@ class Aria2 {
     }
     disconnect () {
         this.websocket.then( (websocket) => websocket.close() );
-    }
-    set onmessage (callback) {
-        this.websocket.then( (websocket) => websocket.addEventListener('message', (event) => callback(JSON.parse(event.data))) );
     }
     send (...messages) {
         return this.websocket.then((websocket) => new Promise((resolve, reject) => {
