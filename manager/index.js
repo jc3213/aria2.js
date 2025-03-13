@@ -7,7 +7,6 @@ var [downPane, ...downloadEntries]= document.querySelectorAll('#adduri, #adduri 
 var [statusEntry, versionEntry, i18nEntry] = document.querySelectorAll('#about > *');
 var [saveBtn, submitBtn, metaBtn, metaEntry, UrlEntry, proxyBtn] = document.querySelectorAll('#adduri button, #setting button, textarea, input[type="file"');
 var i18nCss = document.createElement('style');
-
 document.head.append(i18nCss);
 
 i18nEntry.value = localStorage.locale ??= navigator.language.slice(0, 2);
@@ -117,7 +116,7 @@ async function i18nUserInterface() {
         item.textContent = i18n[item.getAttribute('i18n')];
     });
 
-    i18nCss.tectContent = `
+    i18nCss.textContent = `
 :root {
     --menu: "${i18n.popup_menu}";
     --queue: "${i18n.popup_queue}";
