@@ -34,7 +34,7 @@
                 <option value="zh">简体中文</option>
             </select>
         </div>
-        <div id="setting" class="options">
+        <div id="setting" class="group">
             <div>
                 <h4 i18n="option_jsonrpc">JSON-RPC Server</h4>
                 <div class="flex">
@@ -49,16 +49,16 @@
                     <button id="commit" i18n="common_save">Save</button>
                 </div>
             </div>
-            <div class="menu">
+            <div class="groupitem">
                 <h4 i18n="option_manager_interval">Refresh Interval</h4>
                 <input name="interval" type="number" min="5" max="30" step="1" data-value="10">
             </div>
-            <div class="menu">
+            <div class="groupitem">
                 <h4 i18n="task_proxy">Proxy Server</h4>
                 <input name="proxy" type="url" placeholder="http://127.0.0.1:1280/" data-value="">
             </div>
         </div>
-        <div id="adduri" class="options">
+        <div id="adduri" class="group">
             <div>
                 <h4 i18n="task_referer">Referer</h4>
                 <div class="flex">
@@ -70,37 +70,35 @@
             </div>
             <div>
                 <h4 i18n="task_entry">Download Urls</h4>
-                <div>
-                    <textarea id="entry" rows="2"></textarea>
-                </div>
+                <textarea id="entry" rows="2"></textarea>
             </div>
-            <div class="menu">
+            <div class="groupitem">
                 <h4 i18n="aria2_adv_dir">Download Folder</h4>
                 <input name="dir" type="text">
             </div>
-            <div class="menu">
+            <div class="groupitem">
                 <h4 i18n="task_proxy">Proxy Server</h4>
                 <div class="flex">
                     <input name="all-proxy" type="url">
                     <button id="proxy_btn">⚡️</button>
                 </div>
             </div>
-            <div class="menu">
+            <div class="groupitem">
                 <h4 i18n="aria2_http_split">Download Sections</h4>
                 <input name="split" type="number">
             </div>
-            <div class="menu">
+            <div class="groupitem">
                 <h4 i18n="aria2_http_size">Section Size</h4>
                 <div>
                     <input name="min-split-size" type="text">
                     <span class="float">B</span>
                 </div>
             </div>
-            <div class="menu">
+            <div class="groupitem>
                 <h4 i18n="aria2_max_connection">Max Connections per Server</h4>
                 <input name="max-connection-per-server" type="number">
             </div>
-            <div class="menu">
+            <div class="groupitem">
                 <h4 i18n="task_download">Max Download Speed</h4>
                 <div>
                     <input name="max-download-limit" type="text">
