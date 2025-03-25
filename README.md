@@ -66,7 +66,7 @@ let response = aria2.call( { method, params }, { method, params }, ..., { method
 #### Code Sample
 ```javascript
 let response = await aria2.call( { method: 'aria2.getVersion' } );
-let version = response[0].version;
+let version = response[0].result.version;
 console.log(version) // the version of aria2c.exe;
 ```
 
