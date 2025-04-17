@@ -8,7 +8,7 @@ class Aria2XMLRequest {
     }
     version = '0.4.0';
     get (...args) {
-        return fetch(this.jsonrpc + '?params=' + btoa( unescape( encodeURIComponent(this.json(args)) ) )).then(this.result);
+        return fetch(this.jsonrpc + '?params=' + btoa( unescape( encodeURIComponent (this.json(args) ) ) )).then(this.result);
     }
     post (...args) {
         return fetch(this.jsonrpc, {method: 'POST', body: this.json(args)}).then(this.result);
