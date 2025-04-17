@@ -29,11 +29,6 @@ let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret"); // Requires 0.4
 - [connect](#connect)
 - [disconnect](#disconnect)
 - [call](#call)
-    - Use `WebSocket` or `HTTP Post` based on [scheme](#scheme)
-- [send](#call)
-    - Use `WebSocket` method only
-- [post](#call)
-    - Use `HTTP Post` method only
 
 ### connect
 ```javascript
@@ -56,6 +51,7 @@ aria2.disconnect();
 let response = aria2.call( { method, params } );
 let response = aria2.call( { method, params }, { method, params }, ..., { method, params } );
 ```
+- Use `WebSocket` or `HTTP Post` method based on [scheme](#scheme)
 - response
     - `Promise` object, return an array that contains the response from JSON-RPC if fulfilled
 - method **required**
