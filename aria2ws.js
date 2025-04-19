@@ -1,58 +1,92 @@
-class Aria2WebSocket {
+class Aria2 {
     constructor (...args) {
-        let path = args.join('#').match(/^(wss?:\/\/[^#]+)#?(.*)$/);
-        if (!path) { throw new Error('Invalid JSON-RPC entry: "' + args.join('", "') + '"'); }
-        this.jsonrpc = path[1];
-        this.secret = path[2];
-        this.params = this.secret ? ['token:' + this.secret] : [];
+        let path = args.join('#').match(/^(?:http|ws)?(s)?#?([^#]+)#?(.*)$/);
+        if (!path) { throw new Error('Malformed JSON-RPC entry: "' + args.join('", "') + '"'); }
+        this.ssl = path[1];
+        this.url = path[2];
+        this.secret = path[3];
+    }
+    version = '0.9.0';
+    args = { retries: 10, timeout: 10000, ssl: '' };
+    set ssl (ssl) {
+        this.args.ssl = ssl ? 's' : '';
+    }
+    get ssl () {
+        return !!this.args.ssl;
+    }
+    set url (url) {
+        if (this.args.url === url) { return; }
+        this.args.url = url;
+        this.args.path = 'ws' + this.args.ssl + '://' + url;
+        this.args.tries = 0;
+        this.disconnect();
         this.connect();
     }
-    version = '0.8.0';
-    timeout = 10000;
+    get url () {
+        return this.args.url;
+    }
+    set secret (secret) {
+        this.args.token = 'token:'　+ secret;
+    }
+    get secret () {
+        return this.args.token.slice(6);
+    }
+    set retries (number) {
+        this.args.retries = isNaN(number) || number < 0 ? Infinity : number;
+    }
+    get retries () {
+        return isNaN(this.args.retries) ? Infinity : this.args.retries;
+    }
+    set timeout (number) {
+        this.args.timeout = isNaN(number) ? 10000 : number * 1000;
+    }
+    get timeout () {
+        return isNaN(this.args.timeout) ? 10 : this.args.timeout / 1000;
+    }
     set onopen (callback) {
-        this._onopen = typeof callback === 'function' ? callback : null;
+        this.args.onopen = typeof callback === 'function' ? callback : null;
     }
     get onopen () {
-        return typeof this._onopen === 'function' ? this._onopen : null;
+        return typeof this.args.onopen === 'function' ? this.args.onopen : null;
     }
     set onmessage (callback) {
-        this._onmessage = typeof callback === 'function' ? callback : null;
+        this.args.onmessage = typeof callback === 'function' ? callback : null;
     }
     get onmessage () {
-        return typeof this._onmessage === 'function' ? this._onmessage : null;
+        return typeof this.args.onmessage === 'function' ? this.args.onmessage : null;
     }
     set onclose (callback) {
-        this._onclose = typeof callback === 'function' ? callback : null;
+        this.args.onclose = typeof callback === 'function' ? callback : null;
     }
     get onclose () {
-        return typeof this._onclose === 'function' ? this._onclose : null;
+        return typeof this.args.onclose === 'function' ? this.args.onclose : null;
     }
     connect () {
-        this.socket = new WebSocket(this.jsonrpc);
+        this.socket = new WebSocket(this.args.path);
         this.socket.onopen = (event) => {
             this.alive = true;
-            if (typeof this._onopen === 'function') { this._onopen(event); }
-            resolve(ws);
+            if (typeof this.args.onopen === 'function') { this.args.onopen(event); }
         };
         this.socket.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            if (!response.method) { this.socket.resolve(response); }
-            else if (typeof this._onmessage === 'function') { this._onmessage(response); }
+            if (!response.method) { this.args.onresponse(response); }
+            else if (typeof this.args.onmessage === 'function') { this.args.onmessage(response); }
         };
         this.socket.onclose = (event) => {
             this.alive = false;
-            if (!event.wasClean) { setTimeout(() => this.connect(), this.timeout); }
-            if (typeof this._onclose === 'function') { this._onclose(event); }
+            if (!event.wasClean && this.args.tries ++ < this.args.retries) { setTimeout(() => this.connect(), this.args.timeout); }
+            if (typeof this.args.onclose === 'function') { this.args.onclose(event); }
         };
     }
     disconnect () {
         this.socket?.close();
     }
     send (...args) {
+        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.args.token, ...params] }) );
         return new Promise((resolve, reject) => {
-            this.socket.resolve = resolve;
+            this.args.onresponse = resolve;
             this.socket.onerror = reject;
-            this.socket.send( JSON.stringify( args.map( ({ method, params = [] }) => ({id: '', jsonrpc: '2.0', method, params: [...this.params, ...params]}) ) ) );
+            this.socket.send(JSON.stringify(json));
         });
     }
 }
