@@ -1,24 +1,24 @@
 class Aria2 {
     constructor (...args) {
-        let path = args.join('#').match(/^(?:http|ws)?(s)?(?:#|:\/\/)([^#]+)#?(.*)$/);
+        let path = args.join('#').match(/^(?:ws(s)?)?(?:#|:\/\/)([^#]+)#?(.*)$/);
         if (!path) { throw new Error('Malformed JSON-RPC entry: "' + args.join('", "') + '"'); }
-        this.args.ssl = path[1] ?? '';
+        this.ssl = path[1];
         this.url = path[2];
         this.secret = path[3];
     }
     version = '0.9';
     args = { retries: 10, timeout: 10000 };
     set ssl (ssl) {
-        if (!!ssl === !!this.args.ssl) { return; }
         this.args.ssl = ssl ? 's' : '';
-        this.connect();
     }
     get ssl () {
         return !!this.args.ssl;
     }
     set url (url) {
-        if (url === this.args.url) { return; }
+        if (this.args.url === url) { return; }
         this.args.url = url;
+        this.args.ws = 'ws' + this.args.ssl + '://' + url;
+        this.disconnect();
         this.connect();
     }
     get url () {
@@ -61,10 +61,8 @@ class Aria2 {
         return typeof this.args.onclose === 'function' ? this.args.onclose : null;
     }
     connect () {
-        let ws = 'ws' + this.args.ssl + '://' + this.args.url;
         let tries = 0;
-        this.socket?.close();
-        this.socket = new WebSocket(ws);
+        this.socket = new WebSocket(this.args.ws);
         this.socket.onopen = (event) => {
             this.alive = true;
             if (typeof this.args.onopen === 'function') { this.args.onopen(event); }
