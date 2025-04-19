@@ -1,30 +1,24 @@
 class Aria2 {
     constructor (...args) {
-        let path = args.join('#').match(/^(https?|wss?)(?:#|:\/\/)([^#]+)#?(.*)$/);
+        let path = args.join('#').match(/^(?:http|ws)(s)?(?:#|:\/\/)([^#]+)#?(.*)$/);
         if (!path) { throw new Error('Malformed JSON-RPC entry: "' + args.join('", "') + '"'); }
-        this.scheme = path[1];
+        this.args.ssl = path[1] ?? '';
         this.url = path[2];
         this.secret = path[3];
     }
     version = '0.9';
     args = { retries: 10, timeout: 10000 };
-    set scheme (scheme) {
-        let method = scheme.match(/^(http|ws)(s)?$/);
-        if (!method) { throw new Error('Unsupported JSON-RPC scheme: "' + scheme + '"'); }
-        this.args.scheme = scheme;
-        this.args.ssl = method[2] ?? '';
-        this.call = method[1] === 'ws' ? this.send : this.post;
+    set ssl (ssl) {
+        if (!!ssl === !!this.args.ssl) { return; }
+        this.args.ssl = ssl ? 's' : '';
+        this.connect();
     }
-    get scheme () {
-        return this.args.scheme;
+    get ssl () {
+        return !!this.args.ssl;
     }
     set url (url) {
-        if (this.args.url === url) { return; }
+        if (url === this.args.url) { return; }
         this.args.url = url;
-        this.args.path = 'http' + this.args.ssl + '://' + url;
-        this.args.ws = 'ws' + this.args.ssl + '://' + url;
-        this.args.tries = 0;
-        this.disconnect();
         this.connect();
     }
     get url () {
@@ -67,7 +61,10 @@ class Aria2 {
         return typeof this.args.onclose === 'function' ? this.args.onclose : null;
     }
     connect () {
-        this.socket = new WebSocket(this.args.ws);
+        this.args.path = 'http' + this.args.ssl + '://' + url;
+        let tries = 0;
+        let ws = 'ws' + this.args.ssl + '://' + url;
+        this.socket = new WebSocket(ws);
         this.socket.onopen = (event) => {
             this.alive = true;
             if (typeof this.args.onopen === 'function') { this.args.onopen(event); }
@@ -79,7 +76,7 @@ class Aria2 {
         };
         this.socket.onclose = (event) => {
             this.alive = false;
-            if (!event.wasClean && this.args.tries ++ < this.args.retries) { setTimeout(() => this.connect(), this.args.timeout); }
+            if (!event.wasClean && tries ++ < this.args.retries) { setTimeout(() => this.connect(), this.args.timeout); }
             if (typeof this.args.onclose === 'function') { this.args.onclose(event); }
         };
     }
