@@ -9,10 +9,11 @@ class Aria2 {
     version = '0.9';
     args = { retries: 10, timeout: 10000 };
     set scheme (scheme) {
-        let method = scheme.match(/^(http|ws)s?$/)?.[1];
+        let method = scheme.match(/^(http|ws)(s)?$/);
         if (!method) { throw new Error('Unsupported JSON-RPC scheme: "' + scheme + '"'); }
-        this.call = method === 'ws' ? this.send : this.post;
         this.args.scheme = scheme;
+        this.args.ssl = method[2] ?? '';
+        this.call = method[1] === 'ws' ? this.send : this.post;
     }
     get scheme () {
         return this.args.scheme;
@@ -20,9 +21,9 @@ class Aria2 {
     set url (url) {
         if (this.args.url === url) { return; }
         this.args.url = url;
-        this.args.path = this.args.scheme + '://' + url;
-        this.args.ws = this.args.path.replace('http', 'ws');
-        this.args.count = 0;
+        this.args.path = 'http' + this.args.ssl + '://' + url;
+        this.args.ws = 'ws' + this.args.ssl + '://' + url;
+        this.args.tries = 0;
         this.disconnect();
         this.connect();
     }
@@ -42,11 +43,10 @@ class Aria2 {
         return isNaN(this.args.retries) ? Infinity : this.args.retries;
     }
     set timeout (number) {
-        this.args.time = isNaN(number) ? 10 : number | 0;
-        this.args.timeout = this.args.time * 1000;
+        this.args.timeout = isNaN(number) ? 10000 : number * 1000;
     }
     get timeout () {
-        return isNaN(this.args.time) ? 10 : this.args.time | 0;
+        return isNaN(this.args.timeout) ? 10 : this.args.timeout / 1000;
     }
     set onopen (callback) {
         this.args.onopen = typeof callback === 'function' ? callback : null;
@@ -74,14 +74,13 @@ class Aria2 {
         };
         this.socket.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            if (!response.method) { this.args.onresult(response); }
+            if (!response.method) { this.args.onresponse(response); }
             else if (typeof this.args.onmessage === 'function') { this.args.onmessage(response); }
         };
         this.socket.onclose = (event) => {
             this.alive = false;
-            if (!event.wasClean && this.args.count < this.args.retries) { setTimeout(() => this.connect(), this.args.timeout); }
+            if (!event.wasClean && this.args.tries ++ < this.args.retries) { setTimeout(() => this.connect(), this.args.timeout); }
             if (typeof this.args.onclose === 'function') { this.args.onclose(event); }
-            this.args.count ++;
         };
     }
     disconnect () {
@@ -89,7 +88,7 @@ class Aria2 {
     }
     send (...args) {
         return new Promise((resolve, reject) => {
-            this.args.onresult = resolve;
+            this.args.onresponse = resolve;
             this.socket.onerror = reject;
             this.socket.send(this.json(args));
         });
