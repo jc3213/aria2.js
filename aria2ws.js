@@ -1,13 +1,13 @@
 class Aria2 {
     constructor (...args) {
-        let path = args.join('#').match(/^(?:http|ws)?(s)?#?([^#]+)#?(.*)$/);
+        let path = args.join('#').match(/^(http|ws)?(s)?#?([^#]+)#?(.*)$/);
         if (!path) { throw new Error('Malformed JSON-RPC entry: "' + args.join('", "') + '"'); }
-        this.ssl = path[1];
-        this.url = path[2];
-        this.secret = path[3];
+        this.ssl = path[2];
+        this.url = path[3];
+        this.secret = path[4];
     }
-    version = '0.9.0';
-    args = { retries: 10, timeout: 10000, ssl: '' };
+    version = '0.9';
+    args = { retries: 10, timeout: 10000 };
     set ssl (ssl) {
         this.args.ssl = ssl ? 's' : '';
     }
