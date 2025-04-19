@@ -9,11 +9,10 @@ class Aria2 {
     }
     version = '1.0';
     args = { retries: 10, timeout: 10000 };
-    set method (arg) {
-        let method = arg.match(/^(post|send)$/);
-        if (!method) { throw new Error('Unsupported JSON-RPC method: "' + arg + '"'); }
-        this.args.method = arg;
-        this.call = this[arg];
+    set method (method) {
+        if (method !== 'ws' && method !== 'http') { throw new Error('Unsupported JSON-RPC method: "' + arg + '"'); }
+        this.args.method = method;
+        this.call = this[method];
     }
     get method () {
         return this.args.method;
@@ -96,14 +95,14 @@ class Aria2 {
     disconnect () {
         this.socket?.close();
     }
-    send (...args) {
+    ws (...args) {
         return new Promise((resolve, reject) => {
             this.args.onresponse = resolve;
             this.socket.onerror = reject;
             this.socket.send(this.json(args));
         });
     }
-    post (...args) {
+    http (...args) {
         return fetch(this.args.xml, {method: 'POST', body: this.json(args)}).then((response) => {
             if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
