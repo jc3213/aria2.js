@@ -1,4 +1,4 @@
-class Aria2 {
+class Aria2WebSocket {
     constructor (...args) {
         let path = args.join('#').match(/^(?:ws(s)?)?(?:#|:\/\/)([^#]+)#?(.*)$/);
         if (!path) { throw new Error('Malformed JSON-RPC entry: "' + args.join('", "') + '"'); }
