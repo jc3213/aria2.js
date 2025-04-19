@@ -7,7 +7,7 @@ class Aria2 {
         this.secret = path[3];
     }
     version = '0.9';
-    args = { retries: 10, timeout: 10000 };
+    args = { retries: 10, timeout: 10000, ssl: '' };
     set ssl (ssl) {
         if (!!ssl === !!this.args.ssl) { return; }
         this.args.ssl = ssl ? 's' : '';
