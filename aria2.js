@@ -9,11 +9,11 @@ class Aria2 {
     version = '0.8.1';
     args = { retries: 10, timeout: 10000 };
     set scheme (scheme) {
-        let method = scheme.match(/^(http|ws)s?$/)?.[1];
+        let method = scheme.match(/^(http|ws)(s)?$/);
         if (!method) { throw new Error('Unsupported JSON-RPC scheme: "' + scheme + '"'); }
-        this.call = this[scheme];
         this.args.scheme = scheme;
-        this.args.path = scheme + '://' + this.args.url;
+        this.args.ssl = method[2] ?? '';
+        this.call = method[1] === 'ws' ? this.send : this.post;
     }
     get scheme () {
         return this.args.scheme;
@@ -43,11 +43,10 @@ class Aria2 {
         return isNaN(this.args.retries) ? Infinity : this.args.retries;
     }
     set timeout (number) {
-        this.args.time = isNaN(number) ? 10 : number | 0;
-        this.args.timeout = this.args.time * 1000;
+        this.args.timeout = isNaN(number) ? 10000 : number * 1000;
     }
     get timeout () {
-        return isNaN(this.args.time) ? 10 : this.args.time | 0;
+        return isNaN(this.args.timeout) ? 10 : this.args.timeout / 1000;
     }
     set onopen (callback) {
         this.args.onopen = typeof callback === 'function' ? callback : null;
@@ -75,7 +74,7 @@ class Aria2 {
         };
         this.socket.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            if (!response.method) { this.socket.resolve(response); }
+            if (!response.method) { this.args.onresponse(response); }
             else if (typeof this.args.onmessage === 'function') { this.args.onmessage(response); }
         };
         this.socket.onclose = (event) => {
@@ -88,17 +87,17 @@ class Aria2 {
     disconnect () {
         this.socket?.close();
     }
-    http (...args) {
+    send (...args) {
+        return new Promise((resolve, reject) => {
+            this.args.onresponse = resolve;
+            this.socket.onerror = reject;
+            this.socket.send(this.json(args));
+        });
+    }
+    post (...args) {
         return fetch(this.args.path, {method: 'POST', body: this.json(args)}).then((response) => {
             if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
-        });
-    }
-    ws (...args) {
-        return new Promise((resolve, reject) => {
-            this.socket.resolve = resolve;
-            this.socket.onerror = reject;
-            this.socket.send(this.json(args));
         });
     }
     json (args) {
