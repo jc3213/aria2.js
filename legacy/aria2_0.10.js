@@ -1,16 +1,25 @@
 class Aria2 {
     constructor (...args) {
-        let path = args.join('#').match(/^([^#]+)#?(.*)$/);
-        if (!path) { throw new Error('Malformed JSON-RPC entry: "' + args.join('", "') + '"'); }
-        this.url = path[1];
-        this.secret = path[2];
-        this.method = 'send';
-        this.ssl = false;
+        let path = args.join('#').match(/^(https?|wss?)(?:#|:\/\/)([^#]+)#?(.*)$/);
+        if (!path) { throw new Error('"' + args.join('", "') + '"'); }
+        this.scheme = path[1];
+        this.url = path[2];
+        this.secret = path[3];
     }
-    version = '1.0';
+    version = '0.10';
     args = { retries: 10, timeout: 10000 };
+    set scheme (scheme) {
+        let method = scheme.match(/^(http|ws)(s)?$/);
+        if (!method) { throw new Error('"' + scheme + '"'); }
+        this.args.scheme = scheme;
+        this.method = method[1];
+        this.ssl = method[2];
+    }
+    get scheme () {
+        return this.args.scheme;
+    }
     set method (method) {
-        if (method !== 'ws' && method !== 'http') { throw new Error('Unsupported JSON-RPC method: "' + arg + '"'); }
+        if (!/^(ws|http)$/.test(method)) { throw new Error('"' + method + '"'); }
         this.args.method = method;
         this.call = this[method];
     }
@@ -18,17 +27,15 @@ class Aria2 {
         return this.args.method;
     }
     set ssl (ssl) {
-        if (!!ssl === !!this.args.ssl) { return; }
         this.args.ssl = ssl ? 's' : '';
-        this.rpc();
+        this.path();
     }
     get ssl () {
         return !!this.args.ssl;
     }
     set url (url) {
-        if (url === this.args.url) { return; }
         this.args.url = url;
-        this.rpc();
+        this.path();
     }
     get url () {
         return this.args.url;
@@ -51,25 +58,25 @@ class Aria2 {
     get timeout () {
         return isNaN(this.args.timeout) ? 10 : this.args.timeout / 1000;
     }
-    set onopen (callback) {
-        this.args.onopen = typeof callback === 'function' ? callback : null;
+    set onopen (func) {
+        this.args.onopen = typeof func === 'function' ? func : null;
     }
     get onopen () {
         return typeof this.args.onopen === 'function' ? this.args.onopen : null;
     }
-    set onmessage (callback) {
-        this.args.onmessage = typeof callback === 'function' ? callback : null;
+    set onmessage (func) {
+        this.args.onmessage = typeof func === 'function' ? func : null;
     }
     get onmessage () {
         return typeof this.args.onmessage === 'function' ? this.args.onmessage : null;
     }
-    set onclose (callback) {
-        this.args.onclose = typeof callback === 'function' ? callback : null;
+    set onclose (func) {
+        this.args.onclose = typeof func === 'function' ? func : null;
     }
     get onclose () {
         return typeof this.args.onclose === 'function' ? this.args.onclose : null;
     }
-    rpc () {
+    path () {
         let {ssl, url} = this.args;
         this.args.xml = 'http' + ssl + '://' + url;
         this.args.ws = 'ws' + ssl + '://' + url;
@@ -93,7 +100,7 @@ class Aria2 {
         };
     }
     disconnect () {
-        this.socket?.close();
+        this.socket.close();
     }
     ws (...args) {
         return new Promise((resolve, reject) => {
