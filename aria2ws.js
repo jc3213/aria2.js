@@ -9,7 +9,9 @@ class Aria2WebSocket {
     version = '0.9';
     args = { retries: 10, timeout: 10000 };
     set ssl (ssl) {
+        if (!!ssl === !!this.args.ssl) { return; }
         this.args.ssl = ssl ? 's' : '';
+        this.path();
     }
     get ssl () {
         return !!this.args.ssl;
@@ -17,9 +19,7 @@ class Aria2WebSocket {
     set url (url) {
         if (this.args.url === url) { return; }
         this.args.url = url;
-        this.args.ws = 'ws' + this.args.ssl + '://' + url;
-        this.disconnect();
-        this.connect();
+        this.path();
     }
     get url () {
         return this.args.url;
@@ -59,6 +59,10 @@ class Aria2WebSocket {
     }
     get onclose () {
         return typeof this.args.onclose === 'function' ? this.args.onclose : null;
+    }
+    path () {
+        let {ssl, url} = this.args;
+        this.args.ws = 'ws' + ssl + '://' + url;
     }
     connect () {
         let tries = 0;
