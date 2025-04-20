@@ -19,7 +19,7 @@ class Aria2 {
         return this.args.scheme;
     }
     set method (method) {
-        if (!/^(ws|http)$/.test(method)) { throw new Error('"' + method + '"'); }
+        if (!/^(http|ws)$/.test(method)) { throw new Error('"' + method + '"'); }
         this.args.method = method;
         this.call = this[method];
     }
