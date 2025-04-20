@@ -34,17 +34,23 @@ let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret"); // Requires 0.4
 ```javascript
 aria2.connect();
 ```
-- Requires 0.2.0~
-- Connect to `WebSocket` of JSON-RPC
-- It will connect when initiated or after [url](#url) property is changed
+- Requires 0.2~
+- Connect to `WebSocket` of aria2 JSON-RPC
+- *0.2*~*0.8*
+    - Run when `Aria` instance is initialized, or [url](#url) is changed
+- *0.8*~
+    - Run at yourself
 
 ### disconnect
 ```javascript
 aria2.disconnect();
 ```
-- Requires 0.2.0~
-- Disconnect `WebSocket` from JSON-RPC
-- It will not try to reconnect if `diconnect` event is fired
+- Requires 0.2~
+- Disconnect from `WebSocket` of aria2 JSON-RPC
+- *0.2*~*0.8*
+    - Run when `Aria` instance is initialized, or [url](#url) is changed
+- *0.8*~
+    - Run at yourself
 
 ### call
 ```javascript
@@ -82,7 +88,7 @@ console.log(version) // the version of aria2c.exe;
 aria2.scheme = scheme;
 console.log(aria2.scheme);
 ```
-- Requires 0.2.0~
+- Requires 0.2~
 - schemes that decide the approach to JSON-RPC
 - scheme
     - `http`, `https`, `ws`, and `wss`
@@ -92,7 +98,7 @@ console.log(aria2.scheme);
 aria2.url = url;
 console.log(aria2.url);
 ```
-- Requires 0.3.0~
+- Requires 0.3~
 - the url of JSON-RPC
     - `${hostname}:${port}/jsonrpc`
 - hostname
@@ -106,22 +112,22 @@ console.log(aria2.url);
 aria2.secret = secret;
 console.log(aria2.secret);
 ```
-- Requires 0.3.0~
+- Requires 0.3~
 - the secret token `secret=your-secret-token` in JSON-RPC configuration
 - secret
     - `string`
 
 ### retry
 - `10`: Default
-- Introduced in 0.7.0
-- Use [retries](#retries) since 0.8.0
+- Introduced in 0.7
+- Use [retries](#retries) since 0.8
 
 ### retries
 ```javascript
 aria2.retries = retries;
 console.log(aria2.retries);
 ```
-- Requires 0.8.0~
+- Requires 0.8~
 - maximum retries when connection to JSON-RPC is closed
 - retries
     - `integer`
@@ -133,7 +139,7 @@ console.log(aria2.retries);
 aria2.timeout = timeout;
 console.log(aria2.timeout);
 ```
-- Requires 0.7.0~
+- Requires 0.7~
 - time interval between retries
 - timeout
     - `integer`
@@ -145,7 +151,7 @@ console.log(aria2.timeout);
 aria2.onopen = callback;
 console.log(aria2.onopen);
 ```
-- Requires 0.8.0~
+- Requires 0.8~
 - Function callback that runs when JSON-RPC is connected
 - callback
     - `function`, (event) => void
@@ -155,7 +161,7 @@ console.log(aria2.onopen);
 aria2.onclose = callback;
 console.log(aria2.onclose);
 ```
-- Requires 0.5.0~
+- Requires 0.5~
 - Fcuntion callback that runs when JSON-RPC is closed
 - callback
     - `function`, (event) => void
@@ -165,7 +171,7 @@ console.log(aria2.onclose);
 aria2.onmessage = callback;
 console.log(aria2.onmessage);
 ```
-- Requires 0.2.0~
+- Requires 0.2~
 - Functon callback that runs when JSON-RPC sends messages
 - callback
     - `function`, (response) => void
@@ -227,6 +233,7 @@ aria2.onmessage = async (response) {
             break;
     }
 };
+aria2.connect();
 
 async function aria2UpdateStats() {
     let response = await aria2RPC.call({method: 'aria2.getGlobalStat'}, {method: 'aria2.tellActive'});
