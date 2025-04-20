@@ -2,7 +2,7 @@ class Aria2WebSocket {
     constructor (...args) {
         let path = args.join('#').match(/^(?:ws(s)?)?(?:#|:\/\/)([^#]+)#?(.*)$/);
         if (!path) { throw new Error('Malformed JSON-RPC entry: "' + args.join('", "') + '"'); }
-        this.ssl = path[1];
+        this.args.ssl = path[1] ?? '';
         this.url = path[2];
         this.secret = path[3];
     }
