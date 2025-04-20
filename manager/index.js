@@ -2,7 +2,7 @@ var aria2Config = {};
 var aria2Storage = {};
 var acceptLang = ['en', 'zh'];
 
-var optionEntries = document.querySelectorAll('#setting [name]');
+var [optionsPane, ...optionEntries] = document.querySelectorAll('#setting, #setting [name]');
 var [downPane, ...downloadEntries]= document.querySelectorAll('#adduri, #adduri [name]');
 var [statusEntry, versionEntry, i18nEntry] = document.querySelectorAll('#about > *');
 var [saveBtn, submitBtn, metaBtn, metaEntry, UrlEntry, proxyBtn] = document.querySelectorAll('#adduri button, #setting button, textarea, input[type="file"');
@@ -26,17 +26,14 @@ optionsBtn.addEventListener('click', (event) => {
 });
 
 saveBtn.addEventListener('click', (event) => {
+    aria2RPC.disconnect();
     optionEntries.forEach((entry) => { 
-        localStorage[entry.name] = config[entry.name] ?? entry.dataset.value; 
+        localStorage[entry.name] = aria2Storage[entry.name] || entry.dataset.value; 
     });
     aria2RPC.scheme = aria2Storage.scheme;
     aria2RPC.url = aria2Storage.jsonrpc;
-    aria2RPC.secret = aria2Storage.scheme;
-    aria2Proxy = aria2Storage.proxy;
-    aria2Period = aria2Storage.interval * 1000;
-    clearInterval(aria2Interval);
-    aria2Interval = setInterval(aria2ClientUpdate, aria2Period);
-    changes = {};
+    aria2RPC.secret = aria2Storage.secret;
+    aria2StorageUpdated();
 });
 
 submitBtn.addEventListener('click', (event) => {
@@ -52,9 +49,12 @@ proxyBtn.addEventListener('click', (event) => {
     event.target.previousElementSibling.value = localStorage.aria2Proxy || '';
 });
 
+optionsPane.addEventListener('change', (event) => {
+    aria2Storage[event.target.name] = event.target.value;
+});
+
 downPane.addEventListener('change', (event) => {
-    var {name, value} = event.target;
-    aria2Config[name] = value;
+    aria2Config[event.target.name] = event.target.value;
 });
 
 metaEntry.addEventListener('change', async (event) => {
@@ -81,16 +81,19 @@ function promiseFileReader(file) {
     });
 }
 
-(function () {
-    i18nUserInterface()
-    optionEntries.forEach((entry) => {
-        aria2Storage[entry.name] = entry.value = localStorage[entry.name] ??= entry.dataset.value;
-    });
+function aria2StorageUpdated() {
     aria2Proxy = aria2Storage.proxy;
     aria2Delay = aria2Storage.interval * 1000;
+    aria2RPC.connect();
+}
+
+(function () {
+    i18nUserInterface();
+    optionEntries.forEach((entry) => {
+        aria2Storage[entry.name] = entry.value = localStorage[entry.name] ||= entry.dataset.value;
+    });
     aria2RPC = new Aria2(aria2Storage.scheme, aria2Storage.jsonrpc, aria2Storage.secret);
     aria2RPC.onopen = async () => {
-        aria2ClientOpened();
         var [global, version] = await aria2RPC.call({method: 'aria2.getGlobalOption'}, {method: 'aria2.getVersion'});
         var options = global.result;
         options['min-split-size'] = getFileSize(options['min-split-size']);
@@ -100,11 +103,11 @@ function promiseFileReader(file) {
             aria2Config[entry.name] = entry.value = options[entry.name] ??= '';
         });
         versionEntry.textContent = version.result.version;
+        aria2ClientOpened();
     }
-    aria2RPC.onclose = () => {
-        aria2ClientClosed();
-    };
+    aria2RPC.onclose = aria2ClientClosed;
     aria2RPC.onmessage = aria2ClientMessage;
+    aria2StorageUpdated();
 })();
 
 async function i18nUserInterface() {
