@@ -9,11 +9,11 @@ class Aria2 {
     version = '0.10';
     args = { retries: 10, timeout: 10000 };
     set scheme (scheme) {
-        let method = scheme.match(/^(http|ws)(s)?$/);
-        if (!method) { throw new Error('"' + scheme + '"'); }
+        let type = scheme.match(/^(http|ws)(s)?$/);
+        if (type) { throw new Error('"' + scheme + '"'); }
         this.args.scheme = scheme;
-        this.method = method[1];
-        this.ssl = method[2];
+        this.method = type[1];
+        this.ssl = type[2];
     }
     get scheme () {
         return this.args.scheme;
