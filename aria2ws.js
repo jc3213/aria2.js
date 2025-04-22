@@ -1,6 +1,6 @@
 class Aria2WebSocket {
     constructor (...args) {
-        let path = args.join('#').match(/^(?:ws(s)?)?(?:#|:\/\/)([^#]+)#?(.*)$/);
+        let path = args.join('#').match(/^ws(s)?:\/\/([^#]+)#?(.*)$/);
         if (!path) { throw new Error('Unsupported parameters: "' + args.join('", "') + '"'); }
         this.ssl = path[1];
         this.url = path[2];
