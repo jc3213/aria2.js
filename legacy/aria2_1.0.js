@@ -6,97 +6,97 @@ class Aria2 {
         this.url = path[2];
         this.secret = path[3];
     }
-    version = '0.10';
-    #_ = { retries: 10, timeout: 10000 };
+    version = '1.0';
+    #args = { retries: 10, timeout: 10000 };
     set scheme (scheme) {
         let type = scheme.match(/^(http|ws)(s)?$/);
         if (!type) { throw new Error('"' + scheme + '"'); }
-        this.#_.scheme = scheme;
+        this.#args.scheme = scheme;
         this.method = type[1];
         this.ssl = type[2];
     }
     get scheme () {
-        return this.#_.scheme;
+        return this.#args.scheme;
     }
     set method (method) {
         if (!/^(http|ws)$/.test(method)) { throw new Error('"' + method + '"'); }
-        this.#_.method = method;
+        this.#args.method = method;
         this.call = this[method];
     }
     get method () {
-        return this.#_.method;
+        return this.#args.method;
     }
     set ssl (ssl) {
-        this.#_.ssl = ssl ? 's' : '';
+        this.#args.ssl = ssl ? 's' : '';
         this.path();
     }
     get ssl () {
-        return !!this.#_.ssl;
+        return !!this.#args.ssl;
     }
     set url (url) {
-        this.#_.url = url;
+        this.#args.url = url;
         this.path();
     }
     get url () {
-        return this.#_.url;
+        return this.#args.url;
     }
     set secret (secret) {
-        this.#_.token = 'token:'　+ secret;
+        this.#args.token = 'token:'　+ secret;
     }
     get secret () {
-        return this.#_.token.slice(6);
+        return this.#args.token.slice(6);
     }
     set retries (number) {
-        this.#_.retries = isNaN(number) || number < 0 ? Infinity : number;
+        this.#args.retries = isNaN(number) || number < 0 ? Infinity : number;
     }
     get retries () {
-        return isNaN(this.#_.retries) ? Infinity : this.#_.retries;
+        return this.#args.retries;
     }
     set timeout (number) {
-        this.#_.timeout = isNaN(number) ? 10000 : number * 1000;
+        this.#args.timeout = isNaN(number) ? 10000 : number * 1000;
     }
     get timeout () {
-        return isNaN(this.#_.timeout) ? 10 : this.#_.timeout / 1000;
+        return this.#args.timeout / 1000;
     }
     set onopen (func) {
-        this.#_.onopen = typeof func === 'function' ? func : null;
+        this.#args.onopen = typeof func === 'function' ? func : null;
     }
     get onopen () {
-        return typeof this.#_.onopen === 'function' ? this.#_.onopen : null;
+        return this.#args.onopen ?? null;
     }
     set onmessage (func) {
-        this.#_.onmessage = typeof func === 'function' ? func : null;
+        this.#args.onmessage = typeof func === 'function' ? func : null;
     }
     get onmessage () {
-        return typeof this.#_.onmessage === 'function' ? this.#_.onmessage : null;
+        return this.#args.onmessage ?? null;
     }
     set onclose (func) {
-        this.#_.onclose = typeof func === 'function' ? func : null;
+        this.#args.onclose = typeof func === 'function' ? func : null;
     }
     get onclose () {
-        return typeof this.#_.onclose === 'function' ? this.#_.onclose : null;
+        return this.#args.onclose ?? null;
     }
     path () {
-        let {ssl, url} = this.#_;
-        this.#_.xml = 'http' + ssl + '://' + url;
-        this.#_.ws = 'ws' + ssl + '://' + url;
+        let {ssl, url} = this.#args;
+        this.#args.xml = 'http' + ssl + '://' + url;
+        this.#args.ws = 'ws' + ssl + '://' + url;
     }
     connect () {
         let tries = 0;
-        this.socket = new WebSocket(this.#_.ws);
+        this.socket = new WebSocket(this.#args.ws);
         this.socket.onopen = (event) => {
             this.alive = true;
-            if (typeof this.#_.onopen === 'function') { this.#_.onopen(event); }
+            if (this.#args.onopen) { this.#args.onopen(event); }
         };
         this.socket.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            if (!response.method) { this.#_.onresponse(response); }
-            else if (typeof this.#_.onmessage === 'function') { this.#_.onmessage(response); }
+            if (!response.method) { this.#args.onresponse(response); }
+            else if (this.#args.onmessage) { this.#args.onmessage(response); }
         };
         this.socket.onclose = (event) => {
             this.alive = false;
-            if (!event.wasClean && tries ++ < this.#_.retries) { setTimeout(() => this.connect(), this.#_.timeout); }
-            if (typeof this.#_.onclose === 'function') { this.#_.onclose(event); }
+            if (!event.wasClean && tries ++ < this.#args.retries) { setTimeout(() => this.connect(), this.#args.timeout); }
+            if (this.#args.onclose) { this.#args.onclose(event); }
         };
     }
     disconnect () {
@@ -104,19 +104,19 @@ class Aria2 {
     }
     ws (...args) {
         return new Promise((resolve, reject) => {
-            this.#_.onresponse = resolve;
+            this.#args.onresponse = resolve;
             this.socket.onerror = reject;
             this.socket.send(this.json(args));
         });
     }
     http (...args) {
-        return fetch(this.#_.xml, {method: 'POST', body: this.json(args)}).then((response) => {
+        return fetch(this.#args.xml, {method: 'POST', body: this.json(args)}).then((response) => {
             if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
         });
     }
     json (args) {
-        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.#_.token, ...params] }) );
+        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.#args.token, ...params] }) );
         return JSON.stringify(json);
     }
 }
