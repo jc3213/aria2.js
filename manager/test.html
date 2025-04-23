@@ -12,7 +12,7 @@ function aria2JsonrpcEcho() {
         let timer = setTimeout(() => {
             window.removeEventListener('message', connect);
             reject(new Error('"Download With Aria2" has not been installed!'));
-        }, 10000);
+        }, 5000);
         window.addEventListener('message', connect);
         window.postMessage({ aria2c: 'aria2c_jsonrpc_echo' });
     });
