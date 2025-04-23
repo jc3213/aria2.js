@@ -21,10 +21,10 @@ function aria2JsonrpcEcho() {
 aria2JsonrpcEcho()
     .then(( { name, version } ) => {
         alert('"' + name + '" v' + version + ' has been installed successfully.');
-        close();
+        window.close();
     })
     .catch((err) => {
         alert('"Download with Aria2" has not been installed!"');
-        close();
+        window.close();
     });
 </script>
