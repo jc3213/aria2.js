@@ -1,37 +1,40 @@
 class Aria2XMLRequest {
     constructor (...args) {
         let path = args.join('#').match(/^(https?:\/\/[^#]+)#?(.*)$/);
-        if (!path) { throw new Error('Invalid JSON-RPC entry: "' + args.join('", "') + '"'); }
+        if (!path) { throw new Error('Unsupported parameters: "' + args.join('", "') + '"'); }
         this.method = 'POST';
-        this.#args.xml = path[1];
+        this.#url = path[1];
         this.secret = path[2];
     }
     version = '1.0';
-    #args = {};
+    #method;
     set method (method) {
-        this.call = { 'POST': this.post, 'GET': this.get }[ method ];
+        this.call = { 'POST': this.#post, 'GET': this.#get }[ method ];
         if (!this.call) { throw new Error('Unsupported method: "' + method + '"'); }
-        this.#args.method = method;
+        this.#method = method;
     }
     get method () {
-        return this.#args.method;
+        return this.#method;
     }
+    #url;
+    #secret;
     set secret (secret) {
-        this.#args.token = 'token:'　+ secret;
+        this.#secret = 'token:'　+ secret;
     }
     get secret () {
-        return this.#args.token.slice(6);
+        return this.#secret.slice(6);
     }
-    get (...args) {
-        return fetch(this.#args.xml + '?params=' + btoa( unescape( encodeURIComponent (this.json(args) ) ) )).then(this.result);
+    #get (...args) {
+        return fetch(this.#url + '?params=' + btoa( unescape( encodeURIComponent (this.#json(args) ) ) )).then(this.#then);
     }
-    post (...args) {
-        return fetch(this.#args.xml, {method: 'POST', body: this.json(args)}).then(this.result);
+    #post (...args) {
+        return fetch(this.#url, {method: 'POST', body: this.#json(args)}).then(this.#then);
     }
-    result (response) {
+    #then (response) {
         if (response.ok) { return response.json(); } throw new Error(response.statusText);
     }
-    json (args) {
-        return JSON.stringify( args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.#args.token, ...params] }) ) );
+    #json (args) {
+        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.#token, ...params] }) );
+        return JSON.stringify( json );
     }
 }
