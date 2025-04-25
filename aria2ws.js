@@ -30,8 +30,10 @@ class Aria2WebSocket {
     get secret () {
         return this.#secret.slice(6);
     }
+    #tries;
     #retries = 10;
     set retries (number) {
+        this.#tries = 0;
         this.#retries = isNaN(number) || number < 0 ? Infinity : number;
     }
     get retries () {
@@ -65,40 +67,38 @@ class Aria2WebSocket {
     get onclose () {
         return this.#onclose;
     }
-    #ws;
-    #tries;
+    #wsa;
     #path () {
-        this.#ws = 'ws' + this.#ssl + '://' + this.#url;
-        this.#tries = 0;
+        this.#wsa = 'ws' + this.#ssl + '://' + this.#url;
     }
     #socket;
     connect () {
-        this.#socket = new WebSocket(this.#ws);
-        this.#socket.onopen = (event) => {
+        this.#ws = new WebSocket(this.#wsa);
+        this.#ws.onopen = (event) => {
             this.alive = true;
             if (this.#onopen) { this.#onopen(event); }
         };
-        this.#socket.onmessage = (event) => {
+        this.#ws.onmessage = (event) => {
             let response = JSON.parse(event.data);
             if (!response.method) { this.#onrecieve(response); }
             else if (this.#onmessage) { this.#onmessage(response); }
         };
-        this.#socket.onclose = (event) => {
+        this.#ws.onclose = (event) => {
             this.alive = false;
             if (!event.wasClean && this.#tries++ < this.#retries) { setTimeout(() => this.connect(), this.#timeout); }
             if (this.#onclose) { this.#onclose(event); }
         };
     }
     disconnect () {
-        this.#socket.close();
+        this.#ws.close();
     }
     #onrecieve = null;
     call (...args) {
         let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.#secret, ...params] }) );
         return new Promise((resolve, reject) => {
             this.#onrecieve = resolve;
-            this.#socket.onerror = reject;
-            this.#socket.send( JSON.stringify(json) );
+            this.#ws.onerror = reject;
+            this.#ws.send( JSON.stringify(json) );
         });
     }
 }
