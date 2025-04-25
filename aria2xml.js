@@ -17,6 +17,12 @@ class Aria2XMLRequest {
         return this.#method;
     }
     #url;
+    set url (url) {
+        this.#url = url;
+    }
+    get url () {
+        return this.#url;
+    }
     #secret;
     set secret (secret) {
         this.#secret = 'token:'　+ secret;
