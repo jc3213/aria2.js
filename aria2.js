@@ -6,7 +6,7 @@ class Aria2 {
         this.url = path[2];
         this.secret = path[3];
     }
-    version = '1.0';
+    version = '0.10';
     set scheme (scheme) {
         let type = scheme.match(/^(http|ws)(s)?$/);
         if (!type) { throw new Error('Unsupported scheme: "' + scheme + '"'); }
