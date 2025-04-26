@@ -71,7 +71,7 @@ class Aria2WebSocket {
     #path () {
         this.#wsa = 'ws' + this.#ssl + '://' + this.#url;
     }
-    #socket;
+    #ws;
     connect () {
         this.#ws = new WebSocket(this.#wsa);
         this.#ws.onopen = (event) => {
