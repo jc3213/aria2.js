@@ -1,12 +1,8 @@
 # aria2.js
 
-## Usage
-
-| Application | Command Line | Javascript | Webpage |
-| - | - | - | - |
-| [aria2 download utility](https://github.com/aria2/aria2/releases/latest) | [aria2c.cmd](cli) | [aria2.js](https://jc3213.github.io/aria2.js/aria2.js) | [Task Manager](https://jc3213.github.io/aria2.js/manager) |
-
-
+| Lastest | Extension | Web App |
+| - | - | - |
+| [aria2.js](https://jc3213.github.io/aria2.js/aria2.js) | [Download with Aria2](https://jc3213.github.io/download_with_aria2/) | [Task Manager](https://jc3213.github.io/aria2.js/manager) |
 
 ### HTML
 ```HTML
