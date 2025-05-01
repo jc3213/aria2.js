@@ -84,7 +84,7 @@ class Aria2WebSocket {
         };
         this.#ws.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            if (!response.method) { this.#onrecieve(response); }
+            if (!response.method) { this.#onreceive(response); }
             else if (this.#onmessage) { this.#onmessage(response); }
         };
         this.#ws.onclose = (event) => {
@@ -96,11 +96,11 @@ class Aria2WebSocket {
     disconnect () {
         this.#ws.close();
     }
-    #onrecieve = null;
+    #onreceive = null;
     call (...args) {
         let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.#secret, ...params] }) );
         return new Promise((resolve, reject) => {
-            this.#onrecieve = resolve;
+            this.#onreceive = resolve;
             this.#ws.onerror = reject;
             this.#ws.send( JSON.stringify(json) );
         });
