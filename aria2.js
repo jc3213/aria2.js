@@ -7,6 +7,10 @@ class Aria2 {
         this.secret = path[3];
     }
     version = '1.0';
+    #alive;
+    get alive () {
+        return this.#alive;
+    }
     set scheme (scheme) {
         let type = scheme.match(/^(http|ws)(s)?$/);
         if (!type) { throw new Error('Unsupported scheme: "' + scheme + '"'); }
@@ -114,7 +118,7 @@ class Aria2 {
     connect () {
         this.#ws = new WebSocket(this.#wsa);
         this.#ws.onopen = (event) => {
-            this.alive = true;
+            this.#alive = true;
             if (this.#onopen) { this.#onopen(event); }
         };
         this.#ws.onmessage = (event) => {
@@ -123,7 +127,7 @@ class Aria2 {
             else if (this.#onmessage) { this.#onmessage(response); }
         };
         this.#ws.onclose = (event) => {
-            this.alive = false;
+            this.#alive = false;
             if (!event.wasClean && this.#tries++ < this.#retries) { setTimeout(() => this.connect(), this.#timeout); }
             if (this.#onclose) { this.#onclose(event); }
         };
