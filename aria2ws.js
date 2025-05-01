@@ -7,6 +7,10 @@ class Aria2WebSocket {
         this.secret = path[3];
     }
     version = '1.0';
+    #alive;
+    get alive () {
+        return this.#alive;
+    }
     #ssl;
     set ssl (ssl) {
         this.#ssl = ssl ? 's' : '';
@@ -75,7 +79,7 @@ class Aria2WebSocket {
     connect () {
         this.#ws = new WebSocket(this.#wsa);
         this.#ws.onopen = (event) => {
-            this.alive = true;
+            this.#alive = true;
             if (this.#onopen) { this.#onopen(event); }
         };
         this.#ws.onmessage = (event) => {
@@ -84,7 +88,7 @@ class Aria2WebSocket {
             else if (this.#onmessage) { this.#onmessage(response); }
         };
         this.#ws.onclose = (event) => {
-            this.alive = false;
+            this.#alive = false;
             if (!event.wasClean && this.#tries++ < this.#retries) { setTimeout(() => this.connect(), this.#timeout); }
             if (this.#onclose) { this.#onclose(event); }
         };
