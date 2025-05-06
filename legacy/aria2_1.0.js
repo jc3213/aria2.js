@@ -6,7 +6,7 @@ class Aria2 {
         this.url = path[2];
         this.secret = path[3];
     }
-    version = '0.10';
+    version = '1.0';
     #status;
     get status () {
         return this.#status;
