@@ -1,16 +1,16 @@
 class Aria2XMLRequest {
     constructor (...args) {
-        let path = args.join('#').match(/^(https?:\/\/[^#]+)#?(.*)$/);
-        if (!path) { throw new Error('Unsupported parameters: "' + args.join('", "') + '"'); }
+        let path = args.join('#').match(/^(https?)(?:#|:\/\/)([^#]+)#?(.*)$/);
+        if (!path) { throw new Error(`Unsupported parameters: "${args.join('", "')}"`); }
         this.method = 'POST';
-        this.#url = path[1];
-        this.secret = path[2];
+        this.#url = `${path[1]}://${path[2]}`;
+        this.secret = path[3];
     }
     version = '1.0';
     #method;
     set method (method) {
-        this.call = { 'POST': this.#post, 'GET': this.#get }[ method ];
-        if (!this.call) { throw new Error('Unsupported method: "' + method + '"'); }
+        if (!/^(post|get)$/i.test(method)) { throw new Error(`Unsupported method: "${method}"`); }
+        this.call = method.toLowerCase() === 'post' ? this.#post : this.#get;
         this.#method = method;
     }
     get method () {
@@ -18,6 +18,7 @@ class Aria2XMLRequest {
     }
     #url;
     set url (url) {
+        if (!/^https?:\/\/[^#/]+$/.test(url)) { throw new Error (`Unsupported url: "${url}"`); }
         this.#url = url;
     }
     get url () {
@@ -25,13 +26,13 @@ class Aria2XMLRequest {
     }
     #secret;
     set secret (secret) {
-        this.#secret = 'token:'　+ secret;
+        this.#secret = `token:${secret}`;
     }
     get secret () {
         return this.#secret.slice(6);
     }
     #get (...args) {
-        return fetch(this.#url + '?params=' + btoa( unescape( encodeURIComponent (this.#json(args) ) ) )).then(this.#then);
+        return fetch(`${this.#url}?params=${btoa(unescape(encodeURIComponent(this.#json(args))))}`).then(this.#then);
     }
     #post (...args) {
         return fetch(this.#url, {method: 'POST', body: this.#json(args)}).then(this.#then);
