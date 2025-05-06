@@ -12,22 +12,17 @@ class Aria2 {
         return this.#status;
     }
     #scheme;
+    #ssl;
     set scheme (scheme) {
-        let ssl = scheme.match(/^(?:http|ws)(s)?$/);
-        if (!ssl) { throw new Error(`Unsupported scheme: ${scheme}`); }
+        let method = scheme.match(/^(http|ws)(s)?$/);
+        if (!method) { throw new Error(`Unsupported scheme: "${scheme}"`); }
         this.#scheme = scheme;
-        this.ssl = ssl[1];
+        this.#ssl = method[2] ?? '';
+        this.call = method[1] === 'http' ? this.#post : this.#send;
+        this.#path();
     }
     get scheme () {
         return this.#scheme;
-    }
-    #ssl;
-    set ssl (ssl) {
-        this.#ssl = ssl ? 's' : '';
-        this.#path();
-    }
-    get ssl () {
-        return !!this.#ssl;
     }
     #url;
     set url (url) {
