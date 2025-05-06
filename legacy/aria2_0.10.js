@@ -6,7 +6,7 @@ class Aria2 {
         this.url = path[2];
         this.secret = path[3];
     }
-    version = '1.0';
+    version = '0.10';
     #error (type, text) {
         throw new Error(`Unsupported ${type}: "${text}"`);
     }
