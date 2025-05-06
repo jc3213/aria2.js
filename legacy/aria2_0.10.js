@@ -10,26 +10,15 @@ class Aria2 {
     #error (type, text) {
         throw new Error(`Unsupported ${type}: "${text}"`);
     }
-    #alive;
-    get alive () {
-        return this.#alive;
-    }
+    #scheme;
     set scheme (scheme) {
-        let type = scheme.match(/^(http|ws)(s)?$/);
-        if (!type) { this.#error('scheme', scheme); }
-        this.method = type[1];
-        this.ssl = type[2];
+        let ssl = scheme.match(/^(?:http|ws)(s)?$/);
+        if (!ssl) { this.#error(`Unsupported scheme: ${scheme}`); }
+        this.#scheme = scheme;
+        this.#ssl = ssl[1];
     }
     get scheme () {
         return this.#method + this.#ssl;
-    }
-    #method;
-    set method (method) {
-        this.call = method === "http" ? this.#post : method === "ws" ? this.#send : this.#error('method', method);
-        this.#method = method;
-    }
-    get method () {
-        return this.#method;
     }
     #ssl;
     set ssl (ssl) {
@@ -119,7 +108,6 @@ class Aria2 {
     connect () {
         this.#ws = new WebSocket(this.#wsa);
         this.#ws.onopen = (event) => {
-            this.#alive = true;
             if (this.#onopen) { this.#onopen(event); }
         };
         this.#ws.onmessage = (event) => {
@@ -128,7 +116,6 @@ class Aria2 {
             else if (this.#onmessage) { this.#onmessage(response); }
         };
         this.#ws.onclose = (event) => {
-            this.#alive = false;
             if (!event.wasClean && this.#tries++ < this.#retries) { setTimeout(() => this.connect(), this.#timeout); }
             if (this.#onclose) { this.#onclose(event); }
         };
