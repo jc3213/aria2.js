@@ -1,21 +1,19 @@
 class Aria2 {
     constructor (...args) {
         let path = args.join('#').match(/^(https?|wss?)(?:#|:\/\/)([^#]+)#?(.*)$/);
-        if (!path) { this.#error('parameters', args.join('", "')); }
+        if (!path) { throw new Error(`Unsupported parameters: "${args.join('", "')}"`); }
         this.scheme = path[1];
         this.url = path[2];
         this.secret = path[3];
     }
     version = '0.10';
-    #error (type, text) {
-        throw new Error(`Unsupported ${type}: "${text}"`);
-    }
     #scheme;
     set scheme (scheme) {
-        let ssl = scheme.match(/^(?:http|ws)(s)?$/);
-        if (!ssl) { this.#error(`Unsupported scheme: ${scheme}`); }
+        let ssl = scheme.match(/^(http|ws)(s)?$/);
+        if (!ssl) { throw new Error(`Unsupported scheme: ${scheme}`); }
         this.#scheme = scheme;
-        this.#ssl = ssl[1];
+        this.ssl = ssl[2];
+        this.call = ssl[1] === 'http' ? this.#post : this.#send;
     }
     get scheme () {
         return this.#method + this.#ssl;
