@@ -53,7 +53,6 @@ class Aria2 {
     connect () {
         this.socket = new WebSocket(this.jsonrpc.ws);
         this.socket.onopen = (event) => {
-            this.alive = true;
             if (typeof this.events.onopen === 'function') { this.events.onopen(event); }
         };
         this.socket.onmessage = (event) => {
@@ -62,7 +61,6 @@ class Aria2 {
             else if (typeof this.events.onmessage === 'function') { this.events.onmessage(response); }
         };
         this.socket.onclose = (event) => {
-            this.alive = false;
             if (!event.wasClean && this.jsonrpc.count < this.jsonrpc.retries) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
             if (typeof this.events.onclose === 'function') { this.events.onclose(event); }
             this.jsonrpc.count ++;
