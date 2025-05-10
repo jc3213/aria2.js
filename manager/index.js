@@ -87,23 +87,25 @@ function aria2StorageUpdated() {
     aria2RPC.connect();
 }
 
+function aria2OptionsParser(options, version) {
+    options['min-split-size'] = getFileSize(options['min-split-size']);
+    options['max-download-limit'] = getFileSize(options['max-download-limit']);
+    options['max-upload-limit'] = getFileSize(options['max-upload-limit']);
+    downloadEntries.forEach((entry) => {
+        aria2Config[entry.name] = entry.value = options[entry.name] ??= '';
+    });
+    versionEntry.textContent = version.version;
+}
+
 (function () {
     i18nUserInterface();
     optionEntries.forEach((entry) => {
         aria2Storage[entry.name] = entry.value = localStorage[entry.name] ||= entry.dataset.value;
     });
     aria2RPC = new Aria2(aria2Storage.scheme, aria2Storage.jsonrpc, aria2Storage.secret);
-    aria2RPC.onopen = async () => {
-        var [global, version] = await aria2RPC.call({method: 'aria2.getGlobalOption'}, {method: 'aria2.getVersion'});
-        var options = global.result;
-        options['min-split-size'] = getFileSize(options['min-split-size']);
-        options['max-download-limit'] = getFileSize(options['max-download-limit']);
-        options['max-upload-limit'] = getFileSize(options['max-upload-limit']);
-        downloadEntries.forEach((entry) => {
-            aria2Config[entry.name] = entry.value = options[entry.name] ??= '';
-        });
-        versionEntry.textContent = version.result.version;
-        aria2ClientOpened();
+    aria2RPC.onopen = async ({stats, active, waiting, stopped, version, options}) => {
+        aria2OptionsParser(options.result, version.result);
+        aria2ClientOpened({stats, active, waiting, stopped});
     }
     aria2RPC.onclose = aria2ClientClosed;
     aria2RPC.onmessage = aria2ClientMessage;
