@@ -48,20 +48,20 @@ body:not(.setting) > #setting {
     border-style: outset;
 }
 
-#system::before {
-    content: var(--system);
-}
-
-#version::before {
-    content: var(--version);
-}
-
 #menu::before {
     content: var(--menu);
 }
 
 #filter::before {
     content: var(--queue);
+}
+
+#system::before {
+    content: var(--system);
+}
+
+#version::before {
+    content: var(--version);
 }
 
 [data-sid="download"]::before {
