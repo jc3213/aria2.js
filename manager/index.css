@@ -39,14 +39,6 @@ body:not(.setting) > #setting {
     z-index: 9;
 }
 
-#sytem::before {
-    content: var(--system);
-}
-
-#version::before {
-    content: var(--version);
-}
-
 .adduri #download, .setting #options {
     border-style: inset;
 }
@@ -54,6 +46,14 @@ body:not(.setting) > #setting {
 .adduri [data-bid="download_btn"]:active,
 .setting [data-bid="options_btn"]:active {
     border-style: outset;
+}
+
+#sytem::before {
+    content: var(--system);
+}
+
+#version::before {
+    content: var(--version);
 }
 
 #menu::before {
