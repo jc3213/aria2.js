@@ -39,24 +39,12 @@ body:not(.setting) > #setting {
     z-index: 9;
 }
 
-#about {
-    display: flex;
-    flex-direction: column;
-    grid-area: 3 / 1 / 4 / 2;
-    text-align: center;
+#sytem::before {
+    content: var(--system);
 }
 
-#about::before {
-    content: var(--about);
-}
-
-#aria2_ver {
-    margin-right: 3px;
-    padding: 4px;
-}
-
-#aria2_ver::before {
-    content: "v";
+#version::before {
+    content: var(--version);
 }
 
 .adduri #download, .setting #options {
