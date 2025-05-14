@@ -12,11 +12,6 @@
             <button i18n="popup_newdld"></button>
             <button i18n="popup_purge"></button>
             <button i18n="popup_options"></button>
-            <div class="download" data-sid="download"></div>
-            <div class="upload" data-sid="upload"></div>
-            <div data-sid="active">0</div>
-            <div data-sid="waiting">0</div>
-            <div data-sid="stopped">0</div>
         </div>
         <div id="filter">
             <div data-fid="active" i18n="popup_active_queue"></div>
@@ -25,6 +20,18 @@
             <div data-fid="complete" i18n="popup_complete_queue"></div>
             <div data-fid="removed" i18n="popup_removed_queue"></div>
             <div data-fid="error" i18n="popup_error_queue"></div>
+        </div>
+        <div id="system">
+            <div id="version"></div>
+            <div class="speed" data-sid="download"></div>
+            <div class="speed" data-sid="upload"></div>
+            <div data-sid="active">0</div>
+            <div data-sid="waiting">0</div>
+            <div data-sid="stopped">0</div>
+            <select id="locale" disabled>
+                <option value="en">English</option>
+                <option value="zh">简体中文</option>
+            </select>
         </div>
         <div id="queue">
             <div id="active" data-tid="active"></div>
@@ -125,14 +132,6 @@
                 <div class="ratio"></div>
             </div>
             <div class="uri"></div>
-        </div>
-        <div id="about">
-            <div></div>
-            <div></div>
-            <select>
-                <option value="en">English</option>
-                <option value="zh">简体中文</option>
-            </select>
         </div>
         <div id="setting" class="group">
             <div>
