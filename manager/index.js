@@ -4,7 +4,6 @@ var acceptLang = ['en', 'zh'];
 
 var [optionsPane, ...optionEntries] = document.querySelectorAll('#setting, #setting [name]');
 var [downPane, ...downloadEntries]= document.querySelectorAll('#adduri, #adduri [name]');
-var [statusEntry, versionEntry, i18nEntry] = document.querySelectorAll('#about > *');
 var [saveBtn, submitBtn, metaBtn, metaEntry, UrlEntry, proxyBtn] = document.querySelectorAll('#adduri button, #setting button, textarea, input[type="file"');
 var i18nCss = document.createElement('style');
 document.head.append(i18nCss);
@@ -87,14 +86,13 @@ function aria2StorageUpdated() {
     aria2RPC.connect();
 }
 
-function aria2OptionsParser(options, version) {
+function aria2OptionsParser(options) {
     options['min-split-size'] = getFileSize(options['min-split-size']);
     options['max-download-limit'] = getFileSize(options['max-download-limit']);
     options['max-upload-limit'] = getFileSize(options['max-upload-limit']);
     downloadEntries.forEach((entry) => {
         aria2Config[entry.name] = entry.value = options[entry.name] ??= '';
     });
-    versionEntry.textContent = version.version;
 }
 
 (function () {
