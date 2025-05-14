@@ -123,7 +123,8 @@ async function i18nUserInterface() {
 :root {
     --menu: "${i18n.popup_menu}";
     --queue: "${i18n.popup_queue}";
-    --about: "${i18n.popup_about}";
+    --system: "${i18n.popup_system}";
+    --version "${i18n.popup_version}";
     --download: "${i18n.popup_download}";
     --upload: "${i18n.popup_upload}";
     --active: "${i18n.popup_active}";
