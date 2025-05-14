@@ -48,7 +48,7 @@ body:not(.setting) > #setting {
     border-style: outset;
 }
 
-#sytem::before {
+#system::before {
     content: var(--system);
 }
 
