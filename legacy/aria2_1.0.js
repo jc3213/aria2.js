@@ -7,9 +7,13 @@ class Aria2 {
         this.secret = path[3];
     }
     version = '1.0';
-    #status;
-    get status () {
-        return this.#status;
+    #xml;
+    #wsa;
+    #tries;
+    #path () {
+        this.#xml = `http${this.#ssl}://${this.#url}`;
+        this.#wsa = `ws${this.#ssl}://${this.#url}`;
+        this.#tries = 0;
     }
     #scheme;
     #ssl;
@@ -74,14 +78,6 @@ class Aria2 {
     get onclose () {
         return this.#onclose;
     }
-    #xml;
-    #wsa;
-    #tries;
-    #path () {
-        this.#xml = `http${this.#ssl}://${this.#url}`;
-        this.#wsa = `ws${this.#ssl}://${this.#url}`;
-        this.#tries = 0;
-    }
     #onreceive = null;
     #send (...args) {
         return new Promise((resolve, reject) => {
@@ -103,18 +99,13 @@ class Aria2 {
     #ws;
     connect () {
         this.#ws = new WebSocket(this.#wsa);
-        this.#ws.onopen = async (event) => {
-            let [stats, version, options, active, waiting, stopped] = await this.#send({method: 'aria2.getGlobalStat'}, {method: 'aria2.getVersion'}, {method: 'aria2.getGlobalOption'}, {method: 'aria2.tellActive'}, {method: 'aria2.tellWaiting', params: [0, 999]}, {method: 'aria2.tellStopped', params: [0, 999]});
-            this.#status = {stats, version, options, active, waiting, stopped};
-            if (this.#onopen) { this.#onopen(this.#status); }
-        };
+        this.#ws.onopen = this.#onopen;
         this.#ws.onmessage = (event) => {
             let response = JSON.parse(event.data);
             if (!response.method) { this.#onreceive(response); }
             else if (this.#onmessage) { this.#onmessage(response); }
         };
         this.#ws.onclose = (event) => {
-            this.#status = null;
             if (!event.wasClean && this.#tries++ < this.#retries) { setTimeout(() => this.connect(), this.#timeout); }
             if (this.#onclose) { this.#onclose(event); }
         };
