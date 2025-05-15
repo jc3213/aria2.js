@@ -86,12 +86,13 @@ function aria2StorageUpdated() {
     aria2RPC.connect();
 }
 
-function aria2OptionsParser(options) {
-    options['min-split-size'] = getFileSize(options['min-split-size']);
-    options['max-download-limit'] = getFileSize(options['max-download-limit']);
-    options['max-upload-limit'] = getFileSize(options['max-upload-limit']);
+async function aria2OptionsParser() {
+    let [{result}] = await aria2RPC.call({method: 'aria2.getGlobalOption'});
+    result['min-split-size'] = getFileSize(result['min-split-size']);
+    result['max-download-limit'] = getFileSize(result['max-download-limit']);
+    result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
     downloadEntries.forEach((entry) => {
-        aria2Config[entry.name] = entry.value = options[entry.name] ??= '';
+        aria2Config[entry.name] = entry.value = result[entry.name] ??= '';
     });
 }
 
@@ -102,6 +103,7 @@ function aria2OptionsParser(options) {
     });
     aria2ClientSetup(aria2Storage.scheme, aria2Storage.jsonrpc, aria2Storage.secret);
     aria2StorageUpdated();
+    aria2OptionsUpdated();
 })();
 
 async function i18nUserInterface() {
