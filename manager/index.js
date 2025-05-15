@@ -86,7 +86,7 @@ function aria2StorageUpdated() {
     aria2RPC.connect();
 }
 
-async function aria2OptionsParser() {
+async function aria2OptionsUpdated() {
     let [{result}] = await aria2RPC.call({method: 'aria2.getGlobalOption'});
     result['min-split-size'] = getFileSize(result['min-split-size']);
     result['max-download-limit'] = getFileSize(result['max-download-limit']);
