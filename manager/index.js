@@ -100,10 +100,7 @@ function aria2OptionsParser(options) {
     optionEntries.forEach((entry) => {
         aria2Storage[entry.name] = entry.value = localStorage[entry.name] ||= entry.dataset.value;
     });
-    aria2RPC = new Aria2(aria2Storage.scheme, aria2Storage.jsonrpc, aria2Storage.secret);
-    aria2RPC.onopen = aria2ClientOpened;
-    aria2RPC.onclose = aria2ClientClosed;
-    aria2RPC.onmessage = aria2ClientMessage;
+    aria2ClientSetup(aria2Storage.scheme, aria2Storage.jsonrpc, aria2Storage.secret);
     aria2StorageUpdated();
 })();
 
