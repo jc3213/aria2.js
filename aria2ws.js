@@ -7,6 +7,12 @@ class Aria2WebSocket {
         this.secret = path[3];
     }
     version = '1.0';
+    #wsa;
+    #tries;
+    #path () {
+        this.#wsa = `ws${this.#ssl}://${this.#url}`;
+        this.#tries = 0;
+    }
     #ssl;
     set ssl (ssl) {
         this.#ssl = ssl ? 's' : '';
@@ -64,12 +70,6 @@ class Aria2WebSocket {
     }
     get onclose () {
         return this.#onclose;
-    }
-    #wsa;
-    #tries;
-    #path () {
-        this.#wsa = `ws${this.#ssl}://${this.#url}`;
-        this.#tries = 0;
     }
     #onreceive = null;
     #send (...args) {
