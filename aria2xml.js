@@ -7,10 +7,6 @@ class Aria2XMLRequest {
         this.url = `${path[1]}://${path[2]}`;
     }
     version = '1.0';
-    #status;
-    get status () {
-        return this.#status;
-    }
     #method;
     set method (method) {
         if (!/^(post|get)$/i.test(method)) { throw new Error(`Unsupported method: "${method}"`); }
@@ -24,9 +20,6 @@ class Aria2XMLRequest {
     set url (url) {
         if (!/^https?:\/\/[^/]+\/\w+$/.test(url)) { throw new Error (`Unsupported url: "${url}"`); }
         this.#url = url;
-        this.#post({method: 'aria2.getGlobalStat'}, {method: 'aria2.getVersion'}, {method: 'aria2.getGlobalOption'}, {method: 'aria2.tellActive'}, {method: 'aria2.tellWaiting', params: [0, 999]}, {method: 'aria2.tellStopped', params: [0, 999]})
-        .then(([stats, version, options, active, waiting, stopped]) => { this.#status = {stats, version, options, active, waiting, stopped}; })
-        .catch((error) => { this.#status = null; });
     }
     get url () {
         return this.#url;
