@@ -83,7 +83,9 @@ class Aria2WebSocket {
     #ws;
     connect () {
         this.#ws = new WebSocket(this.#wsa);
-        this.#ws.onopen = this.#onopen;
+        this.#ws.onopen = (event) => {
+            if (this.#onopen) { this.#onopen(event); }
+        };
         this.#ws.onmessage = (event) => {
             let response = JSON.parse(event.data);
             if (!response.method) { this.#onreceive(response); }
