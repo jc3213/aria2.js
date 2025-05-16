@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title i18n="manager_title">Aria2 Task Manager</title>
+        <link rel="stylesheet" href="https://jc3213.github.io/download_with_aria2/chromium/pages/common.css">
+        <link rel="stylesheet" href="https://jc3213.github.io/download_with_aria2/chromium/pages/popup/popup.css">
+        <link rel="stylesheet" href="index.css">
+    </head>
+    <body>
+        <div id="menu">
+            <button i18n="popup_newdld"></button>
+            <button i18n="popup_purge"></button>
+            <button i18n="popup_options"></button>
+        </div>
+        <div id="filter">
+            <div data-fid="active" i18n="popup_active_queue"></div>
+            <div data-fid="waiting" i18n="popup_waiting_queue"></div>
+            <div data-fid="paused" i18n="popup_paused_queue"></div>
+            <div data-fid="complete" i18n="popup_complete_queue"></div>
+            <div data-fid="removed" i18n="popup_removed_queue"></div>
+            <div data-fid="error" i18n="popup_error_queue"></div>
+        </div>
+        <div id="system">
+            <select id="locale">
+                <option value="en">English</option>
+                <option value="zh">简体中文</option>
+            </select>
+            <div id="version"></div>
+            <div class="speed" data-sid="download"></div>
+            <div class="speed" data-sid="upload"></div>
+            <div data-sid="active">0</div>
+            <div data-sid="waiting">0</div>
+            <div data-sid="stopped">0</div>
+        </div>
+        <div id="queue">
+            <div id="active" data-tid="active"></div>
+            <div id="waiting" data-tid="waiting"></div>
+            <div id="paused" data-tid="waiting"></div>
+            <div id="complete" data-tid="stopped"></div>
+            <div id="removed" data-tid="stopped"></div>
+            <div id="error" data-tid="stopped"></div>
+        </div>
+        <div class="template">
+            <div class="session">
+                <div class="name"></div>
+                <div class="completed filesize"></div>
+                <div class="estimated"><span class="day"></span><span class="hour"></span><span class="minute"></span><span class="second"></span><span class="infinite">∞</span></div>
+                <div class="filesize"></div>
+                <div class="network"></div>
+                <div class="download speed"></div>
+                <div class="upload speed" data-p2p></div>
+                <div class="menu">
+                    <button i18n-tips="tips_task_remove">❌</button>
+                    <button i18n-tips="tips_task_detail">⚙️</button>
+                    <button i18n-tips="tips_task_retry">♻️</button>
+                </div>
+                <div class="meter" i18n-tips="tips_task_pause">
+                    <div class="ratio" i18n-tips="tips_task_pause"></div>
+                </div>
+                <div class="group">
+                    <div class="groupitem" i18n-tips="tips_task_download">
+                        <h4 i18n="task_download"></h4>
+                        <div>
+                            <input name="max-download-limit" type="text">
+                            <span>B/s</span>
+                        </div>
+                    </div>
+                    <div class="groupitem" i18n-tips="tips_task_upload" data-p2p>
+                        <h4 i18n="task_upload"></h4>
+                        <div>
+                            <input name="max-upload-limit" type="text">
+                            <span>B/s</span>
+                        </div>
+                    </div>
+                    <div class="groupitem" i18n-tips="tips_task_proxy">
+                        <h4 i18n="task_proxy"></h4>
+                        <div class="flexmenu">
+                            <input class="proxy" name="all-proxy" type="url">
+                            <button i18n-tips="tips_proxy_server">⚡️</button>
+                        </div>
+                    </div>
+                    <div class="groupitem" i18n-tips="tips_aria2_http_split" data-http>
+                        <h4 i18n="aria2_http_split"></h4>
+                        <input name="split" type="number">
+                    </div>
+                    <div class="groupitem" i18n-tips="tips_aria2_http_size" data-http>
+                        <h4 i18n="aria2_http_size"></h4>
+                        <div>
+                            <input name="min-split-size" type="text">
+                            <span>B</span>
+                        </div>
+                    </div>
+                    <div class="groupitem" i18n-tips="tips_aria2_bt_remove" data-p2p>
+                        <h4 i18n="aria2_bt_remove"></h4>
+                        <select name="bt-remove-unselected-file">
+                            <option value="true" i18n="common_true"></option>
+                            <option value="false" i18n="common_false"></option>
+                        </select>
+                    </div>
+                    <div class="groupitem" i18n-tips="tips_aria2_bt_ratio" data-p2p>
+                        <h4 i18n="aria2_bt_ratio"></h4>
+                        <input name="seed-ratio" type="number" min="0" step="0.1">
+                    </div>
+                    <div class="groupitem" i18n-tips="tips_aria2_bt_seed" data-p2p>
+                        <h4 i18n="aria2_bt_seed"></h4>
+                        <div>
+                            <input name="seed-time" type="number">
+                            <span i18n="time_minute_full"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="files" i18n-tips="tips_task_files">
+                    <div class="flexmenu">
+                        <h4 i18n="task_files"></h4>
+                        <button i18n-tips="tips_select_file">💾</button>
+                    </div>
+                </div>
+                <div class="uris" i18n-tips="tips_task_urls" data-http>
+                    <div class="flexmenu">
+                        <h4 i18n="task_urls"></h4>
+                        <input type="url">
+                        <button i18n-tips="tips_task_adduri">➕</button>
+                    </div>
+                </div>
+            </div>
+            <div class="file">
+                <input type="checkbox">
+                <label></label>
+                <div></div>
+                <div></div>
+                <div class="ratio"></div>
+            </div>
+            <div class="uri"></div>
+        </div>
+        <div id="setting" class="group">
+            <div>
+                <h4 i18n="option_jsonrpc">JSON-RPC Server</h4>
+                <div class="flex">
+                    <select name="scheme" data-value="http">
+                        <option value="http" selected>HTTP</option>
+                        <option value="https">HTTPS</option>
+                        <option value="ws">WS</option>
+                        <option value="wss">WSS</option>
+                    </select>
+                    <input name="jsonrpc" type="url" data-value="localhost:6800/jsonrpc">
+                    <input name="secret" type="text" placeholder="$$secret$$" data-value="">
+                    <button id="commit" i18n="common_save">Save</button>
+                </div>
+            </div>
+            <div class="groupitem">
+                <h4 i18n="option_manager_interval">Refresh Interval</h4>
+                <input name="interval" type="number" min="5" max="30" step="1" data-value="10">
+            </div>
+            <div class="groupitem">
+                <h4 i18n="task_proxy">Proxy Server</h4>
+                <input name="proxy" type="url" placeholder="http://127.0.0.1:1230/" data-value="">
+            </div>
+        </div>
+        <div id="adduri" class="group">
+            <div>
+                <h4 i18n="task_referer">Referer</h4>
+                <div class="flex">
+                    <input id="referer" type="text">
+                    <button id="enter_btn" i18n="task_submit">Submit</button>
+                    <button><label for="uploader" i18n="task_base64">Upload</label></button>
+                    <input id="uploader" type="file" accept=".torrent, .metalink, .meta4" multiple>
+                </div>
+            </div>
+            <div>
+                <h4 i18n="task_entry">Download Urls</h4>
+                <textarea id="entry" rows="2"></textarea>
+            </div>
+            <div class="groupitem">
+                <h4 i18n="aria2_adv_dir">Download Folder</h4>
+                <input name="dir" type="text">
+            </div>
+            <div class="groupitem">
+                <h4 i18n="task_proxy">Proxy Server</h4>
+                <div class="flexmenu">
+                    <input name="all-proxy" type="url">
+                    <button id="proxy_btn">⚡️</button>
+                </div>
+            </div>
+            <div class="groupitem">
+                <h4 i18n="aria2_http_split">Download Sections</h4>
+                <input name="split" type="number">
+            </div>
+            <div class="groupitem">
+                <h4 i18n="aria2_http_size">Section Size</h4>
+                <div>
+                    <input name="min-split-size" type="text">
+                    <span class="float">B</span>
+                </div>
+            </div>
+            <div class="groupitem">
+                <h4 i18n="aria2_max_connection">Max Connections per Server</h4>
+                <input name="max-connection-per-server" type="number">
+            </div>
+            <div class="groupitem">
+                <h4 i18n="task_download">Max Download Speed</h4>
+                <div>
+                    <input name="max-download-limit" type="text">
+                    <span class="float">B/s</span>
+                </div>
+            </div>
+        </div>
+        <script src="../aria2.js"></script>
+        <script src="https://jc3213.github.io/download_with_aria2/chromium/pages/popup/popup.js"></script>
+        <script src="index.js"></script>
+    </body>
+</html>
