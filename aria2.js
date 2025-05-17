@@ -20,9 +20,9 @@ class Aria2 {
     set scheme (scheme) {
         let method = scheme.match(/^(http|ws)(s)?$/);
         if (!method) { throw new Error(`Unsupported scheme: "${scheme}"`); }
+        this.call = method[1] === 'http' ? this.#post : this.#send;
         this.#scheme = scheme;
         this.#ssl = method[2] ?? '';
-        this.call = method[1] === 'http' ? this.#post : this.#send;
         this.#path();
     }
     get scheme () {
