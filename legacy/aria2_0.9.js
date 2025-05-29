@@ -27,10 +27,10 @@ class Aria2 {
         return this.args.url;
     }
     set secret (secret) {
-        this.args.token = 'token:'　+ secret;
+        this.args.secret = 'token:'　+ secret;
     }
     get secret () {
-        return this.args.token.slice(6);
+        return this.args.secret.slice(6);
     }
     set retries (number) {
         this.args.retries = isNaN(number) || number < 0 ? Infinity : number;
@@ -65,22 +65,19 @@ class Aria2 {
     path () {
         let {ssl, url} = this.args;
         this.args.xml = 'http' + ssl + '://' + url;
-        this.args.ws = 'ws' + ssl + '://' + url;
+        this.args.wsa = 'ws' + ssl + '://' + url;
         this.args.tries = 0;
     }
     connect () {
-        this.socket = new WebSocket(this.args.ws);
+        this.socket = new WebSocket(this.args.wsa);
         this.socket.onopen = (event) => {
-            this.alive = true;
             if (typeof this.args.onopen === 'function') { this.args.onopen(event); }
         };
         this.socket.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            if (!response.method) { this.args.onresponse(response); }
-            else if (typeof this.args.onmessage === 'function') { this.args.onmessage(response); }
+            if (response.method && this.args.onmessage === 'function') { this.args.onmessage(response); }
         };
         this.socket.onclose = (event) => {
-            this.alive = false;
             if (!event.wasClean && this.args.tries ++ < this.args.retries) { setTimeout(() => this.connect(), this.args.timeout); }
             if (typeof this.args.onclose === 'function') { this.args.onclose(event); }
         };
@@ -89,8 +86,9 @@ class Aria2 {
         this.socket.close();
     }
     call (...args) {
-        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.#secret, ...params] }) );
-        return fetch(this.#xml, { method: 'POST', body: JSON.stringify(json) }).then((response) => {
+        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.args.secret, ...params] }) );
+        console.log(json);
+        return fetch(this.args.xml, { method: 'POST', body: JSON.stringify(json) }).then((response) => {
             if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
         });
