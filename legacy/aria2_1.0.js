@@ -78,25 +78,24 @@ class Aria2 {
     get onclose () {
         return this.#onclose;
     }
-    #res = new Map();
     #send (...args) {
         return new Promise((resolve, reject) => {
-            let {id, json} = this.#json(args);
-            this.#res.set(id, resolve);
+            let {id, body} = this.#json(args);
+            this[id] = resolve;
             this.#ws.onerror = reject;
-            this.#ws.send(json);
+            this.#ws.send(body);
         });
     }
     #post (...args) {
-        return fetch(this.#xml, {method: 'POST', body: this.#json(args).json}).then((response) => {
+        return fetch(this.#xml, {method: 'POST', body: this.#json(args).body}).then((response) => {
             if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
         });
     }
     #json (args) {
         let id = `${Date.now()}`;
-        let json = JSON.stringify( args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [this.#secret, ...params] }) ) );
-        return { id, json };
+        let body = JSON.stringify( args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [this.#secret, ...params] }) ) );
+        return {id, body};
     }
     #ws;
     connect () {
@@ -106,8 +105,8 @@ class Aria2 {
         };
         this.#ws.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            if (response.method) { if (this.#onmessage) { this.#onmessage(response); } }
-            else { let {id} = response[0]; this.#res.get(id)(response); this.#res.delete(id); }
+            if (response.method) { if(this.#onmessage) { this.#onmessage(response); } }
+            else { let {id} = response[0]; this[id](response); delete this[id]; }
         };
         this.#ws.onclose = (event) => {
             if (!event.wasClean && this.#tries++ < this.#retries) { setTimeout(() => this.connect(), this.#timeout); }
