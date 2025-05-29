@@ -14,7 +14,6 @@ class Aria2 {
         if (!this.call) { throw new Error('Invalid JSON-RPC scheme: "' + scheme + '" is not supported!'); }
         this.jsonrpc.scheme = scheme;
         this.jsonrpc.path = scheme + '://' + this.jsonrpc.url;
-        this.jsonrpc.ws = this.jsonrpc.path.replace('http', 'ws');
     }
     get scheme () {
         return this.jsonrpc.scheme;
@@ -77,7 +76,7 @@ class Aria2 {
         this.socket.onmessage = (event) => {
             let response = JSON.parse(event.data);
             if (response.method) { if (typeof this.events.onmessage === 'function') { this.events.onmessage(response); } }
-            else { let {id} = response[0]; this[id](response); delete this[id]; }
+            else { let {id} = response[0]; this.events[id](response); delete this.events[id]; }
         };
         this.socket.onclose = (event) => {
             if (!event.wasClean && this.jsonrpc.count < this.jsonrpc.retries) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
@@ -90,8 +89,8 @@ class Aria2 {
     }
     send (...args) {
         return new Promise((resolve, reject) => {
-            let {id, body} = this.json(args)
-            this[id] = resolve;
+            let {id, body} = this.json(args);
+            this.events[id] = resolve;
             this.socket.onerror = reject;
             this.socket.send(body);
         });
