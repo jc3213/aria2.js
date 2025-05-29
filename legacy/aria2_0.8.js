@@ -50,6 +50,25 @@ class Aria2 {
     get timeout () {
         return isNaN(this.jsonrpc.time) ? 10 : this.jsonrpc.time | 0;
     }
+    connect () {
+        this.socket = new WebSocket(this.jsonrpc.ws);
+        this.socket.onopen = (event) => {
+            if (typeof this.events.onopen === 'function') { this.events.onopen(event); }
+        };
+        this.socket.onmessage = (event) => {
+            let response = JSON.parse(event.data);
+            if (!response.method) { this.socket.resolve(response); }
+            else if (typeof this.events.onmessage === 'function') { this.events.onmessage(response); }
+        };
+        this.socket.onclose = (event) => {
+            if (!event.wasClean && this.jsonrpc.count < this.jsonrpc.retries) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
+            if (typeof this.events.onclose === 'function') { this.events.onclose(event); }
+            this.jsonrpc.count ++;
+        };
+    }
+    disconnect () {
+        this.socket?.close();
+    }
     set onopen (callback) {
         this.events.onopen = typeof callback === 'function' ? callback : null;
     }
@@ -68,42 +87,21 @@ class Aria2 {
     get onclose () {
         return typeof this.events.onclose === 'function' ? this.events.onclose : null;
     }
-    connect () {
-        this.socket = new WebSocket(this.jsonrpc.ws);
-        this.socket.onopen = (event) => {
-            if (typeof this.events.onopen === 'function') { this.events.onopen(event); }
-        };
-        this.socket.onmessage = (event) => {
-            let response = JSON.parse(event.data);
-            if (response.method) { if (typeof this.events.onmessage === 'function') { this.events.onmessage(response); } }
-            else { let {id} = response[0]; this.events[id](response); delete this.events[id]; }
-        };
-        this.socket.onclose = (event) => {
-            if (!event.wasClean && this.jsonrpc.count < this.jsonrpc.retries) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
-            if (typeof this.events.onclose === 'function') { this.events.onclose(event); }
-            this.jsonrpc.count ++;
-        };
-    }
-    disconnect () {
-        this.socket?.close();
-    }
     send (...args) {
         return new Promise((resolve, reject) => {
-            let {id, body} = this.json(args);
-            this.events[id] = resolve;
+            this.socket.resolve = resolve;
             this.socket.onerror = reject;
-            this.socket.send(body);
+            this.socket.send(this.json(args));
         });
     }
     post (...args) {
-        return fetch(this.jsonrpc.path, {method: 'POST', body: this.json(args).body}).then((response) => {
+        return fetch(this.jsonrpc.path, {method: 'POST', body: this.json(args)}).then((response) => {
             if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
         });
     }
     json (args) {
-        let id = Date.now() + '';
-        let body = JSON.stringify( args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [...this.jsonrpc.params, ...params] }) ) );
-        return {id, body};
+        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [...this.jsonrpc.params, ...params] }) );
+        return JSON.stringify(json);
     }
 }
