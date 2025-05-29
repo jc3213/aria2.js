@@ -34,13 +34,13 @@ class Aria2 {
         return this.args.token.slice(6);
     }
     set retries (number) {
-        this.args.retries = isNaN(number) || number < 0 ? Infinity : number;
+        this.args.retries = Number.isInteger(number) || number >= 0 ? number : Infinity;
     }
     get retries () {
         return isNaN(this.args.retries) ? Infinity : this.args.retries;
     }
     set timeout (number) {
-        this.args.timeout = isNaN(number) ? 10000 : number * 1000;
+        this.args.timeout = isNaN(number) || number <= 0 ? 10000 : number * 1000;
     }
     get timeout () {
         return isNaN(this.args.timeout) ? 10 : this.args.timeout / 1000;
