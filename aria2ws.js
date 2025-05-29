@@ -76,25 +76,23 @@ class Aria2WebSocket {
         let id = `${Date.now()}`;
         let body = JSON.stringify( args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [this.#secret, ...params] }) ) );
         return new Promise((resolve, reject) => {
-            this[id] = resolve;
-            this.#ws.onerror = reject;
-            this.#ws.send(body);
+            this[id] = resolve; this.#ws.onerror = reject; this.#ws.send(body);
         });
     }
     #ws;
     connect () {
         this.#ws = new WebSocket(this.#wsa);
         this.#ws.onopen = (event) => {
-            if (this.#onopen) { this.#onopen(event); }
+            this.#onopen?.(event);
         };
         this.#ws.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            if (response.method) { if(this.#onmessage) { this.#onmessage(response); } }
+            if (response.method) { this.#onmessage?.(response); }
             else { let {id} = response[0]; this[id](response); delete this[id]; }
         };
         this.#ws.onclose = (event) => {
             if (!event.wasClean && this.#tries++ < this.#retries) { setTimeout(() => this.connect(), this.#timeout); }
-            if (this.#onclose) { this.#onclose(event); }
+            this.#onclose?.(event);
         };
     }
     disconnect () {
