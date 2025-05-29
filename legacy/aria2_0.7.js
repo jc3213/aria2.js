@@ -9,8 +9,7 @@ class Aria2 {
     version = '0.7';
     jsonrpc = { retry: 10, timeout: 10000 };
     set scheme (scheme) {
-        this.call = { 'http': this.post, 'https': this.post, 'ws': this.send, 'wss': this.send }[ scheme ];
-        if (!this.call) { throw new Error('Invalid JSON-RPC scheme: "' + scheme + '" is not supported!'); }
+        if (!/^(https?|wss?)$/.test(scheme)) { throw new Error('Invalid JSON-RPC scheme: "' + scheme + '" is not supported!'); }
         this.jsonrpc.scheme = scheme;
         this.jsonrpc.path = scheme + '://' + this.jsonrpc.url;
     }
@@ -79,21 +78,11 @@ class Aria2 {
     disconnect () {
         this.socket?.then( (ws) => ws.close() );
     }
-    send (...args) {
-        return this.socket.then((ws) => new Promise((resolve, reject) => {
-            ws.resolve = resolve;
-            ws.onerror = reject;
-            ws.send(this.json(args));
-        }));
-    }
-    post (...args) {
-        return fetch(this.jsonrpc.path, {method: 'POST', body: this.json(args)}).then((response) => {
+    call (...args) {
+        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [...this.jsonrpc.params, ...params] }) );
+        return fetch(this.jsonrpc.path, { method: 'POST', body: JSON.stringify(json) }).then((response) => {
             if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
         });
-    }
-    json (args) {
-        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [...this.jsonrpc.params, ...params] }) );
-        return JSON.stringify(json);
     }
 }
