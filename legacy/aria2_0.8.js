@@ -14,6 +14,7 @@ class Aria2 {
         if (!this.call) { throw new Error('Invalid JSON-RPC scheme: "' + scheme + '" is not supported!'); }
         this.jsonrpc.scheme = scheme;
         this.jsonrpc.path = scheme + '://' + this.jsonrpc.url;
+        this.jsonrpc.ws = this.jsonrpc.path.replace('http', 'ws');
     }
     get scheme () {
         return this.jsonrpc.scheme;
@@ -50,25 +51,6 @@ class Aria2 {
     get timeout () {
         return isNaN(this.jsonrpc.time) ? 10 : this.jsonrpc.time | 0;
     }
-    connect () {
-        this.socket = new WebSocket(this.jsonrpc.ws);
-        this.socket.onopen = (event) => {
-            if (typeof this.events.onopen === 'function') { this.events.onopen(event); }
-        };
-        this.socket.onmessage = (event) => {
-            let response = JSON.parse(event.data);
-            if (response.method) { if (typeof this.events.onmessage === 'function') { this.events.onmessage(response); } }
-            else { let {id} = response[0]; this.events[id](response); delete this.events[id]; }
-        };
-        this.socket.onclose = (event) => {
-            if (!event.wasClean && this.jsonrpc.count < this.jsonrpc.retries) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
-            if (typeof this.events.onclose === 'function') { this.events.onclose(event); }
-            this.jsonrpc.count ++;
-        };
-    }
-    disconnect () {
-        this.socket?.close();
-    }
     set onopen (callback) {
         this.events.onopen = typeof callback === 'function' ? callback : null;
     }
@@ -87,23 +69,42 @@ class Aria2 {
     get onclose () {
         return typeof this.events.onclose === 'function' ? this.events.onclose : null;
     }
+    connect () {
+        this.socket = new WebSocket(this.jsonrpc.ws);
+        this.socket.onopen = (event) => {
+            if (typeof this.events.onopen === 'function') { this.events.onopen(event); }
+        };
+        this.socket.onmessage = (event) => {
+            let response = JSON.parse(event.data);
+            if (response.method) { if (typeof this.events.onmessage === 'function') { this.events.onmessage(response); } }
+            else { let {id} = response[0]; this[id](response); delete this[id]; }
+        };
+        this.socket.onclose = (event) => {
+            if (!event.wasClean && this.jsonrpc.count < this.jsonrpc.retries) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
+            if (typeof this.events.onclose === 'function') { this.events.onclose(event); }
+            this.jsonrpc.count ++;
+        };
+    }
+    disconnect () {
+        this.socket?.close();
+    }
     send (...args) {
         return new Promise((resolve, reject) => {
-            let {id, json} = this.json(args)
-            this.events[id] = resolve;
+            let {id, body} = this.json(args)
+            this[id] = resolve;
             this.socket.onerror = reject;
-            this.socket.send(json);
+            this.socket.send(body);
         });
     }
     post (...args) {
-        return fetch(this.args.xml, {method: 'POST', body: this.json(args).json}).then((response) => {
+        return fetch(this.jsonrpc.path, {method: 'POST', body: this.json(args).body}).then((response) => {
             if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
         });
     }
     json (args) {
         let id = Date.now() + '';
-        let json = JSON.stringify( args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [this.args.token, ...params] }) ) );
-        return {id, json};
+        let body = JSON.stringify( args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [...this.jsonrpc.params, ...params] }) ) );
+        return {id, body};
     }
 }
