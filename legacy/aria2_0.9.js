@@ -89,21 +89,21 @@ class Aria2 {
     }
     ws (...args) {
         return new Promise((resolve, reject) => {
-            let {id, json} = this.json(args)
+            let {id, body} = this.json(args)
             this[id] = resolve;
             this.socket.onerror = reject;
-            this.socket.send(json);
+            this.socket.send(body);
         });
     }
     http (...args) {
-        return fetch(this.args.xml, {method: 'POST', body: this.json(args).json}).then((response) => {
+        return fetch(this.args.xml, {method: 'POST', body: this.json(args).body}).then((response) => {
             if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
         });
     }
     json (args) {
         let id = Date.now() + '';
-        let json = JSON.stringify( args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [this.args.token, ...params] }) ) );
-        return {id, json};
+        let body = JSON.stringify( args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [this.args.token, ...params] }) ) );
+        return {id, body};
     }
 }
