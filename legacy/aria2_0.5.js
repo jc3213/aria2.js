@@ -46,7 +46,11 @@ class Aria2 {
     }
     set onclose (callback) {
         if (typeof callback !== 'function') { return; }
-        if (!this._onclose) { this.websocket.then( (websocket) => websocket.addEventListener('close', this._onclose) ); }
+        if (!this._onclose) { 
+            this.websocket.then( (websocket) => {
+                websocket.addEventListener('close', this._onclose);
+            });
+        }
         this._onclose = callback;
     }
     get onclose () {
