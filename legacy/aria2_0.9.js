@@ -77,7 +77,7 @@ class Aria2 {
         this.socket.onmessage = (event) => {
             let response = JSON.parse(event.data);
             if (response.method) { if (typeof this.args.onmessage === 'function') { this.args.onmessage(response); } }
-            else { let {id} = response[0]; this.args[id](response); delete this.args[id]; }
+            else { let {id} = response[0]; this[id](response); delete this[id]; }
         };
         this.socket.onclose = (event) => {
             if (!event.wasClean && this.args.tries ++ < this.args.retries) { setTimeout(() => this.connect(), this.args.timeout); }
@@ -90,7 +90,7 @@ class Aria2 {
     ws (...args) {
         return new Promise((resolve, reject) => {
             let {id, json} = this.json(args)
-            this.args[id] = resolve;
+            this[id] = resolve;
             this.socket.onerror = reject;
             this.socket.send(json);
         });
