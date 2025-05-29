@@ -57,8 +57,8 @@ class Aria2 {
         };
         this.socket.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            if (!response.method) { this.socket.resolve(response); }
-            else if (typeof this.events.onmessage === 'function') { this.events.onmessage(response); }
+            if (response.method) { if (typeof this.events.onmessage === 'function') { this.events.onmessage(response); } }
+            else { let {id} = response[0]; this.events[id](response); delete this.events[id]; }
         };
         this.socket.onclose = (event) => {
             if (!event.wasClean && this.jsonrpc.count < this.jsonrpc.retries) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
@@ -89,19 +89,21 @@ class Aria2 {
     }
     send (...args) {
         return new Promise((resolve, reject) => {
-            this.socket.resolve = resolve;
+            let {id, json} = this.json(args)
+            this.events[id] = resolve;
             this.socket.onerror = reject;
-            this.socket.send(this.json(args));
+            this.socket.send(json);
         });
     }
     post (...args) {
-        return fetch(this.jsonrpc.path, {method: 'POST', body: this.json(args)}).then((response) => {
+        return fetch(this.args.xml, {method: 'POST', body: this.json(args).json}).then((response) => {
             if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
         });
     }
     json (args) {
-        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [...this.jsonrpc.params, ...params] }) );
-        return JSON.stringify(json);
+        let id = Date.now() + '';
+        let json = JSON.stringify( args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [this.args.token, ...params] }) ) );
+        return {id, json};
     }
 }
