@@ -13,7 +13,6 @@ class Aria2 {
         if (scheme === this.args.scheme || !method) { return; }
         this.args.scheme = scheme;
         this.args.ssl = method[2] ?? '';
-        this.call = this[method[1]];
         this.path();
     }
     get scheme () {
@@ -89,21 +88,11 @@ class Aria2 {
     disconnect () {
         this.socket.close();
     }
-    ws (...args) {
-        return new Promise((resolve, reject) => {
-            this.args.onresponse = resolve;
-            this.socket.onerror = reject;
-            this.socket.send(this.json(args));
-        });
-    }
-    http (...args) {
-        return fetch(this.args.xml, {method: 'POST', body: this.json(args)}).then((response) => {
+    call (...args) {
+        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.#secret, ...params] }) );
+        return fetch(this.#xml, { method: 'POST', body: JSON.stringify(json) }).then((response) => {
             if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
         });
-    }
-    json (args) {
-        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.args.token, ...params] }) );
-        return JSON.stringify(json);
     }
 }
