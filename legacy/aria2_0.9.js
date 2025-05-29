@@ -87,7 +87,6 @@ class Aria2 {
     }
     call (...args) {
         let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.args.secret, ...params] }) );
-        console.log(json);
         return fetch(this.args.xml, { method: 'POST', body: JSON.stringify(json) }).then((response) => {
             if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
