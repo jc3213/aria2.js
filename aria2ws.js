@@ -73,11 +73,13 @@ class Aria2WebSocket {
     }
     #onreceive = null;
     #send (...args) {
-        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.#secret, ...params] }) );
+        let id = `${Date.now()}`;
+        let body = JSON.stringify( args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [this.#secret, ...params] }) ) );
         return new Promise((resolve, reject) => {
-            this.#onreceive = resolve;
+            let {id, body} = this.#json(args);
+            this[id] = resolve;
             this.#ws.onerror = reject;
-            this.#ws.send(JSON.stringify(json));
+            this.#ws.send(body);
         });
     }
     #ws;
@@ -88,8 +90,8 @@ class Aria2WebSocket {
         };
         this.#ws.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            if (!response.method) { this.#onreceive(response); }
-            else if (this.#onmessage) { this.#onmessage(response); }
+            if (response.method) { if(this.#onmessage) { this.#onmessage(response); } }
+            else { let {id} = response[0]; this[id](response); delete this[id]; }
         };
         this.#ws.onclose = (event) => {
             this.#status = null;
