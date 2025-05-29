@@ -38,14 +38,14 @@ class Aria2WebSocket {
     }
     #retries = 10;
     set retries (number) {
-        this.#retries = isNaN(number) || number < 0 ? Infinity : number;
+        this.#retries = Number.isInteger(number) || number >= 0 ? number : Infinity;
     }
     get retries () {
         return this.#retries;
     }
     #timeout = 10000;
     set timeout (number) {
-        this.#timeout = isNaN(number) ? 10000 : number * 1000;
+        this.#timeout = isNaN(number) || number <= 0 ? 10000 : number * 1000;
     }
     get timeout () {
         return this.#timeout / 1000;
