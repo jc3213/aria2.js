@@ -25,7 +25,6 @@ let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret"); // Requires 0.4
 - [scheme](#scheme)
 - [url](#url)
 - [secret](#secret)
-- [retry](#retry) *deprecated*
 - [retries](#retries)
 - [timeout](#timeout)
 - [onopen](#onopen)
