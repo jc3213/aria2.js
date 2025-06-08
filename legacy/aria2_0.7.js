@@ -115,7 +115,7 @@ class Aria2 {
         });
     }
     json (array) {
-        let json = args.map(({ method, params = [] }) => {
+        let json = array.map(({ method, params = [] }) => {
             return { id: '', jsonrpc: '2.0', method, params: [this.jsonrpc.secret, ...params] };
         });
         return JSON.stringify(json);
