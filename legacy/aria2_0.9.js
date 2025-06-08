@@ -1,7 +1,9 @@
 class Aria2 {
     constructor (...args) {
         let path = args.join('#').match(/^(https?|wss?)(?:#|:\/\/)([^#]+)#?(.*)$/);
-        if (!path) { throw new Error('Malformed JSON-RPC entry: "' + args.join('", "') + '"'); }
+        if (!path) {
+            throw new Error('Malformed JSON-RPC entry: "' + args.join('", "') + '"');
+        }
         this.scheme = path[1];
         this.url = path[2];
         this.secret = path[3];
@@ -10,7 +12,6 @@ class Aria2 {
     args = { retries: 10, timeout: 10000 };
     set scheme (scheme) {
         let method = scheme.match(/^(http|ws)(s)?$/);
-        if (scheme === this.args.scheme || !method) { return; }
         this.args.scheme = scheme;
         this.args.ssl = method[2] ?? '';
         this.call = this[method[1]];
@@ -20,7 +21,6 @@ class Aria2 {
         return this.args.scheme;
     }
     set url (url) {
-        if (url === this.args.url) { return; }
         this.args.url = url;
         this.path();
     }
@@ -72,16 +72,30 @@ class Aria2 {
     connect () {
         this.socket = new WebSocket(this.args.ws);
         this.socket.onopen = (event) => {
-            if (typeof this.args.onopen === 'function') { this.args.onopen(event); }
+            if (typeof this.args.onopen === 'function') {
+                this.args.onopen(event);
+            }
         };
         this.socket.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            if (response.method) { if (typeof this.args.onmessage === 'function') { this.args.onmessage(response); } }
-            else { let {id} = response[0]; this[id](response); delete this[id]; }
+            if (response.method) {
+                if (typeof this.args.onmessage === 'function') {
+                    this.args.onmessage(response);
+                }
+            }
+            else {
+                let [{ id }] = response;
+                this[id](response);
+                delete this[id];
+            }
         };
         this.socket.onclose = (event) => {
-            if (!event.wasClean && this.args.tries ++ < this.args.retries) { setTimeout(() => this.connect(), this.args.timeout); }
-            if (typeof this.args.onclose === 'function') { this.args.onclose(event); }
+            if (!event.wasClean && this.args.tries ++ < this.args.retries) {
+                setTimeout(() => this.connect(), this.args.timeout);
+            }
+            if (typeof this.args.onclose === 'function') {
+                this.args.onclose(event);
+            }
         };
     }
     disconnect () {
@@ -89,21 +103,25 @@ class Aria2 {
     }
     ws (...args) {
         return new Promise((resolve, reject) => {
-            let {id, body} = this.json(args)
+            let body = this.json(args)
+            let [{ id }] = body;
             this[id] = resolve;
             this.socket.onerror = reject;
-            this.socket.send(body);
+            this.socket.send(JSON.stringify(body));
         });
     }
     http (...args) {
-        return fetch(this.args.xml, {method: 'POST', body: this.json(args).body}).then((response) => {
-            if (response.ok) { return response.json(); }
+        return fetch(this.args.xml, { method: 'POST', body: JSON.stringify(this.#json(args)) }).then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
             throw new Error(response.statusText);
         });
     }
     json (args) {
-        let id = Date.now() + '';
-        let body = JSON.stringify( args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [this.args.token, ...params] }) ) );
-        return {id, body};
+        let id = String(Date.now());
+        return args.map(({ method, params = [] }) => {
+            return { id, jsonrpc: '2.0', method, params: [this.#secret, ...params] };
+        });
     }
 }
