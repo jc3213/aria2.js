@@ -76,7 +76,7 @@ class Aria2WebSocket {
     #onreceive = null;
     #send (...args) {
         let id = String(Date.now());
-        let json = args.map( ({ method, params = [] }) => {
+        let json = args.map(({ method, params = [] }) => {
             return { id, jsonrpc: '2.0', method, params: [this.#secret, ...params] };
         });
         return new Promise((resolve, reject) => {
