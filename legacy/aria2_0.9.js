@@ -71,16 +71,12 @@ class Aria2 {
     connect () {
         this.socket = new WebSocket(this.args.ws);
         this.socket.onopen = (event) => {
-            if (typeof this.args.onopen === 'function') {
-                this.args.onopen(event);
-            }
+            if (typeof this.args.onopen === 'function') { this.args.onopen(event); }
         };
         this.socket.onmessage = (event) => {
             let response = JSON.parse(event.data);
             if (response.method) {
-                if (typeof this.args.onmessage === 'function') {
-                    this.args.onmessage(response);
-                }
+                if (typeof this.args.onmessage === 'function') { this.args.onmessage(response); }
             }
             else {
                 let [{ id }] = response;
@@ -92,9 +88,7 @@ class Aria2 {
             if (!event.wasClean && this.args.tries ++ < this.args.retries) {
                 setTimeout(() => this.connect(), this.args.timeout);
             }
-            if (typeof this.args.onclose === 'function') {
-                this.args.onclose(event);
-            }
+            if (typeof this.args.onclose === 'function') { this.args.onclose(event); }
         };
     }
     disconnect () {
