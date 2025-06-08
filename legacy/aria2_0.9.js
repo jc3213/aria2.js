@@ -1,9 +1,7 @@
 class Aria2 {
     constructor (...args) {
         let path = args.join('#').match(/^(https?|wss?)(?:#|:\/\/)([^#]+)#?(.*)$/);
-        if (!path) {
-            throw new Error('Malformed JSON-RPC entry: "' + args.join('", "') + '"');
-        }
+        if (!path) { throw new Error('Malformed JSON-RPC entry: "' + args.join('", "') + '"'); }
         this.scheme = path[1];
         this.url = path[2];
         this.secret = path[3];
@@ -12,6 +10,7 @@ class Aria2 {
     args = { retries: 10, timeout: 10000 };
     set scheme (scheme) {
         let method = scheme.match(/^(http|ws)(s)?$/);
+        if (!method) { throw new Error('Unsupported scheme: "' + scheme + '"'); }
         this.args.scheme = scheme;
         this.args.ssl = method[2] ?? '';
         this.call = this[method[1]];
@@ -28,10 +27,10 @@ class Aria2 {
         return this.args.url;
     }
     set secret (secret) {
-        this.args.token = 'token:'　+ secret;
+        this.args.secret = 'token:'　+ secret;
     }
     get secret () {
-        return this.args.token.slice(6);
+        return this.args.secret.slice(6);
     }
     set retries (number) {
         this.args.retries = isNaN(number) || number < 0 ? Infinity : number;
@@ -111,17 +110,13 @@ class Aria2 {
         });
     }
     http (...args) {
-        return fetch(this.args.xml, { method: 'POST', body: JSON.stringify(this.#json(args)) }).then((response) => {
-            if (response.ok) {
-                return response.json();
-            }
+        return fetch(this.args.xml, { method: 'POST', body: JSON.stringify(this.json(args)) }).then((response) => {
+            if (response.ok) { return response.json(); }
             throw new Error(response.statusText);
         });
     }
     json (args) {
         let id = String(Date.now());
-        return args.map(({ method, params = [] }) => {
-            return { id, jsonrpc: '2.0', method, params: [this.#secret, ...params] };
-        });
+        return args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [this.args.secret, ...params] }) );
     }
 }
