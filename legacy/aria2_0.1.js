@@ -9,11 +9,13 @@ class Aria2 {
         throw new Error(`Invalid protocol: "${protocol}" is not supported.`);
     }
     call (...args) {
-        const json = args.map( ({method, params = []}) => ({ id: '', jsonrpc: '2.0', method, params: [...this.jsonrpc.params, ...params] }) );
+        const json = args.map(({ method, params = [] }) => {
+            return { id: '', jsonrpc: '2.0', method, params: [this.secret, ...params] };
+        });
         return this.post(JSON.stringify(json));
     }
     fetch (body) {
-        return fetch(this.jsonrpc, {method: 'POST', body}).then((response) => {
+        return fetch(this.jsonrpc, { method: 'POST', body }).then((response) => {
             if (response.ok) {
                 return response.json();
             }

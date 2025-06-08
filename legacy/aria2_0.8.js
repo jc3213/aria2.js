@@ -1,107 +1,129 @@
 class Aria2 {
     constructor (...args) {
         let path = args.join('#').match(/^(https?|wss?)(?:#|:\/\/)([^#]+)#?(.*)$/);
-        if (!path) { throw new Error('Invalid JSON-RPC entry: "' + args.join('", "') + '"'); }
+        if (!path) {
+            throw new Error('Invalid JSON-RPC entry: "' + args.join('", "') + '"');
+        }
         this.scheme = path[1];
         this.url = path[2];
         this.secret = path[3];
+        this.onmessage = this.onclose = null;
     }
     version = '0.8';
-    jsonrpc = { retries: 10, timeout: 10000 };
-    events = { onopen: null, onmessage: null, onclose: null };
+    args = { retry: 10, timeout: 10000, onopen: null, onmessage: null, onclose: null };
     set scheme (scheme) {
-        this.call = { 'http': this.post, 'https': this.post, 'ws': this.send, 'wss': this.send }[ scheme ];
-        if (!this.call) { throw new Error('Invalid JSON-RPC scheme: "' + scheme + '" is not supported!'); }
-        this.jsonrpc.scheme = scheme;
-        this.jsonrpc.path = scheme + '://' + this.jsonrpc.url;
+        this.call = {
+            'http': this.post,
+            'https': this.post,
+            'ws': this.send,
+            'wss': this.send
+        }[ scheme ];
+        if (!this.call) {
+            throw new Error('Invalid JSON-RPC scheme: "' + scheme + '" is not supported!');
+        }
+        this.args.scheme = scheme;
+        this.args.path = scheme + '://' + this.args.url;
     }
     get scheme () {
-        return this.jsonrpc.scheme;
+        return this.args.scheme;
     }
     set url (url) {
-        if (this.jsonrpc.url === url) { return; }
-        this.jsonrpc.url = url;
-        this.jsonrpc.path = this.jsonrpc.scheme + '://' + url;
-        this.jsonrpc.ws = this.jsonrpc.path.replace('http', 'ws');
-        this.jsonrpc.count = 0;
-        this.disconnect();
+        if (this.args.url === url) {
+            return;
+        }
+        this.args.url = url;
+        this.args.path = this.args.scheme + '://' + url;
+        this.args.ws = this.args.path.replace('http', 'ws');
+        this.args.tries = 0;
         this.connect();
     }
     get url () {
-        return this.jsonrpc.url;
+        return this.args.url;
     }
     set secret (secret) {
-        this.jsonrpc.secret = secret;
-        this.jsonrpc.params = secret ? ['token:' + secret] : [];
+        this.args.secret = 'token:' + secret;
     }
     get secret () {
-        return this.jsonrpc.secret;
+        return this.args.secret;
     }
     set retries (number) {
-        this.jsonrpc.retries = isNaN(number) || number < 0 ? Infinity : number;
+        this.args.retries = isNaN(number) || number <= 0 ? Infinity : number;
     }
     get retries () {
-        return isNaN(this.jsonrpc.retries) ? Infinity : this.jsonrpc.retries;
+        return this.args.retries;
     }
     set timeout (number) {
-        this.jsonrpc.time = isNaN(number) ? 10 : number | 0;
-        this.jsonrpc.timeout = this.jsonrpc.time * 1000;
+        this.args.timeout = isNaN(number) ? 10000 : number <= 3 ? 3000 : number * 1000;
     }
     get timeout () {
-        return isNaN(this.jsonrpc.time) ? 10 : this.jsonrpc.time | 0;
-    }
-    connect () {
-        this.socket = new WebSocket(this.jsonrpc.ws);
-        this.socket.onopen = (event) => {
-            if (this.events.onopen) { this.events.onopen(event); }
-        };
-        this.socket.onmessage = (event) => {
-            let response = JSON.parse(event.data);
-            if (!response.method) { this.socket.resolve(response); }
-            else if (this.events.onmessage) { this.events.onmessage(response); }
-        };
-        this.socket.onclose = (event) => {
-            if (!event.wasClean && this.jsonrpc.count < this.jsonrpc.retries) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
-            if (this.events.onclose) { this.events.onclose(event); }
-            this.jsonrpc.count ++;
-        };
-    }
-    disconnect () {
-        this.socket?.close();
+        return this.args.timeout / 1000;
     }
     set onopen (callback) {
-        this.events.onopen = typeof callback === 'function' ? callback : null;
+        this.args.onopen = typeof callback === 'function' ? callback : null;
     }
     get onopen () {
         return this.events.onopen;
     }
     set onmessage (callback) {
-        this.events.onmessage = typeof callback === 'function' ? callback : null;
+        this.args.onmessage = typeof callback === 'function' ? callback : null;
     }
     get onmessage () {
-        return this.events.onmessage;
+        return this.args.onmessage;
     }
     set onclose (callback) {
-        this.events.onclose = typeof callback === 'function' ? callback : null;
+        this.args.onclose = typeof callback === 'function' ? callback : null;
     }
     get onclose () {
-        return this.events.onclose;
+        return this.args.onclose;
+    }
+    connect () {
+        this.disconnect();
+        this.socket = new WebSocket(this.args.ws);
+        this.socket.onopen = (event) => {
+            if (this.args.onopen) {
+                this.args.onopen(event);
+            }
+        };
+        this.socket.onmessage = (event) => {
+            let response = JSON.parse(event.data);
+            if (!response.method) {
+                this.socket.resolve(response);
+            } else if (this.args.onmessage) {
+                this.args.onmessage(response);
+            }
+        };
+        this.socket.onclose = (event) => {
+            if (!event.wasClean && this.args.tries < this.args.retries) {
+                setTimeout(() => this.connect(), this.args.timeout);
+            }
+            if (this.args.onclose) {
+                this.args.onclose(event);
+            }
+            this.args.tries++;
+        };
+    }
+    disconnect () {
+        this.socket?.close();
     }
     send (...args) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             this.socket.resolve = resolve;
             this.socket.onerror = reject;
             this.socket.send(this.json(args));
         });
     }
     post (...args) {
-        return fetch(this.jsonrpc.path, {method: 'POST', body: this.json(args)}).then((response) => {
-            if (response.ok) { return response.json(); }
+        return fetch(this.args.path, { method: 'POST', body: this.json(args) }).then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
             throw new Error(response.statusText);
         });
     }
     json (args) {
-        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [...this.jsonrpc.params, ...params] }) );
+        let json = args.map(({ method, params = [] }) => {
+            return { id: '', jsonrpc: '2.0', method, params: [this.args.secret, ...params] };
+        });
         return JSON.stringify(json);
     }
 }
