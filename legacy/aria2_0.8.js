@@ -73,19 +73,19 @@ class Aria2 {
         this.events.onopen = typeof callback === 'function' ? callback : null;
     }
     get onopen () {
-        return typeof this.events.onopen === 'function' ? this.events.onopen : null;
+        return this.events.onopen;
     }
     set onmessage (callback) {
         this.events.onmessage = typeof callback === 'function' ? callback : null;
     }
     get onmessage () {
-        return typeof this.events.onmessage === 'function' ? this.events.onmessage : null;
+        return this.events.onmessage;
     }
     set onclose (callback) {
         this.events.onclose = typeof callback === 'function' ? callback : null;
     }
     get onclose () {
-        return typeof this.events.onclose === 'function' ? this.events.onclose : null;
+        return this.events.onclose;
     }
     send (...args) {
         return new Promise((resolve, reject) => {
