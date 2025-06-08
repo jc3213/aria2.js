@@ -1,7 +1,9 @@
 class Aria2WebSocket {
     constructor (...args) {
         let path = args.join('#').match(/^ws(s)?(?:#|:\/\/)([^#]+)#?(.*)$/);
-        if (!path) { throw new Error(`Unsupported parameters: "${args.join('", "')}"`); }
+        if (!path) {
+            throw new Error(`Unsupported parameters: "${args.join('", "')}"`);
+        }
         this.ssl = path[1];
         this.url = path[2];
         this.secret = path[3];
@@ -51,22 +53,22 @@ class Aria2WebSocket {
         return this.#timeout / 1000;
     }
     #onopen = null;
-    set onopen (func) {
-        this.#onopen = typeof func === 'function' ? func : null;
+    set onopen (callback) {
+        this.#onopen = typeof callback === 'function' ? callback : null;
     }
     get onopen () {
         return this.#onopen;
     }
     #onmessage = null;
-    set onmessage (func) {
-        this.#onmessage = typeof func === 'function' ? func : null;
+    set onmessage (callback) {
+        this.#onmessage = typeof callback === 'function' ? callback : null;
     }
     get onmessage () {
         return this.#onmessage;
     }
     #onclose = null;
-    set onclose (func) {
-        this.#onclose = typeof func === 'function' ? func : null;
+    set onclose (callback) {
+        this.#onclose = typeof callback === 'function' ? callback : null;
     }
     get onclose () {
         return this.#onclose;
@@ -74,9 +76,13 @@ class Aria2WebSocket {
     #onreceive = null;
     #send (...args) {
         let id = String(Date.now());
-        let body = JSON.stringify( args.map( ({ method, params = [] }) => ({ id, jsonrpc: '2.0', method, params: [this.#secret, ...params] }) ) );
+        let json = args.map( ({ method, params = [] }) => {
+            return { id, jsonrpc: '2.0', method, params: [this.#secret, ...params] };
+        });
         return new Promise((resolve, reject) => {
-            this[id] = resolve; this.#ws.onerror = reject; this.#ws.send(body);
+            this[id] = resolve;
+            this.#ws.onerror = reject;
+            this.#ws.send(JSON.stringify(json));
         });
     }
     #ws;
@@ -87,11 +93,19 @@ class Aria2WebSocket {
         };
         this.#ws.onmessage = (event) => {
             let response = JSON.parse(event.data);
-            if (response.method) { this.#onmessage?.(response); }
-            else { let {id} = response[0]; this[id](response); delete this[id]; }
+            if (response.method) {
+                this.#onmessage?.(response);
+            }
+            else {
+                let [{ id }] = response;
+                this[id](response);
+                delete this[id];
+            }
         };
         this.#ws.onclose = (event) => {
-            if (!event.wasClean && this.#tries++ < this.#retries) { setTimeout(() => this.connect(), this.#timeout); }
+            if (!event.wasClean && this.#tries++ < this.#retries) {
+                setTimeout(() => this.connect(), this.#timeout);
+            }
             this.#onclose?.(event);
         };
     }
