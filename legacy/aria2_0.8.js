@@ -53,16 +53,16 @@ class Aria2 {
     connect () {
         this.socket = new WebSocket(this.jsonrpc.ws);
         this.socket.onopen = (event) => {
-            if (typeof this.events.onopen === 'function') { this.events.onopen(event); }
+            if (this.events.onopen) { this.events.onopen(event); }
         };
         this.socket.onmessage = (event) => {
             let response = JSON.parse(event.data);
             if (!response.method) { this.socket.resolve(response); }
-            else if (typeof this.events.onmessage === 'function') { this.events.onmessage(response); }
+            else if (this.events.onmessage) { this.events.onmessage(response); }
         };
         this.socket.onclose = (event) => {
             if (!event.wasClean && this.jsonrpc.count < this.jsonrpc.retries) { setTimeout(() => this.connect(), this.jsonrpc.timeout); }
-            if (typeof this.events.onclose === 'function') { this.events.onclose(event); }
+            if (this.events.onclose) { this.events.onclose(event); }
             this.jsonrpc.count ++;
         };
     }
