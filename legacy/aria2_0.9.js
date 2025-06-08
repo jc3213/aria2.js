@@ -7,7 +7,7 @@ class Aria2 {
         this.secret = path[3];
     }
     version = '0.9';
-    args = { retries: 10, timeout: 10000 };
+    args = { retries: 10, timeout: 10000, onopen: null, onmessage: null, onclose: null };
     set scheme (scheme) {
         let method = scheme.match(/^(http|ws)(s)?$/);
         if (!method) { throw new Error('Unsupported scheme: "' + scheme + '"'); }
@@ -48,19 +48,19 @@ class Aria2 {
         this.args.onopen = typeof callback === 'function' ? callback : null;
     }
     get onopen () {
-        return typeof this.args.onopen === 'function' ? this.args.onopen : null;
+        return this.args.onopen;
     }
     set onmessage (callback) {
         this.args.onmessage = typeof callback === 'function' ? callback : null;
     }
     get onmessage () {
-        return typeof this.args.onmessage === 'function' ? this.args.onmessage : null;
+        return this.args.onmessage;
     }
     set onclose (callback) {
         this.args.onclose = typeof callback === 'function' ? callback : null;
     }
     get onclose () {
-        return typeof this.args.onclose === 'function' ? this.args.onclose : null;
+        return this.args.onclose;
     }
     path () {
         let {ssl, url} = this.args;
@@ -71,12 +71,12 @@ class Aria2 {
     connect () {
         this.socket = new WebSocket(this.args.ws);
         this.socket.onopen = (event) => {
-            if (typeof this.args.onopen === 'function') { this.args.onopen(event); }
+            if (this.args.onopen) { this.args.onopen(event); }
         };
         this.socket.onmessage = (event) => {
             let response = JSON.parse(event.data);
             if (response.method) {
-                if (typeof this.args.onmessage === 'function') { this.args.onmessage(response); }
+                if (this.args.onmessage) { this.args.onmessage(response); }
             }
             else {
                 let [{ id }] = response;
@@ -88,7 +88,7 @@ class Aria2 {
             if (!event.wasClean && this.args.tries ++ < this.args.retries) {
                 setTimeout(() => this.connect(), this.args.timeout);
             }
-            if (typeof this.args.onclose === 'function') { this.args.onclose(event); }
+            if (this.args.onclose) { this.args.onclose(event); }
         };
     }
     disconnect () {
