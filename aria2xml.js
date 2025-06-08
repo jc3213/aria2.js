@@ -1,7 +1,9 @@
 class Aria2XMLRequest {
     constructor (...args) {
         let path = args.join('#').match(/^(https?)(?:#|:\/\/)([^#]+)#?(.*)$/);
-        if (!path) { throw new Error(`Unsupported parameters: "${args.join('", "')}"`); }
+        if (!path) {
+            throw new Error(`Unsupported parameters: "${args.join('", "')}"`);
+        }
         this.method = 'post';
         this.secret = path[3];
         this.url = `${path[1]}://${path[2]}`;
@@ -9,7 +11,9 @@ class Aria2XMLRequest {
     version = '1.0';
     #method;
     set method (method) {
-        if (!/^(post|get)$/i.test(method)) { throw new Error(`Unsupported method: "${method}"`); }
+        if (!/^(post|get)$/i.test(method)) {
+            throw new Error(`Unsupported method: "${method}"`);
+        }
         this.call = method.toLowerCase() === 'post' ? this.#post : this.#get;
         this.#method = method;
     }
@@ -18,7 +22,9 @@ class Aria2XMLRequest {
     }
     #url;
     set url (url) {
-        if (!/^https?:\/\/[^/]+\/\w+$/.test(url)) { throw new Error (`Unsupported url: "${url}"`); }
+        if (!/^https?:\/\/[^/]+\/\w+$/.test(url)) {
+            throw new Error (`Unsupported url: "${url}"`);
+        }
         this.#url = url;
     }
     get url () {
@@ -38,10 +44,15 @@ class Aria2XMLRequest {
         return fetch(this.#url, {method: 'POST', body: this.#json(args)}).then(this.#then);
     }
     #then (response) {
-        if (response.ok) { return response.json(); } throw new Error(response.statusText);
+        if (response.ok) {
+            return response.json();
+        }
+        throw new Error(response.statusText);
     }
     #json (args) {
-        let json = args.map( ({ method, params = [] }) => ({ id: '', jsonrpc: '2.0', method, params: [this.#secret, ...params] }) );
+        let json = args.map(({ method, params = [] }) => {
+            return { id: '', jsonrpc: '2.0', method, params: [this.#secret, ...params] };
+        });
         return JSON.stringify(json);
     }
 }
