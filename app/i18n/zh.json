@@ -2,6 +2,8 @@
     "manager_title": "基于 JSON-RPC 协议的 aria2 任务管理器",
     "common_default": "默认",
     "common_disabled": "禁用",
+    "common_true": "是",
+    "common_false": "否",
     "common_save": "保存",
     "time_day": "日",
     "time_hour": "时",
@@ -48,3 +50,4 @@
     "option_jsonrpc": "JSON-RPC 服务器",
     "option_manager_interval": "更新间隔"
 }
+
