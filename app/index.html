@@ -8,78 +8,6 @@
         <link rel="stylesheet" href="index.css">
     </head>
     <body>
-        <div id="setting" class="group">
-            <div>
-                <h4 i18n="option_jsonrpc">JSON-RPC Server</h4>
-                <div class="flex">
-                    <select name="scheme" data-value="http">
-                        <option value="http" selected>HTTP</option>
-                        <option value="https">HTTPS</option>
-                        <option value="ws">WS</option>
-                        <option value="wss">WSS</option>
-                    </select>
-                    <input name="jsonrpc" type="url" data-value="localhost:6800/jsonrpc">
-                    <input name="secret" type="text" placeholder="$$secret$$" data-value="">
-                    <button id="commit" i18n="common_save">Save</button>
-                </div>
-            </div>
-            <div class="groupitem">
-                <h4 i18n="option_manager_interval">Refresh Interval</h4>
-                <input name="interval" type="number" min="5" max="30" step="1" data-value="10">
-            </div>
-            <div class="groupitem">
-                <h4 i18n="task_proxy">Proxy Server</h4>
-                <input name="proxy" type="url" placeholder="http://127.0.0.1:1230/" data-value="">
-            </div>
-        </div>
-        <div id="adduri" class="group">
-            <div>
-                <h4 i18n="task_referer">Referer</h4>
-                <div class="flex">
-                    <input id="referer" type="text">
-                    <button id="enter_btn" i18n="task_submit">Submit</button>
-                    <button><label for="uploader" i18n="task_base64">Upload</label></button>
-                    <input id="uploader" type="file" accept=".torrent, .metalink, .meta4" multiple>
-                </div>
-            </div>
-            <div>
-                <h4 i18n="task_entry">Download Urls</h4>
-                <textarea id="entry" rows="2"></textarea>
-            </div>
-            <div class="groupitem">
-                <h4 i18n="aria2_adv_dir">Download Folder</h4>
-                <input name="dir" type="text">
-            </div>
-            <div class="groupitem">
-                <h4 i18n="task_proxy">Proxy Server</h4>
-                <div class="flexmenu">
-                    <input name="all-proxy" type="url">
-                    <button id="proxy_btn">⚡️</button>
-                </div>
-            </div>
-            <div class="groupitem">
-                <h4 i18n="aria2_http_split">Download Sections</h4>
-                <input name="split" type="number">
-            </div>
-            <div class="groupitem">
-                <h4 i18n="aria2_http_size">Section Size</h4>
-                <div>
-                    <input name="min-split-size" type="text">
-                    <span class="float">B</span>
-                </div>
-            </div>
-            <div class="groupitem">
-                <h4 i18n="aria2_max_connection">Max Connections per Server</h4>
-                <input name="max-connection-per-server" type="number">
-            </div>
-            <div class="groupitem">
-                <h4 i18n="task_download">Max Download Speed</h4>
-                <div>
-                    <input name="max-download-limit" type="text">
-                    <span class="float">B/s</span>
-                </div>
-            </div>
-        </div>
         <div id="menu">
             <button i18n="popup_newdld"></button>
             <button i18n="popup_purge"></button>
@@ -205,10 +133,83 @@
             </div>
             <div class="uri" i18n-tips="tips_task_copy"></div>
         </div>
+        <div id="setting" class="group">
+            <div>
+                <h4 i18n="option_jsonrpc">JSON-RPC Server</h4>
+                <div class="flex">
+                    <select name="scheme" data-value="http">
+                        <option value="http" selected>HTTP</option>
+                        <option value="https">HTTPS</option>
+                        <option value="ws">WS</option>
+                        <option value="wss">WSS</option>
+                    </select>
+                    <input name="jsonrpc" type="url" data-value="localhost:6800/jsonrpc">
+                    <input name="secret" type="text" placeholder="$$secret$$" data-value="">
+                    <button id="commit" i18n="common_save">Save</button>
+                </div>
+            </div>
+            <div class="groupitem">
+                <h4 i18n="option_manager_interval">Refresh Interval</h4>
+                <input name="interval" type="number" min="5" max="30" step="1" data-value="10">
+            </div>
+            <div class="groupitem">
+                <h4 i18n="task_proxy">Proxy Server</h4>
+                <input name="proxy" type="url" placeholder="http://127.0.0.1:1230/" data-value="">
+            </div>
+        </div>
+        <div id="adduri" class="group">
+            <div>
+                <h4 i18n="task_referer">Referer</h4>
+                <div class="flex">
+                    <input id="referer" type="text">
+                    <button id="enter_btn" i18n="task_submit">Submit</button>
+                    <button><label for="uploader" i18n="task_base64">Upload</label></button>
+                    <input id="uploader" type="file" accept=".torrent, .metalink, .meta4" multiple>
+                </div>
+            </div>
+            <div>
+                <h4 i18n="task_entry">Download Urls</h4>
+                <textarea id="entry" rows="2"></textarea>
+            </div>
+            <div class="groupitem">
+                <h4 i18n="aria2_adv_dir">Download Folder</h4>
+                <input name="dir" type="text">
+            </div>
+            <div class="groupitem">
+                <h4 i18n="task_proxy">Proxy Server</h4>
+                <div class="flexmenu">
+                    <input name="all-proxy" type="url">
+                    <button id="proxy_btn">⚡️</button>
+                </div>
+            </div>
+            <div class="groupitem">
+                <h4 i18n="aria2_http_split">Download Sections</h4>
+                <input name="split" type="number">
+            </div>
+            <div class="groupitem">
+                <h4 i18n="aria2_http_size">Section Size</h4>
+                <div>
+                    <input name="min-split-size" type="text">
+                    <span class="float">B</span>
+                </div>
+            </div>
+            <div class="groupitem">
+                <h4 i18n="aria2_max_connection">Max Connections per Server</h4>
+                <input name="max-connection-per-server" type="number">
+            </div>
+            <div class="groupitem">
+                <h4 i18n="task_download">Max Download Speed</h4>
+                <div>
+                    <input name="max-download-limit" type="text">
+                    <span class="float">B/s</span>
+                </div>
+            </div>
+        </div>
         <script src="../aria2.js"></script>
         <script src="https://jc3213.github.io/download_with_aria2/chromium/pages/popup/popup.js"></script>
         <script src="index.js"></script>
     </body>
 </html>
+
 
 
