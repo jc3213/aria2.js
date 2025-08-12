@@ -2,6 +2,8 @@
     "manager_title": "Task Manager for aria2 over JSON-RPC",
     "common_default": "Default",
     "common_disabled": "Disabled",
+    "common_true": "True",
+    "common_false": "False",
     "common_save": "Save",
     "time_day": "d",
     "time_hour": "h",
@@ -48,3 +50,4 @@
     "option_jsonrpc": "JSON-RPC Server",
     "option_manager_interval": "Refresh Interval"
 }
+
