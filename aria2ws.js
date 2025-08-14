@@ -78,7 +78,7 @@ class Aria2WebSocket {
         let id = crypto.randomUUID();
         let json = args.map(({ method, params = [] }) => {
             params.unshift(this.#secret);
-            return { id, jsonrpc: '2.0', method, params: [this.#secret, ...params] };
+            return { id, jsonrpc: '2.0', method, params };
         });
         return new Promise((resolve, reject) => {
             this[id] = resolve;
