@@ -50,9 +50,9 @@ class Aria2XMLRequest {
         throw new Error(response.statusText);
     }
     #json (args) {
-        let json = args.map(({ method, params = [] }) => {
-            return { id: '', jsonrpc: '2.0', method, params: [this.#secret, ...params] };
-        });
-        return JSON.stringify(json);
+        return JSON.stringify(args.map(({ method, params = [] }) => {
+            params.unshift(this.#secret);
+            return { id, jsonrpc: '2.0', method, params };
+        }));
     }
 }
