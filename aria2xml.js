@@ -52,7 +52,7 @@ class Aria2XMLRequest {
     #json (args) {
         return JSON.stringify(args.map((arg) => {
             arg.jsonrpc = '2.0';
-            arg.id = id;
+            arg.id = '';
             ( arg.params ??= [] ).unshift(this.#secret);
             return arg;
         }));
