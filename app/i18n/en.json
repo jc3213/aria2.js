@@ -23,11 +23,11 @@
     "popup_waiting": "Waiting",
     "popup_stopped": "Stopped",
     "popup_active_queue": "Downloading",
-    "popup_waiting_queue": "Wait in Queue",
-    "popup_paused_queue": "Download Paused",
+    "popup_waiting_queue": "Waiting in Queue",
+    "popup_paused_queue": "User Paused",
     "popup_complete_queue": "Completed",
-    "popup_removed_queue": "Download Stopped",
-    "popup_error_queue": "Error Occured",
+    "popup_removed_queue": "User Stopped",
+    "popup_error_queue": "Error Occured"
     "task_submit": "Submit",
     "task_referer": "Referer",
     "task_entry": "Download Urls",
@@ -50,4 +50,3 @@
     "option_jsonrpc": "JSON-RPC Server",
     "option_manager_interval": "Refresh Interval"
 }
-
