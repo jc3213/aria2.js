@@ -64,23 +64,23 @@ body:not(.setting) > #setting {
     content: var(--version);
 }
 
-[data-sid="download"]::before {
+#download::before {
     content: var(--download);
 }
 
-[data-sid="upload"]::before {
+#upload::before {
     content: var(--upload);
 }
 
-[data-sid="active"]::before {
+#active::before {
     content: var(--active);
 }
 
-[data-sid="waiting"]::before {
+#waiting::before {
     content: var(--waiting);
 }
 
-[data-sid="stopped"]::before {
+#stopped::before {
     content: var(--stopped);
 }
 
