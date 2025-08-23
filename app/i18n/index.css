@@ -1,0 +1,101 @@
+textarea {
+    padding: 3px;
+    border-width: 1px;
+    border-style: inset;
+    overflow-y: auto;
+    overflow-x: hidden;
+    resize: none;
+    width: calc(100% - 12px);
+}
+
+body:not(.adduri) > #adduri,
+body:not(.setting) > #setting {
+    display: none;
+}
+
+#menu,
+#about,
+#adduri,
+#setting {
+    padding: 8px;
+}
+
+#setting > :first-child {
+    margin-top: 0px;
+}
+
+#adduri,
+#setting,
+#about {
+    border-width: 1px;
+    border-style: solid;
+}
+
+#adduri, #setting {
+    grid-area: 1 / 2 / 2 / 3;
+    height: fit-content;
+    position: absolute;
+    width: 600px;
+    z-index: 9;
+}
+
+.adduri #download, .setting #options {
+    border-style: inset;
+}
+
+.adduri [data-bid="download_btn"]:active,
+.setting [data-bid="options_btn"]:active {
+    border-style: outset;
+}
+
+#menu::before {
+    content: var(--menu);
+}
+
+#filter::before {
+    content: var(--queue);
+}
+
+#system::before {
+    content: var(--system);
+}
+
+#version::before {
+    content: var(--version);
+}
+
+#download::before {
+    content: var(--download);
+}
+
+#upload::before {
+    content: var(--upload);
+}
+
+#active::before {
+    content: var(--active);
+}
+
+#waiting::before {
+    content: var(--waiting);
+}
+
+#stopped::before {
+    content: var(--stopped);
+}
+
+.day:not(:empty)::after {
+    content: var(--day);
+}
+
+.hour:not(:empty)::after {
+    content: var(--hour);
+}
+
+.minute:not(:empty)::after {
+    content: var(--minute);
+}
+
+.second:not(:empty)::after {
+    content: var(--second);
+}
