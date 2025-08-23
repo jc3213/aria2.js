@@ -8,8 +8,11 @@ textarea {
     width: calc(100% - 12px);
 }
 
-body:not(.adduri) > #adduri,
-body:not(.setting) > #setting {
+button.checked {
+    border-style: inset;
+}
+
+.hidden {
     display: none;
 }
 
@@ -37,15 +40,6 @@ body:not(.setting) > #setting {
     position: absolute;
     width: 600px;
     z-index: 9;
-}
-
-.adduri #download, .setting #options {
-    border-style: inset;
-}
-
-.adduri [data-bid="download_btn"]:active,
-.setting [data-bid="options_btn"]:active {
-    border-style: outset;
 }
 
 #menu::before {

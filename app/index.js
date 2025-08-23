@@ -15,13 +15,13 @@ i18nEntry.addEventListener('change', (event) => {
 });
 
 downBtn.addEventListener('click', async (event) => {
-    manager.toggle('adduri');
-    manager.remove('setting')
+    downBtn.classList.toggle('checked');
+    downPane.classList.toggle('hidden');
 });
 
 optionsBtn.addEventListener('click', (event) => {
-    manager.toggle('setting');
-    manager.remove('adduri');
+    optionsBtn.classList.toggle('checked');
+    optionsPane.classList.toggle('hidden');
 });
 
 saveBtn.addEventListener('click', (event) => {
