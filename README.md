@@ -27,9 +27,6 @@ let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret"); // Requires 0.4
 - [secret](#secret)
 - [retries](#retries)
 - [timeout](#timeout)
-- [onopen](#onopen)
-- [onclose](#onclose)
-- [onmessage](#onmessage)
 
 ### scheme
 ```javascript
@@ -132,6 +129,9 @@ console.log(version) // the version of aria2c.exe;
 ```
 
 ## Events
+- [onopen](#onopen)
+- [onclose](#onclose)
+- [onmessage](#onmessage)
 
 ### onopen
 ```javascript
