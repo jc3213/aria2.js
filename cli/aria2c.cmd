@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 pushd %~dp0
-for /f "delims=" %%a in ('dir /s /b aria2c.exe') do (set aria2c=%%a)
+for /f "delims=" %%a in ('dir /s /b /a-d aria2c.exe') do (set aria2c=%%a)
 if not defined aria2c goto :eof
 set aria2c=!aria2c:%~dp0=!
 if not exist aria2c.session type nul > aria2c.session
