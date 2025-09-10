@@ -3,9 +3,7 @@
     - C:\cli\aria2c.cmd
     - C:\cli\aria2c.conf
     - C:\cli\aria2c.session
-    - C:\cli\\*\aria2c.exe
-        - Put `aria2c.exe` the same folder as `aria2c.cmd`
-        - Put `aria2c.exe` in any sub-folder of `aria2c.cmd`
+    - C:\cli\\bin\aria2c.exe
 - Run `aria2c.cmd`
     - Use [switches](#switches)
 
