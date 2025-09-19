@@ -12,34 +12,24 @@ button.checked {
     border-style: inset;
 }
 
-.hidden {
-    display: none;
-}
-
-#menu,
-#about,
-#adduri,
-#setting {
-    padding: 8px;
-}
-
-#setting > :first-child {
-    margin-top: 0px;
-}
-
-#adduri,
-#setting,
-#about {
+#adduri, #setting {
     border-width: 1px;
     border-style: solid;
-}
-
-#adduri, #setting {
     grid-area: 1 / 2 / 2 / 3;
     height: fit-content;
+    padding: 8px;
     position: absolute;
     width: 600px;
     z-index: 9;
+}
+
+#adduri .flex > button, #setting .flex > button {
+    height: 25px;
+    padding: 0px 5px;
+}
+
+#adduri .config, #setting .config {
+    gap: 5px;
 }
 
 #menu::before {
