@@ -4,7 +4,7 @@ class Aria2XMLRequest {
         if (!path) {
             throw new Error(`Unsupported parameters: "${args.join('", "')}"`);
         }
-        this.method = 'post';
+        this.method = 'POST';
         this.secret = path[3];
         this.url = `${path[1]}://${path[2]}`;
     }
