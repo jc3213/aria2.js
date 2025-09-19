@@ -11,10 +11,13 @@ class Aria2XMLRequest {
     version = '1.0';
     #method;
     set method (method) {
-        if (!/^(post|get)$/i.test(method)) {
+        if (method === 'POST') {
+            this.call = this.#post;
+        } else if (method === 'GET') {
+            this.call = this.#get;
+        } else {
             throw new Error(`Unsupported method: "${method}"`);
         }
-        this.call = method.toLowerCase() === 'post' ? this.#post : this.#get;
         this.#method = method;
     }
     get method () {
