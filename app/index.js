@@ -1,6 +1,6 @@
 var aria2Config = {};
 var aria2Storage = {};
-var acceptLang = ['en', 'zh'];
+var acceptLang = ['en-US', 'zh-CN'];
 
 var [optionsPane, ...optionEntries] = document.querySelectorAll('#setting, #setting [name]');
 var [downPane, ...downloadEntries]= document.querySelectorAll('#adduri, #adduri [name]');
@@ -17,11 +17,15 @@ i18nEntry.addEventListener('change', (event) => {
 downBtn.addEventListener('click', async (event) => {
     downBtn.classList.toggle('checked');
     downPane.classList.toggle('hidden');
+    optionsBtn.classList.remove('checked');
+    optionsPane.classList.add('hidden');
 });
 
 optionsBtn.addEventListener('click', (event) => {
     optionsBtn.classList.toggle('checked');
     optionsPane.classList.toggle('hidden');
+    downBtn.classList.remove('checked');
+    downPane.classList.add('hidden');
 });
 
 saveBtn.addEventListener('click', (event) => {
@@ -108,7 +112,7 @@ async function aria2OptionsUpdated() {
 
 async function i18nUserInterface() {
     var locale = localStorage.locale;
-    var lang = acceptLang.includes(locale) ? locale : 'en';
+    var lang = acceptLang.includes(locale) ? locale : 'en-US';
     var i18n = await fetch('i18n/' + lang + '.json').then((res) => res.json());
 
     document.querySelectorAll('[i18n]').forEach((item) => {
@@ -132,3 +136,4 @@ async function i18nUserInterface() {
     --second: "${i18n.time_second}";
 }`;
 }
+
