@@ -27,7 +27,7 @@
     "popup_paused_queue": "User Paused",
     "popup_complete_queue": "Completed",
     "popup_removed_queue": "User Stopped",
-    "popup_error_queue": "Error Occured"
+    "popup_error_queue": "Error Occured",
     "task_submit": "Submit",
     "task_referer": "Referer",
     "task_entry": "Download Urls",
@@ -50,4 +50,3 @@
     "option_jsonrpc": "JSON-RPC Server",
     "option_manager_interval": "Refresh Interval"
 }
-
