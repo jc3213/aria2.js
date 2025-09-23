@@ -2,6 +2,11 @@ var aria2Config = {};
 var aria2Storage = {};
 var acceptLang = ['en-US', 'zh-CN'];
 
+taskFilters(
+    JSON.parse(localStorage.getItem('queue')),
+    (array) => localStorage.setItem('queue', JSON.stringify(array))
+);
+
 var [optionsPane, ...optionEntries] = document.querySelectorAll('#setting, #setting [name]');
 var [downPane, ...downloadEntries]= document.querySelectorAll('#adduri, #adduri [name]');
 var [saveBtn, submitBtn, metaBtn, metaEntry, UrlEntry, proxyBtn] = document.querySelectorAll('#adduri button, #setting button, textarea, input[type="file"');
@@ -136,4 +141,5 @@ async function i18nUserInterface() {
     --second: "${i18n.time_second}";
 }`;
 }
+
 
