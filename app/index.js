@@ -162,5 +162,3 @@ async function i18nUserInterface(locale) {
     --second: "${i18n.time_second}";
 }`;
 }
-
-
