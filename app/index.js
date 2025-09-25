@@ -35,22 +35,21 @@ optionsBtn.addEventListener('click', (event) => {
 
 saveBtn.addEventListener('click', (event) => {
     aria2RPC.disconnect();
-    optionEntries.forEach((entry) => { 
-        localStorage[entry.name] = aria2Storage[entry.name] || entry.dataset.value; 
+    optionEntries.forEach((entry) => {
+        let { name } = entry;
+        localStorage[name] = aria2Storage[name] || entry.getAttribute('data-value'); 
     });
-    aria2RPC.scheme = aria2Storage.scheme;
-    aria2RPC.url = aria2Storage.jsonrpc;
-    aria2RPC.secret = aria2Storage.secret;
     aria2StorageUpdated();
 });
 
 submitBtn.addEventListener('click', (event) => {
     var sessions = [];
     var urls = UrlEntry.value.match(/(https?:\/\/|ftp:\/\/|magnet:\?)[^\s\n]+/g);
-    urls?.forEach((url) => sessions.push({url, options: aria2Config}));
+    urls?.forEach((url) => sessions.push({ url, options: aria2Config }));
     aria2RPC.call(...sessions);
     UrlEntry.value = '';
-    manager.remove('adduri');
+    downBtn.classList.remove('checked');
+    downPane.classList.add('hidden');
 });
 
 proxyBtn.addEventListener('click', (event) => {
@@ -70,7 +69,7 @@ metaEntry.addEventListener('change', async (event) => {
     await Promise.all([...event.target.files].map(async (file) => {
         var type = file.name.slice(file.name.lastIndexOf('.') + 1);
         var b64encode = await promiseFileReader(file);
-        var download = type === 'torrent' ? {method: 'aria2.addTorrent', params: [b64encode, [], aria2Config]} : {method: 'aria2.addMetalink', params: [b64encode, aria2Config]};
+        var download = type === 'torrent' ? { method: 'aria2.addTorrent', params: [b64encode, [], aria2Config] } : { method: 'aria2.addMetalink', params: [b64encode, aria2Config] };
         sessions.push(download);
     }));
     await aria2RPC.call(...sessions);
@@ -92,11 +91,14 @@ function promiseFileReader(file) {
 function aria2StorageUpdated() {
     aria2Proxy = aria2Storage.proxy;
     aria2Delay = aria2Storage.interval * 1000;
+    aria2RPC.scheme = aria2Storage.scheme;
+    aria2RPC.url = aria2Storage.jsonrpc;
+    aria2RPC.secret = aria2Storage.secret;
     aria2RPC.connect();
 }
 
 async function aria2OptionsUpdated() {
-    let [{result}] = await aria2RPC.call({method: 'aria2.getGlobalOption'});
+    let [{ result }] = await aria2RPC.call({method: 'aria2.getGlobalOption'});
     result['min-split-size'] = getFileSize(result['min-split-size']);
     result['max-download-limit'] = getFileSize(result['max-download-limit']);
     result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
@@ -108,9 +110,9 @@ async function aria2OptionsUpdated() {
 (function () {
     i18nUserInterface();
     optionEntries.forEach((entry) => {
-        aria2Storage[entry.name] = entry.value = localStorage[entry.name] ||= entry.dataset.value;
+        let { name } = entry;
+        entry.value = localStorage[name] = aria2Storage[name] || entry.getAttribute('data-value'); 
     });
-    aria2ClientSetup(aria2Storage.scheme, aria2Storage.jsonrpc, aria2Storage.secret);
     aria2StorageUpdated();
     aria2OptionsUpdated();
 })();
@@ -141,5 +143,4 @@ async function i18nUserInterface() {
     --second: "${i18n.time_second}";
 }`;
 }
-
 
