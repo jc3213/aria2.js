@@ -87,7 +87,7 @@ const defaultStorage = {
     scheme: 'http',
     url: 'localhost:6800/jsonrpc',
     retries: 10,
-    timeout = 10
+    timeout: 10
 };
 
 function storageLoader(key) {
