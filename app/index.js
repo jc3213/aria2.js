@@ -14,8 +14,9 @@ taskFilters(
 );
 
 i18nEntry.addEventListener('change', (event) => {
-    localStorage.locale = i18nEntry.value;
-    i18nUserInterface();
+    let locale = i18nEntry.value;
+    localStorage.setItem('locale', locale);
+    i18nUserInterface(locale);
 });
 
 downBtn.addEventListener('click', async (event) => {
@@ -117,7 +118,8 @@ function aria2StorageUpdated() {
 }
 
 (function () {
-    i18nUserInterface();
+    let locale = storageLoader('locale');
+    i18nUserInterface(locale);
     optionEntries.forEach((entry) => {
         entry.value = storageLoader(entry.name);
     });
@@ -132,11 +134,10 @@ function aria2StorageUpdated() {
                 aria2Config[name] = entry.value = result[name] ??= '';
             });
         });
-    }, 1000);
+    }, 500);
 })();
 
-async function i18nUserInterface() {
-    let locale = storageLoader('locale');
+async function i18nUserInterface(locale) {
     let lang = acceptLang.has(locale) ? locale : 'en-US';
     let i18n = await fetch('i18n/' + lang + '.json').then((res) => res.json());
 
@@ -161,4 +162,5 @@ async function i18nUserInterface() {
     --second: "${i18n.time_second}";
 }`;
 }
+
 
