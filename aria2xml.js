@@ -1,9 +1,6 @@
 class Aria2XMLRequest {
     constructor (...args) {
-        let path = args.join('#').match(/^(https?)(?:#|:\/\/)([^#]+)#?(.*)$/);
-        if (!path) {
-            throw new Error(`Unsupported parameters: "${args.join('", "')}"`);
-        }
+        let path = args.join('#').match(/^(https?)(?:#|:\/\/)([^#]+)#?(.*)$/) ?? [, 'http', 'localhost:6800/jsonrpc', ''];
         this.method = 'POST';
         this.secret = path[3];
         this.url = `${path[1]}://${path[2]}`;
