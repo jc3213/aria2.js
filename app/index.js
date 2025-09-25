@@ -119,6 +119,7 @@ function aria2StorageUpdated() {
 
 (function () {
     let locale = storageLoader('locale');
+    i18nEntry.value = locale;
     i18nUserInterface(locale);
     optionEntries.forEach((entry) => {
         entry.value = storageLoader(entry.name);
