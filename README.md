@@ -21,6 +21,13 @@ let aria2 = new Aria2("http", "localhost:6800/jsonrpc", "mysecret"); // Requires
 let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret"); // Requires 0.4.0~
 ```
 
+```javascript
+let aria2 = new Aria2(); // Requires 0.10.0~
+aria2.scheme = 'wss';
+aria2.url = 'example.com:433/jsonrpc';
+aria2.secret = 'test-token';
+```
+
 ## Properties
 - [scheme](#scheme)
 - [url](#url)
