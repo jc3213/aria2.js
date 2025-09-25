@@ -1,5 +1,5 @@
 let aria2Config = {};
-let aria2Update = new Map();
+let aria2Storage = new Map();
 let acceptLang = new Set(['en-US', 'zh-CN']);
 
 let [optionsPane, ...optionEntries] = document.querySelectorAll('#setting, #setting [name]');
@@ -35,7 +35,7 @@ optionsBtn.addEventListener('click', (event) => {
 
 saveBtn.addEventListener('click', (event) => {
     aria2RPC.disconnect();
-    aria2Update.forEach((value, key) => localStorage.setItem(key, value));
+    aria2Storage.forEach((value, key) => localStorage.setItem(key, value));
     aria2StorageUpdated();
 });
 
@@ -55,7 +55,7 @@ proxyBtn.addEventListener('click', (event) => {
 });
 
 optionsPane.addEventListener('change', (event) => {
-    aria2Update.set(event.target.name, event.target.value);
+    aria2Storage.set(event.target.name, event.target.value);
 });
 
 downPane.addEventListener('change', (event) => {
@@ -107,12 +107,12 @@ function storageLoader(key) {
 }
 
 function aria2StorageUpdated() {
-    aria2RPC.scheme = localStorage.getItem('scheme');
-    aria2RPC.url = localStorage.getItem('url');
-    aria2RPC.secret = localStorage.getItem('secret');
-    aria2RPC.retries = localStorage.getItem('retries') | 0;
-    aria2RPC.timeout = localStorage.getItem('timeout') | 0;
-    aria2Proxy = localStorage.getItem('proxy');
+    aria2RPC.scheme = aria2Storage.get('scheme');
+    aria2RPC.url = aria2Storage.get('url');
+    aria2RPC.secret = aria2Storage.get('secret');
+    aria2RPC.retries = aria2Storage.get('retries') | 0;
+    aria2RPC.timeout = aria2Storage.get('timeout') | 0;
+    aria2Proxy = aria2Storage.get('proxy');
     aria2Delay = aria2RPC.timeout * 1000;
     aria2RPC.connect();
 }
@@ -122,7 +122,9 @@ function aria2StorageUpdated() {
     i18nEntry.value = locale;
     i18nUserInterface(locale);
     optionEntries.forEach((entry) => {
-        entry.value = storageLoader(entry.name);
+        let { name } = entry;
+        let value = entry.value = storageLoader(name);
+        aria2Storage.set(name, value);
     });
     aria2StorageUpdated();
     setTimeout(() => {
