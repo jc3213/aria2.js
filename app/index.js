@@ -1,5 +1,4 @@
 var aria2Config = {};
-var aria2Storage = {};
 var acceptLang = ['en-US', 'zh-CN'];
 
 taskFilters(
@@ -35,10 +34,6 @@ optionsBtn.addEventListener('click', (event) => {
 
 saveBtn.addEventListener('click', (event) => {
     aria2RPC.disconnect();
-    optionEntries.forEach((entry) => {
-        let { name } = entry;
-        localStorage[name] = aria2Storage[name] || entry.getAttribute('data-value'); 
-    });
     aria2StorageUpdated();
 });
 
@@ -57,7 +52,7 @@ proxyBtn.addEventListener('click', (event) => {
 });
 
 optionsPane.addEventListener('change', (event) => {
-    aria2Storage[event.target.name] = event.target.value;
+    localStorage.setItem(event.target.name, event.target.value);
 });
 
 downPane.addEventListener('change', (event) => {
@@ -89,32 +84,35 @@ function promiseFileReader(file) {
 }
 
 function aria2StorageUpdated() {
-    aria2Proxy = aria2Storage.proxy;
-    aria2Delay = aria2Storage.interval * 1000;
-    aria2RPC.scheme = aria2Storage.scheme;
-    aria2RPC.url = aria2Storage.jsonrpc;
-    aria2RPC.secret = aria2Storage.secret;
+    aria2RPC.scheme = localStorage.getItem('scheme') || 'http';
+    aria2RPC.url = localStorage.getItem('jsonrpc') || 'localhost:6800/jsonrpc';
+    aria2RPC.secret = localStorage.getItem('secret') || '';
+    aria2RPC.retries = (localStorage.getItem('retries') || -1) | 0;
+    aria2RPC.timeout = localStorage.getItem('timeout') | 0;
+    aria2Proxy = localStorage.getItem('proxy');
+    aria2Delay = aria2RPC.timeout * 1000;
     aria2RPC.connect();
-}
-
-async function aria2OptionsUpdated() {
-    let [{ result }] = await aria2RPC.call({method: 'aria2.getGlobalOption'});
-    result['min-split-size'] = getFileSize(result['min-split-size']);
-    result['max-download-limit'] = getFileSize(result['max-download-limit']);
-    result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
-    downloadEntries.forEach((entry) => {
-        aria2Config[entry.name] = entry.value = result[entry.name] ??= '';
-    });
 }
 
 (function () {
     i18nUserInterface();
     optionEntries.forEach((entry) => {
         let { name } = entry;
-        entry.value = localStorage[name] = aria2Storage[name] || entry.getAttribute('data-value'); 
+        entry.value = localStorage.getItem[name] || entry.getAttribute('data-value'); 
     });
     aria2StorageUpdated();
-    aria2OptionsUpdated();
+    setTimeout(() => {
+        aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(([{ result }]) => {
+            console.log(result);
+            result['min-split-size'] = getFileSize(result['min-split-size']);
+            result['max-download-limit'] = getFileSize(result['max-download-limit']);
+            result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
+            downloadEntries.forEach((entry) => {
+                let { name } = entry;
+                aria2Config[name] = entry.value = result[name] ??= '';
+            });
+        }).catch(e => console.log(e));
+    }, 1000);
 })();
 
 async function i18nUserInterface() {
