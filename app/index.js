@@ -1,18 +1,18 @@
-var aria2Config = {};
-var acceptLang = ['en-US', 'zh-CN'];
+let aria2Config = {};
+let aria2Update = new Map();
+let acceptLang = new Set(['en-US', 'zh-CN']);
+
+let [optionsPane, ...optionEntries] = document.querySelectorAll('#setting, #setting [name]');
+let [downPane, ...downloadEntries]= document.querySelectorAll('#adduri, #adduri [name]');
+let [saveBtn, submitBtn, metaBtn, metaEntry, UrlEntry, proxyBtn] = document.querySelectorAll('#adduri button, #setting button, textarea, input[type="file"');
+let i18nCss = document.createElement('style');
+document.head.append(i18nCss);
 
 taskFilters(
     JSON.parse(localStorage.getItem('queue')),
     (array) => localStorage.setItem('queue', JSON.stringify(array))
 );
 
-var [optionsPane, ...optionEntries] = document.querySelectorAll('#setting, #setting [name]');
-var [downPane, ...downloadEntries]= document.querySelectorAll('#adduri, #adduri [name]');
-var [saveBtn, submitBtn, metaBtn, metaEntry, UrlEntry, proxyBtn] = document.querySelectorAll('#adduri button, #setting button, textarea, input[type="file"');
-var i18nCss = document.createElement('style');
-document.head.append(i18nCss);
-
-i18nEntry.value = localStorage.locale ??= navigator.language.slice(0, 2);
 i18nEntry.addEventListener('change', (event) => {
     localStorage.locale = i18nEntry.value;
     i18nUserInterface();
@@ -34,17 +34,19 @@ optionsBtn.addEventListener('click', (event) => {
 
 saveBtn.addEventListener('click', (event) => {
     aria2RPC.disconnect();
+    aria2Update.forEach((value, key) => localStorage.setItem(key, value));
     aria2StorageUpdated();
 });
 
 submitBtn.addEventListener('click', (event) => {
-    var sessions = [];
-    var urls = UrlEntry.value.match(/(https?:\/\/|ftp:\/\/|magnet:\?)[^\s\n]+/g);
-    urls?.forEach((url) => sessions.push({ url, options: aria2Config }));
-    aria2RPC.call(...sessions);
+    let urls = UrlEntry.value.match(/(https?:\/\/|ftp:\/\/|magnet:\?)[^\s\n]+/g);
     UrlEntry.value = '';
     downBtn.classList.remove('checked');
     downPane.classList.add('hidden');
+    let session = urls?.map((url) => ({ url, options: aria2Config }));
+    if (session) {
+        aria2RPC.call(...sessions);
+    }
 });
 
 proxyBtn.addEventListener('click', (event) => {
@@ -52,7 +54,7 @@ proxyBtn.addEventListener('click', (event) => {
 });
 
 optionsPane.addEventListener('change', (event) => {
-    localStorage.setItem(event.target.name, event.target.value);
+    aria2Update.set(event.target.name, event.target.value);
 });
 
 downPane.addEventListener('change', (event) => {
@@ -60,11 +62,11 @@ downPane.addEventListener('change', (event) => {
 });
 
 metaEntry.addEventListener('change', async (event) => {
-    var sessions = [];
+    let sessions = [];
     await Promise.all([...event.target.files].map(async (file) => {
-        var type = file.name.slice(file.name.lastIndexOf('.') + 1);
-        var b64encode = await promiseFileReader(file);
-        var download = type === 'torrent' ? { method: 'aria2.addTorrent', params: [b64encode, [], aria2Config] } : { method: 'aria2.addMetalink', params: [b64encode, aria2Config] };
+        let type = file.name.slice(file.name.lastIndexOf('.') + 1);
+        let b64encode = await promiseFileReader(file);
+        let download = type === 'torrent' ? { method: 'aria2.addTorrent', params: [b64encode, [], aria2Config] } : { method: 'aria2.addMetalink', params: [b64encode, aria2Config] };
         sessions.push(download);
     }));
     await aria2RPC.call(...sessions);
@@ -74,9 +76,9 @@ metaEntry.addEventListener('change', async (event) => {
 
 function promiseFileReader(file) {
     return new Promise((resolve) => {
-        var reader = new FileReader();
+        let reader = new FileReader();
         reader.onload = (event) => {
-            var base64 = reader.result.slice(reader.result.indexOf(',') + 1);
+            let base64 = reader.result.slice(reader.result.indexOf(',') + 1);
             resolve(base64);
         };
         reader.readAsDataURL(file);
@@ -86,24 +88,29 @@ function promiseFileReader(file) {
 const defaultStorage = {
     scheme: 'http',
     url: 'localhost:6800/jsonrpc',
+    secret: '',
     retries: 10,
-    timeout: 10
+    timeout: 10,
+    proxy: '',
+    locale: 'en-US'
 };
 
 function storageLoader(key) {
-    let value = localStorage.getItem('scheme');
-    if (value === '' && key in defaultStorage) {
-        return defaultStorage[key];
+    let value = localStorage.getItem(key);
+    if (value === null) {
+        let new_value = defaultStorage[key];
+        localStorage.setItem(key, new_value);
+        return new_value;
     }
     return value;
 }
 
 function aria2StorageUpdated() {
-    aria2RPC.scheme = storageLoader('scheme');
-    aria2RPC.url = storageLoader('url');
+    aria2RPC.scheme = localStorage.getItem('scheme');
+    aria2RPC.url = localStorage.getItem('url');
     aria2RPC.secret = localStorage.getItem('secret');
-    aria2RPC.retries = storageLoader('retries') | 0;
-    aria2RPC.timeout = storageLoader('timeout') | 0;
+    aria2RPC.retries = localStorage.getItem('retries') | 0;
+    aria2RPC.timeout = localStorage.getItem('timeout') | 0;
     aria2Proxy = localStorage.getItem('proxy');
     aria2Delay = aria2RPC.timeout * 1000;
     aria2RPC.connect();
@@ -129,9 +136,9 @@ function aria2StorageUpdated() {
 })();
 
 async function i18nUserInterface() {
-    var locale = localStorage.locale;
-    var lang = acceptLang.includes(locale) ? locale : 'en-US';
-    var i18n = await fetch('i18n/' + lang + '.json').then((res) => res.json());
+    let locale = storageLoader('locale');
+    let lang = acceptLang.has(locale) ? locale : 'en-US';
+    let i18n = await fetch('i18n/' + lang + '.json').then((res) => res.json());
 
     document.querySelectorAll('[i18n]').forEach((item) => {
         item.textContent = i18n[item.getAttribute('i18n')];
