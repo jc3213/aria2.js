@@ -48,5 +48,6 @@
     "aria2_true": "True",
     "aria2_false": "False",
     "option_jsonrpc": "JSON-RPC Server",
-    "option_manager_interval": "Refresh Interval"
+    "option_jsonrpc_retries": "Max Retries",
+    "option_jsonrpc_timeout": "Retry Interval"
 }

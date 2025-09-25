@@ -103,7 +103,6 @@ function aria2StorageUpdated() {
     aria2StorageUpdated();
     setTimeout(() => {
         aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(([{ result }]) => {
-            console.log(result);
             result['min-split-size'] = getFileSize(result['min-split-size']);
             result['max-download-limit'] = getFileSize(result['max-download-limit']);
             result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
@@ -111,7 +110,7 @@ function aria2StorageUpdated() {
                 let { name } = entry;
                 aria2Config[name] = entry.value = result[name] ??= '';
             });
-        }).catch(e => console.log(e));
+        });
     }, 1000);
 })();
 

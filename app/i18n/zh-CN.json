@@ -48,5 +48,6 @@
     "aria2_true": "是",
     "aria2_false": "否",
     "option_jsonrpc": "JSON-RPC 服务器",
-    "option_manager_interval": "更新间隔"
+    "option_jsonrpc_retries": "重试次数",
+    "option_jsonrpc_timeout": "重试间隔"
 }
