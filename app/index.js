@@ -83,12 +83,27 @@ function promiseFileReader(file) {
     });
 }
 
+const defaultStorage = {
+    scheme: 'http',
+    url: 'localhost:6800/jsonrpc',
+    retries: 10;
+    timeout = 10;
+};
+
+function storageLoader(key) {
+    let value = localStorage.getItem('scheme');
+    if (value === '' && key in defaultStorage) {
+        return defaultStorage[key];
+    }
+    return value;
+}
+
 function aria2StorageUpdated() {
-    aria2RPC.scheme = localStorage.getItem('scheme') || 'http';
-    aria2RPC.url = localStorage.getItem('jsonrpc') || 'localhost:6800/jsonrpc';
-    aria2RPC.secret = localStorage.getItem('secret') || '';
-    aria2RPC.retries = (localStorage.getItem('retries') || -1) | 0;
-    aria2RPC.timeout = localStorage.getItem('timeout') | 0;
+    aria2RPC.scheme = storageLoader('scheme');
+    aria2RPC.url = storageLoader('url');
+    aria2RPC.secret = localStorage.getItem('secret');
+    aria2RPC.retries = storageLoader('retries') | 0;
+    aria2RPC.timeout = storageLoader('timeout') | 0;
     aria2Proxy = localStorage.getItem('proxy');
     aria2Delay = aria2RPC.timeout * 1000;
     aria2RPC.connect();
@@ -97,8 +112,7 @@ function aria2StorageUpdated() {
 (function () {
     i18nUserInterface();
     optionEntries.forEach((entry) => {
-        let { name } = entry;
-        entry.value = localStorage.getItem[name] || entry.getAttribute('data-value'); 
+        entry.value = storageLoader(entry.name);
     });
     aria2StorageUpdated();
     setTimeout(() => {
