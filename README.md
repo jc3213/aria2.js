@@ -113,7 +113,7 @@ let response = aria2.call( { method, params }, { method, params }, ..., { method
 - params *optional*
     - JSON-RPC method call parameters
 
-#### Code Sample
+#### Call Sample
 ```javascript
 let [{ result }] = await aria2.call( { method: 'aria2.getVersion' } );
 let { version } = result;
