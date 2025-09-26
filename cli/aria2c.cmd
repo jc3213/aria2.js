@@ -1,15 +1,15 @@
 @echo off
 pushd %~dp0
-if not exist bin\aria2c.exe goto :eof
+if not exist aria2c.exe goto :eof
 if not exist aria2c.session type nul > aria2c.session
 if "%1" equ "/s" goto :nowindow
 if "%1" equ "/r" goto :register
 if "%1" equ "/u" goto :unregister
-bin\aria2c.exe --conf=aria2c.conf
+aria2c.exe --conf=aria2c.conf
 :register
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v "aria2c" /t "REG_SZ" /d "mshta vbscript:CreateObject(\"Shell.Application\").ShellExecute(\"bin\\aria2c.exe\",\"--conf=aria2c.conf\",\"%~dp0",\"\",0)(window.close)" /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v "aria2c" /t "REG_SZ" /d "mshta vbscript:CreateObject(\"Shell.Application\").ShellExecute(\"aria2c.exe\",\"--conf=aria2c.conf\",\"%~dp0",\"\",0)(window.close)" /f
 :nowindow
-mshta vbscript:CreateObject("Shell.Application").ShellExecute("bin\\aria2c.exe","--conf=aria2c.conf","%~dp0","",0)(window.close)
+mshta vbscript:CreateObject("Shell.Application").ShellExecute("aria2c.exe","--conf=aria2c.conf","%~dp0","",0)(window.close)
 goto :eof
 :unregister
 taskkill /f /im "aria2c.exe" 2>nul
