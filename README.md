@@ -22,7 +22,7 @@ let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
 ```
 
 ```javascript
-let aria2 = new Aria2(); // Requires 0.10.0~
+let aria2 = new Aria2();
 aria2.scheme = 'wss';
 aria2.url = 'example.com:433/jsonrpc';
 aria2.secret = 'test-token';
@@ -36,12 +36,14 @@ aria2.secret = 'test-token';
 - [timeout](#timeout)
 
 ### scheme
+- schemes that JSON-RPC uses
 ```javascript
 aria2.scheme = scheme;
 ```
-- schemes that decide the approach to JSON-RPC
-- scheme
-    - `http`, `https`, `ws`, and `wss`
+- `http`
+- `https`
+- `ws`
+- `wss`
 
 ### url
 - the url of JSON-RPC
@@ -53,35 +55,32 @@ aria2.url = url;
         - `www.example.com
     - port
         - `6800` *default*
-        - `443` for SSL
+        - `443`  *ssl
 
 ### secret
 - the secret token `secret=your-secret-token` in JSON-RPC configuration
 ```javascript
 aria2.secret = secret;
 ```
-- secret
-    - `string`
+- `string`
 
 ### retries
 - maximum retries when connection to JSON-RPC is closed
 ```javascript
 aria2.retries = retries;
 ```
-- retries
-    - `integer`
-    - `10`: Default
-    - `-1` or other negative numbers for unlimited retries
+- `integer`
+- `10`: Default
+- `-1` or other negative numbers for unlimited retries
  
 ### timeout
 - time interval between retries
 ```javascript
 aria2.timeout = timeout;
 ```
-- timeout
-    - `integer`
-    - `10`: Default, equivalent to **10000** millisecond
-    - It is recommended to use numbers larger than `3`
+- `integer`
+- `10`: Default, equivalent to **10000** millisecond
+- It is recommended to use numbers larger than `3`
 
 ## Method
 - [connect](#connect)
@@ -131,8 +130,6 @@ console.log(version) // the version of aria2c.exe;
 ```javascript
 aria2.onopen = function(event) { ... };
 ```
-- callback
-    - `function`, ( event: event[] ) => void
 
 ### onclose
 - callback function triggered when JSON-RPC connection is closed.
