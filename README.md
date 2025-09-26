@@ -17,8 +17,8 @@
 ## Syntax
 ```javascript
 let aria2 = new Aria2("http://localhost:6800/jsonrpc", "mysecret");
-let aria2 = new Aria2("http", "localhost:6800/jsonrpc", "mysecret"); // Requires 0.2.0~
-let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret"); // Requires 0.4.0~
+let aria2 = new Aria2("http", "localhost:6800/jsonrpc", "mysecret");
+let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
 ```
 
 ```javascript
@@ -39,50 +39,45 @@ aria2.secret = 'test-token';
 ```javascript
 aria2.scheme = scheme;
 ```
-- require `0.2~`
 - schemes that decide the approach to JSON-RPC
 - scheme
     - `http`, `https`, `ws`, and `wss`
 
 ### url
+- the url of JSON-RPC
 ```javascript
 aria2.url = url;
 ```
-- require `0.3~`
-- the url of JSON-RPC
-    - `${hostname}:${port}/jsonrpc`
-- hostname
-    - `www.example.com`
-- port
-    - `6800` *default*
-    - `443` for SSL
+- `${hostname}:${port}/jsonrpc`
+    - hostname
+        - `www.example.com
+    - port
+        - `6800` *default*
+        - `443` for SSL
 
 ### secret
+- the secret token `secret=your-secret-token` in JSON-RPC configuration
 ```javascript
 aria2.secret = secret;
 ```
-- require `0.3~`
-- the secret token `secret=your-secret-token` in JSON-RPC configuration
 - secret
     - `string`
 
 ### retries
+- maximum retries when connection to JSON-RPC is closed
 ```javascript
 aria2.retries = retries;
 ```
-- require `0.8~`
-- maximum retries when connection to JSON-RPC is closed
 - retries
     - `integer`
     - `10`: Default
     - `-1` or other negative numbers for unlimited retries
  
 ### timeout
+- time interval between retries
 ```javascript
 aria2.timeout = timeout;
 ```
-- require `0.7~`
-- time interval between retries
 - timeout
     - `integer`
     - `10`: Default, equivalent to **10000** millisecond
@@ -94,33 +89,24 @@ aria2.timeout = timeout;
 - [call](#call)
 
 ### connect
+- connect to `WebSocket` of aria2 JSON-RPC
 ```javascript
 aria2.connect();
 ```
-- require `0.2~`
-- connect to `WebSocket` of aria2 JSON-RPC
-- *0.2*~*0.8*
-    - Run when `Aria` instance is initialized, or [url](#url) is changed
-- *0.8*~
-    - Run at yourself
 
 ### disconnect
+- disconnect from `WebSocket` of aria2 JSON-RPC
 ```javascript
 aria2.disconnect();
 ```
-- require `0.2~`
-- disconnect from `WebSocket` of aria2 JSON-RPC
-- *0.2*~*0.8*
-    - Run when `Aria` instance is initialized, or [url](#url) is changed
-- *0.8*~
-    - Run at yourself
 
 ### call
+- send message to JSON-RPC
 ```javascript
 let response = aria2.call( { method, params } );
 let response = aria2.call( { method, params }, { method, params }, ..., { method, params } );
 ```
-- use `WebSocket` or `HTTP Post` method based on [scheme](#scheme)
+- use `WebSocket` or `POST` method based on [scheme](#scheme)
 - response
     - `Promise` object, return an array that contains the response from JSON-RPC if fulfilled
 - method **required**
@@ -130,8 +116,8 @@ let response = aria2.call( { method, params }, { method, params }, ..., { method
 
 #### Code Sample
 ```javascript
-let response = await aria2.call( { method: 'aria2.getVersion' } );
-let version = response[0].result.version;
+let [{ result }] = await aria2.call( { method: 'aria2.getVersion' } );
+let { version } = result;
 console.log(version) // the version of aria2c.exe;
 ```
 
@@ -141,31 +127,24 @@ console.log(version) // the version of aria2c.exe;
 - [onmessage](#onmessage)
 
 ### onopen
+- callback function triggered when JSON-RPC connection is opened.
 ```javascript
-aria2.onopen = callback: function;
+aria2.onopen = function(event) { ... };
 ```
-- require `0.8~`
-- function callback that fires when JSON-RPC is connected
 - callback
     - `function`, ( event: event[] ) => void
 
 ### onclose
+- callback function triggered when JSON-RPC connection is closed.
 ```javascript
-aria2.onclose = callback: function;
+aria2.onclose = function(event) { ... };
 ```
-- require `0.5~`
-- function callback that fires when JSON-RPC is closed
-- callback
-    - `function`, ( event: event[] ) => void
 
 ### onmessage
+- callback function triggered when a message is received from JSON-RPC.
 ```javascript
-aria2.onmessage = callback: function;
+aria2.onmessage = function (response: object[]) { ... };
 ```
-- require `0.2~`
-- function callback that fires when recieve message from JSON-RPC
-- callback
-    - `function`, ( response: object ) => void
 
 ## Code Sample
 ```javascript
