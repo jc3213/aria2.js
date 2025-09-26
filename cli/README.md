@@ -1,9 +1,9 @@
 ## First of all
 - Download the latest [aria2c](https://github.com/aria2/aria2/releases/latest)
-    - C:\cli\aria2c.cmd
-    - C:\cli\aria2c.conf
-    - C:\cli\aria2c.session
-    - C:\cli\\bin\aria2c.exe
+    - X:\aria2c.cmd
+    - X:\aria2c.conf
+    - X:\aria2c.session
+    - X:\aria2c.exe
 - Run `aria2c.cmd`
     - Use [switches](#switches)
 
