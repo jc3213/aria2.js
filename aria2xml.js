@@ -7,25 +7,25 @@ class Aria2XMLRequest {
     }
     version = '1.0';
     #method;
-    set method arg) {
-        if (arg === 'POST') {
+    set method (string) {
+        if (string === 'POST') {
             this.call = this.#post;
-        } else if (arg === 'GET') {
+        } else if (string === 'GET') {
             this.call = this.#get;
         } else {
             throw new Error(`Unsupported method: "${method}"`);
         }
-        this.#method = arg;
+        this.#method = string;
     }
     get method () {
         return this.#method;
     }
     #jsonrpc;
-    set jsonrpc (arg) {
-        if (!/^https?:\/\/[^/]+\/\w+$/.test(arg)) {
-            throw new Error (`Unsupported url: "${arg}"`);
+    set jsonrpc (string) {
+        if (!/^https?:\/\/[^/]+\/\w+$/.test(string)) {
+            throw new Error (`Unsupported url: "${string}"`);
         }
-        this.#jsonrpc = arg;
+        this.#jsonrpc = string;
     }
     get jsonrpc () {
         return this.#jsonrpc;
