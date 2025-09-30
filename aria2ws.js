@@ -1,7 +1,7 @@
 class Aria2WebSocket {
     constructor (...args) {
-        let [, scheme = 'ws', url = 'localhost:6800/jsonrpc', secret = ''] = args.join('#').match(/^(wss?)(?:#|:\/\/)([^#]+)#?(.*)$/) ?? [];
-        this.url = `${scheme}://${url}`;
+        let [, url = 'localhost:6800/jsonrpc', secret = ''] = args.join('#').match(/^(wss?:\/\/[^#]+)#?(.*)$/) ?? [];
+        this.url = url;
         this.secret = secret;
     }
     version = '1.0';
@@ -9,7 +9,7 @@ class Aria2WebSocket {
     #wsa;
     #tries;
     set url (string) {
-        if (!/^wss?:\/\/[^/]+\/\w+$/.test(string)) {
+        if (!/^wss?:\/\/.+$/.test(string)) {
             throw new Error (`Unsupported url: "${string}"`);
         }
         this.#wsa = string;
