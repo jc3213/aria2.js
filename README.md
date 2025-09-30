@@ -17,40 +17,32 @@
 ## Syntax
 ```javascript
 let aria2 = new Aria2("http://localhost:6800/jsonrpc", "mysecret");
-let aria2 = new Aria2("http", "localhost:6800/jsonrpc", "mysecret");
 let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
 ```
 
 ```javascript
 let aria2 = new Aria2();
-aria2.scheme = 'wss';
-aria2.url = 'example.com:433/jsonrpc';
+aria2.url = 'wss://example.com:433/jsonrpc';
 aria2.secret = 'test-token';
 ```
 
 ## Properties
-- [scheme](#scheme)
 - [url](#url)
 - [secret](#secret)
 - [retries](#retries)
 - [timeout](#timeout)
 
-### scheme
-- schemes that JSON-RPC uses
-```javascript
-aria2.scheme = scheme;
-```
-- `http`
-- `https`
-- `ws`
-- `wss`
-
 ### url
-- the url of JSON-RPC
+- the URL of JSON-RPC
 ```javascript
 aria2.url = url;
 ```
-- `${hostname}:${port}/jsonrpc`
+- `${scheme}://${hostname}:${port}/jsonrpc`
+    - scheme
+        - `http`
+        - `https`
+        - `ws`
+        - `wss`
     - hostname
         - `www.example.com
     - port
