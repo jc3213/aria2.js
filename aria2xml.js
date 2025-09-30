@@ -1,9 +1,9 @@
 class Aria2XMLRequest {
     constructor (...args) {
-        let path = args.join('#').match(/^(https?)(?:#|:\/\/)([^#]+)#?(.*)$/) ?? [, 'http', 'localhost:6800/jsonrpc', ''];
+        let [, scheme = 'http', url = 'localhost:6800/jsonrpc', secret = ''] = args.join('#').match(/^(https?)(?:#|:\/\/)([^#]+)#?(.*)$/) ?? [];
+        this.url = `${scheme}://${url}`;
+        this.secret = secret;
         this.method = 'POST';
-        this.secret = path[3];
-        this.url = `${path[1]}://${path[2]}`;
     }
     version = '1.0';
     #method;
@@ -20,15 +20,15 @@ class Aria2XMLRequest {
     get method () {
         return this.#method;
     }
-    #jsonrpc;
-    set jsonrpc (string) {
+    #xml;
+    set url (string) {
         if (!/^https?:\/\/[^/]+\/\w+$/.test(string)) {
             throw new Error (`Unsupported url: "${string}"`);
         }
-        this.#jsonrpc = string;
+        this.#xml = string;
     }
     get jsonrpc () {
-        return this.#jsonrpc;
+        return this.#xml;
     }
     #secret;
     set secret (secret) {
@@ -38,10 +38,10 @@ class Aria2XMLRequest {
         return this.#secret.slice(6);
     }
     #get (...args) {
-        return fetch(`${this.#url}?params=${btoa(unescape(encodeURIComponent(this.#json(args))))}`).then(this.#then);
+        return fetch(`${this.#xml}?params=${btoa(unescape(encodeURIComponent(this.#json(args))))}`).then(this.#then);
     }
     #post (...args) {
-        return fetch(this.#url, {method: 'POST', body: this.#json(args)}).then(this.#then);
+        return fetch(this.#xml, {method: 'POST', body: this.#json(args)}).then(this.#then);
     }
     #then (response) {
         if (response.ok) {
