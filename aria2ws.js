@@ -1,32 +1,21 @@
 class Aria2WebSocket {
     constructor (...args) {
-        let path = args.join('#').match(/^ws(s)?(?:#|:\/\/)([^#]+)#?(.*)$/) ?? [, 'ws', 'localhost:6800/jsonrpc', ''];
-        this.ssl = path[1];
-        this.url = path[2];
-        this.secret = path[3];
+        let [, scheme = 'ws', url = 'localhost:6800/jsonrpc', secret = ''] = args.join('#').match(/^(wss?)(?:#|:\/\/)([^#]+)#?(.*)$/) ?? [];
+        this.jsonrpc = `${scheme}://${url}`;
+        this.secret = secret;
     }
     version = '1.0';
     #wsa;
     #tries;
-    #path () {
-        this.#wsa = `ws${this.#ssl}://${this.#url}`;
+    #jsonrpc;
+    set jsonrpc (string) {
+        let [, scheme = 'ws', ssl = '', url = '://localhost:6800/jsonrpc'] = string.match(/^(ws)(s)?(:\/\/.+)$/) ?? [];
+        this.#wsa = `ws${ssl}${url}`;
+        this.#jsonrpc = `${scheme}${ssl}${url}`;
         this.#tries = 0;
     }
-    #ssl;
-    set ssl (ssl) {
-        this.#ssl = ssl ? 's' : '';
-        this.#path();
-    }
-    get ssl () {
-        return !!this.#ssl;
-    }
-    #url;
-    set url (url) {
-        this.#url = url;
-        this.#path();
-    }
-    get url () {
-        return this.#url;
+    get jsonrpc () {
+        return this.#jsonrpc;
     }
     #secret;
     set secret (secret) {
