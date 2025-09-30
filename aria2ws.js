@@ -1,6 +1,6 @@
 class Aria2WebSocket {
     constructor (...args) {
-        let [, url = 'localhost:6800/jsonrpc', secret = ''] = args.join('#').match(/^(wss?:\/\/[^#]+)#?(.*)$/) ?? [];
+        let [, url = 'ws://localhost:6800/jsonrpc', secret = ''] = args.join('#').match(/^(wss?:\/\/[^#]+)#?(.*)$/) ?? [];
         this.url = url;
         this.secret = secret;
     }
