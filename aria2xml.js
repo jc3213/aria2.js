@@ -1,7 +1,7 @@
 class Aria2XMLRequest {
     constructor (...args) {
-        let [, scheme = 'http', url = 'localhost:6800/jsonrpc', secret = ''] = args.join('#').match(/^(https?)(?:#|:\/\/)([^#]+)#?(.*)$/) ?? [];
-        this.url = `${scheme}://${url}`;
+        let [, url = 'http://localhost:6800/jsonrpc', secret = ''] = args.join('#').match(/^(https?:\/\/[^#]+)#?(.*)$/) ?? [];
+        this.url = url;
         this.secret = secret;
         this.method = 'POST';
     }
@@ -22,7 +22,7 @@ class Aria2XMLRequest {
     }
     #xml;
     set url (string) {
-        if (!/^https?:\/\/[^/]+\/\w+$/.test(string)) {
+        if (!/^https?:\/\/.+$/.test(string)) {
             throw new Error (`Unsupported url: "${string}"`);
         }
         this.#xml = string;
