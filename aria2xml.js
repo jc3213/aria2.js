@@ -8,11 +8,14 @@ class Aria2XMLRequest {
     version = '1.0';
     #method;
     set method (string) {
-        his.call = { 'POST': this.#post, 'GET': this.#get }[string];
-        if (!this.call) {
-            throw new Error(`Unsupported method: "${method}"`);
+        let call = { 'POST': this.#post, 'GET': this.#get }[string];
+        if (call) {
+            this.#method = string;
+            this.call = call;
+        } else {
+            this.method = 'POST';
+            this.call = this.#post;
         }
-        this.#method = string;
     }
     get method () {
         return this.#method;
