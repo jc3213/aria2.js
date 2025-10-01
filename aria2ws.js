@@ -8,7 +8,7 @@ class Aria2WebSocket {
     #wsa;
     #tries;
     set url (string) {
-        let [, scheme = 'http', ssl = '', url = '://localhost:6800/jsonrpc'] = string.match(/^ws(s)?(:\/\/.+)$/) ?? [];
+        let [, ssl = '', url = '://localhost:6800/jsonrpc'] = string.match(/^ws(s)?(:\/\/.+)$/) ?? [];
         this.#wsa = `ws${ssl}${url}`;
         this.#tries = 0;
     }
