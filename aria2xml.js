@@ -8,11 +8,8 @@ class Aria2XMLRequest {
     version = '1.0';
     #method;
     set method (string) {
-        if (string === 'POST') {
-            this.call = this.#post;
-        } else if (string === 'GET') {
-            this.call = this.#get;
-        } else {
+        his.call = { 'POST': this.#post, 'GET': this.#get }[string];
+        if (!this.call) {
             throw new Error(`Unsupported method: "${method}"`);
         }
         this.#method = string;
@@ -22,8 +19,8 @@ class Aria2XMLRequest {
     }
     #xml;
     set url (string) {
-        let [, ssl = '', url = '://localhost:6800/jsonrpc'] = string.match(/^http(s)?(:\/\/.+)$/) ?? [];
-        this.#xml = `http${ssl}${url}`;
+        let url = string.match(/^https?:\/\.+$/)?.[0];
+        this.#xml = url ?? 'http://localhost:6800/jsonrpc';
     }
     get jsonrpc () {
         return this.#xml;
