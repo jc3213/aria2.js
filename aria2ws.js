@@ -5,14 +5,11 @@ class Aria2WebSocket {
         this.secret = secret;
     }
     version = '1.0';
-    #url;
     #wsa;
     #tries;
     set url (string) {
-        if (!/^wss?:\/\/.+$/.test(string)) {
-            throw new Error (`Unsupported url: "${string}"`);
-        }
-        this.#wsa = string;
+        let [, scheme = 'http', ssl = '', url = '://localhost:6800/jsonrpc'] = string.match(/^ws(s)?(:\/\/.+)$/) ?? [];
+        this.#wsa = `ws${ssl}${url}`;
         this.#tries = 0;
     }
     get url () {
