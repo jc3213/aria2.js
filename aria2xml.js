@@ -22,10 +22,8 @@ class Aria2XMLRequest {
     }
     #xml;
     set url (string) {
-        if (!/^https?:\/\/.+$/.test(string)) {
-            throw new Error (`Unsupported url: "${string}"`);
-        }
-        this.#xml = string;
+        let [, ssl = '', url = '://localhost:6800/jsonrpc'] = string.match(/^http(s)?(:\/\/.+)$/) ?? [];
+        this.#xml = `http${ssl}${url}`;
     }
     get jsonrpc () {
         return this.#xml;
