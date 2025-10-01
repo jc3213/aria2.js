@@ -12,9 +12,6 @@ class Aria2XMLRequest {
         if (call) {
             this.#method = string;
             this.call = call;
-        } else {
-            this.method = 'POST';
-            this.call = this.#post;
         }
     }
     get method () {
