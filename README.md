@@ -47,7 +47,7 @@ aria2.url = url;
         - `www.example.com
     - port
         - `6800` *default*
-        - `443`  *ssl
+        - `443`  *ssl*
 
 ### secret
 - the secret token `secret=your-secret-token` in JSON-RPC configuration
