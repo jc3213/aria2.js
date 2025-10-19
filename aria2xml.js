@@ -5,7 +5,6 @@ class Aria2XMLRequest {
         this.secret = secret;
         this.method = 'POST';
     }
-    version = '1.0';
     #method;
     set method (string) {
         let call = { 'POST': this.#post, 'GET': this.#get }[string];

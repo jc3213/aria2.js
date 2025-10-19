@@ -4,7 +4,6 @@ class Aria2WebSocket {
         this.url = url;
         this.secret = secret;
     }
-    version = '1.0';
     #wsa;
     #tries;
     set url (string) {
