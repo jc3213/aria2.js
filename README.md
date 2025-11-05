@@ -17,6 +17,9 @@
 ## Syntax
 ```javascript
 let aria2 = new Aria2("http://localhost:6800/jsonrpc", "mysecret");
+```
+
+```javascript
 let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
 ```
 
