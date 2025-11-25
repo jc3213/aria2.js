@@ -43,20 +43,18 @@ class Aria2XMLRequest {
         }
         throw new Error(response.statusText);
     }
-    #json (arg) {
+    #json (id, arg) {
         if (Array.isArray(arg)) {
-            arg = {
-                method: 'system.multicall',
-                params: [ arg.map(({ method, params = [] }) => {
-                    params.unshift(this.#secret);
-                    return { methodName: method, params };
-                }) ]
-            };
+            let params = [ arg.map(({ method, params = [] }) => {
+                params.unshift(this.#secret);
+                return { methodName: method, params };
+            }) ];
+            arg = { method: 'system.multicall', params };
         } else {
             (arg.params ??= []).unshift(this.#secret);
         }
         arg.jsonrpc = '2.0';
-        arg.id = ‘’;
+        arg.id = id;
         return JSON.stringify(arg);
     }
 }
