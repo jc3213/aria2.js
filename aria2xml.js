@@ -43,7 +43,7 @@ class Aria2XMLRequest {
         }
         throw new Error(response.statusText);
     }
-    #json (id, arg) {
+    #json (arg) {
         if (Array.isArray(arg)) {
             let params = [ arg.map(({ method, params = [] }) => {
                 params.unshift(this.#secret);
