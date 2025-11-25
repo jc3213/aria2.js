@@ -31,11 +31,11 @@ class Aria2XMLRequest {
     get secret () {
         return this.#secret.slice(6);
     }
-    #get (...args) {
-        return fetch(`${this.#xml}?params=${btoa(unescape(encodeURIComponent(this.#json(args))))}`).then(this.#then);
+    #get (arg) {
+        return fetch(`${this.#xml}?params=${btoa(unescape(encodeURIComponent(this.#json(arg))))}`).then(this.#then);
     }
-    #post (...args) {
-        return fetch(this.#xml, {method: 'POST', body: this.#json(args)}).then(this.#then);
+    #post (arg) {
+        return fetch(this.#xml, {method: 'POST', body: this.#json(arg)}).then(this.#then);
     }
     #then (response) {
         if (response.ok) {
@@ -43,12 +43,20 @@ class Aria2XMLRequest {
         }
         throw new Error(response.statusText);
     }
-    #json (args) {
-        return JSON.stringify(args.map((arg) => {
-            arg.jsonrpc = '2.0';
-            arg.id = '';
-            ( arg.params ??= [] ).unshift(this.#secret);
-            return arg;
-        }));
+    #json (arg) {
+        if (Array.isArray(arg)) {
+            arg = {
+                method: 'system.multicall',
+                params: [ arg.map(({ method, params = [] }) => {
+                    params.unshift(this.#secret);
+                    return { methodName: method, params };
+                }) ]
+            };
+        } else {
+            (arg.params ??= []).unshift(this.#secret);
+        }
+        arg.jsonrpc = '2.0';
+        arg.id = ‘’;
+        return JSON.stringify(arg);
     }
 }
