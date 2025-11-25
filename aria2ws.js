@@ -53,25 +53,23 @@ class Aria2WebSocket {
         return this.#onclose;
     }
     #onreceive = null;
-    #send (json) {
+    #send (arg) {
         let id = crypto.randomUUID();
-        if (Array.isArray(json)) {
-            json = {
-                method: 'system.multicall',
-                params: [ json.map(({ method, params = [] }) => {
-                    params.unshift(this.#secret);
-                    return { methodName: method, params };
-                }) ]
-            };
+        if (Array.isArray(arg)) {
+            let params = [ arg.map(({ method, params = [] }) => {
+                params.unshift(this.#secret);
+                return { methodName: method, params };
+            }) ];
+            arg = { method: 'system.multicall', params };
         } else {
-            (json.params ??= []).unshift(this.#secret);
+            (arg.params ??= []).unshift(this.#secret);
         }
-        json.jsonrpc = '2.0';
-        json.id = id;
+        arg.jsonrpc = '2.0';
+        arg.id = id;
         return new Promise((resolve, reject) => {
             this[id] = resolve;
             this.#ws.onerror = reject;
-            this.#ws.send(JSON.stringify(json));
+            this.#ws.send(JSON.stringify(arg));
         });
     }
     #ws;
