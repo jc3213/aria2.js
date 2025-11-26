@@ -98,7 +98,7 @@ aria2.disconnect();
 - send message to JSON-RPC
 ```javascript
 let response = aria2.call( { method, params } );
-let response = aria2.call( { method, params }, { method, params }, ..., { method, params } );
+let response = aria2.call([ { method, params }, { method, params }, ..., { method, params } ]);
 ```
 - use `WebSocket` or `POST` method based on [scheme](#scheme)
 - response
@@ -110,9 +110,12 @@ let response = aria2.call( { method, params }, { method, params }, ..., { method
 
 #### Call Sample
 ```javascript
-let [{ result }] = await aria2.call( { method: 'aria2.getVersion' } );
-let { version } = result;
-console.log(version) // the version of aria2c.exe;
+let { result } = await aria2.call( { method: 'aria2.getVersion' } );
+console.log(result) // the version and enabled features of aria2c.exe;
+
+let { result } = await aria2.call([ { method: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
+let [ [globalOption], [version] ] = result;
+console.log(globalOption, version); // the options, version and enabled features of aria2c.exe;
 ```
 
 ## Events
