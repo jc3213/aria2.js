@@ -147,6 +147,31 @@ let jsonrpc = {};
 let session = {};
 let keeplive;
 
+let waiting = new Set([ 'waiting', 'paused' ]);
+let dispatch = {
+    'aria2.onDownloadStart' (gid, result) {
+        console.log("The session #" + gid + " has started");
+        session.active[gid] = result;
+        if (session.waiting[gid]) {
+            delete session.waiting[gid];
+        }
+    },
+    'aria2.onDownloadComplete' (gid, result) {
+        console.log("The session #" + gid + " has completed");
+        dispatch.default(gid, result);
+    },
+    default (gid, result) {
+        if (session.active[gid]) {
+            delete session.active[gid];
+            if (waiting.has(result.status)) {
+                session.waiting[gid] = result;
+            } else {
+                session.stopped[gid] = result;
+            }
+        }
+    }
+};
+
 let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
 aria2.retries = -1;
 aria2.onopen = async () => {
@@ -154,57 +179,40 @@ aria2.onopen = async () => {
     session.active = {};
     session.waiting = {};
     session.stopped = {};
-    let [
-        { result: options }, { result: version }, { result: stats }, { result: active }, { result: waiting }, { result: stopped }
-    ] = await aria2.call(
-        { method: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' }, { method: 'aria2.getGlobalStat' }, { method: 'aria2.tellActive' }, { method: 'aria2.tellWaiting', params: [0, 999] }, { method: 'aria2.tellStopped', params: [0, 999] }
-    );
+
+    let {
+        result: [ [options], [version], [stats], [active], [waiting], [stopped] ]
+    } = await aria2.call([
+        { method: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' }, { method: 'aria2.getGlobalStat' },
+        { method: 'aria2.tellActive' }, { method: 'aria2.tellWaiting', params: [0, 999] }, { method: 'aria2.tellStopped', params: [0, 999] }
+    ]);
+
     jsonrpc.options = options;
     jsonrpc.version = version;
     jsonrpc.stats = stats;
+
     active.forEach((a) => session.active[a.gid] = session.all[a.gid] = a);
     waiting.forEach((w) => session.waiting[w.gid] = session.all[w.gid] = w);
     stopped.forEach((s) => session.stopped[s.gid] = session.all[s.gid] = s);
+
     keeplive = setInterval(async () => {
-        let [{ result: stats }, { result: active }] = await aria2.call({ method: 'aria2.getGlobalStat' }, { method: 'aria2.tellActive'} );
+        let { result: [ [stats], [active] ] } = await aria2.call([ { method: 'aria2.getGlobalStat' }, { method: 'aria2.tellActive'} ]);
         jsonrpc.stats = stats;
         active.forEach((a) => session.active[a.gid] = session.all[a.gid] = a);
     }, 10000);
 };
+
 aria2.onclose = () => clearInterval(keeplive);
 aria2.onmessage = async ({ method, params }) => {
     if (method === 'aria2.onBtDownloadComplete') {
         return;
     }
+
     let [{ gid }] = params;
-    let [{ result }] = await aria2.call({ method: 'aria2.tellStatus', params: [gid] });
-    switch (method) {
-        case 'aria2.onDownloadStart':
-            console.log("The session #" + gid + " has started");
-            session.active[gid] = result;
-            if (session.waiting[gid]) {
-                delete session.waiting[gid];
-            }
-            break;
-        case 'aria2.onDownloadComplete':
-            console.log("The session #" + gid + " has completed");
-        default:
-            if (session.active[gid]) {
-                delete session.active[gid];
-                switch (result.status) {
-                    case 'waiting':
-                    case 'paused':
-                        session.waiting[gid] = result;
-                        break;
-                    case 'complete':
-                    case 'removed':
-                    case 'error':
-                        session.stopped[gid] = result;
-                        break;
-                }
-            }
-            break;
-    }
+    let { result } = await aria2.call({ method: 'aria2.tellStatus', params: [gid] });
+
+    let func = dispatch[method] ?? dispatch.default;
+    func?.(gid, result);
 };
 aria2.connect();
 ```
