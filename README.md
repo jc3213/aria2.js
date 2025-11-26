@@ -174,6 +174,7 @@ let dispatch = {
 
 let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
 aria2.retries = -1;
+
 aria2.onopen = async () => {
     session.all = {};
     session.active = {};
@@ -203,6 +204,7 @@ aria2.onopen = async () => {
 };
 
 aria2.onclose = () => clearInterval(keeplive);
+
 aria2.onmessage = async ({ method, params }) => {
     if (method === 'aria2.onBtDownloadComplete') {
         return;
