@@ -213,8 +213,8 @@ aria2.onmessage = async ({ method, params }) => {
     let [{ gid }] = params;
     let { result } = await aria2.call({ method: 'aria2.tellStatus', params: [gid] });
 
-    let func = dispatch[method] ?? dispatch.default;
-    func?.(gid, result);
+    (dispatch[method] ?? dispatch.default)(gid, result);
 };
+
 aria2.connect();
 ```
