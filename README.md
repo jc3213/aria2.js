@@ -47,7 +47,7 @@ aria2.url = url;
         - `ws`
         - `wss`
     - hostname
-        - `www.example.com
+        - `www.example.com`
     - port
         - `6800` *default*
         - `443`  *ssl*
