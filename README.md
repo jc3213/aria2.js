@@ -26,7 +26,7 @@ let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
 ```javascript
 let aria2 = new Aria2();
 aria2.url = 'wss://example.com:433/jsonrpc';
-aria2.secret = 'test-token';
+aria2.secret = 'mysecret';
 ```
 
 ## Properties
