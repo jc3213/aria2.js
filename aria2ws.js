@@ -1,9 +1,9 @@
-class Aria2 {
+class Aria2WebSocket {
     #url;
     #wsa;
+    #secret;
     #ws;
     #tries;
-    #secret;
     #retries = 10;
     #timeout = 10000;
     #onopen = null;
