@@ -1,11 +1,33 @@
 class Aria2XMLRequest {
+    #url;
+    #xml;
+    #secret;
+    #method;
+
     constructor (...args) {
-        let [, url = 'http://localhost:6800/jsonrpc', secret = ''] = args.join('#').match(/^(https?:\/\/[^#]+)#?(.*)$/) ?? [];
+        let [, url = 'http://localhost:6800/jsonrpc', secret = ''] =
+            args.join('#').match(/^(https?:\/\/[^#]+)#?(.*)$/) ?? [];
         this.url = url;
         this.secret = secret;
         this.method = 'POST';
     }
-    #method;
+
+    set url (string) {
+        let [, ssl = '', url = '://localhost:6800/jsonrpc'] =
+            string.match(/^http(s)?(:\/\/.+)$/) ?? [];
+        this.#url = this.#xml = `http${ssl}${url}`;
+    }
+    get url () {
+        return this.#url;
+    }
+
+    set secret (string) {
+        this.#secret = `token:${string}`;
+    }
+    get secret () {
+        return this.#secret.slice(6);
+    }
+
     set method (string) {
         let call = { 'POST': this.#post, 'GET': this.#get }[string];
         if (call) {
@@ -16,34 +38,8 @@ class Aria2XMLRequest {
     get method () {
         return this.#method;
     }
-    #xml;
-    set url (string) {
-        let url = string.match(/^https?:\/\.+$/)?.[0];
-        this.#xml = url ?? 'http://localhost:6800/jsonrpc';
-    }
-    get jsonrpc () {
-        return this.#xml;
-    }
-    #secret;
-    set secret (secret) {
-        this.#secret = `token:${secret}`;
-    }
-    get secret () {
-        return this.#secret.slice(6);
-    }
-    #get (arg) {
-        return fetch(`${this.#xml}?params=${btoa(unescape(encodeURIComponent(this.#json(arg))))}`).then(this.#then);
-    }
-    #post (arg) {
-        return fetch(this.#xml, {method: 'POST', body: this.#json(arg)}).then(this.#then);
-    }
-    #then (response) {
-        if (response.ok) {
-            return response.json();
-        }
-        throw new Error(response.statusText);
-    }
-    #json (arg) {
+
+    #json (id, arg) {
         if (Array.isArray(arg)) {
             let params = [ arg.map(({ method, params = [] }) => {
                 params.unshift(this.#secret);
@@ -56,5 +52,17 @@ class Aria2XMLRequest {
         arg.jsonrpc = '2.0';
         arg.id = id;
         return JSON.stringify(arg);
+    }
+    #then (response) {
+        if (response.ok) {
+            return response.json();
+        }
+        throw new Error(response.statusText);
+    }
+    #post (arg) {
+        return fetch(this.#xml, {method: 'POST', body: this.#json(arg)}).then(this.#then);
+    }
+    #get (arg) {
+        return fetch(`${this.#xml}?params=${btoa(unescape(encodeURIComponent(this.#json(arg))))}`).then(this.#then);
     }
 }
