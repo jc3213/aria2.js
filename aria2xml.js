@@ -4,7 +4,7 @@ class Aria2XMLRequest {
     #secret;
     #method;
 
-    constructor (...args) {
+    constructor(...args) {
         let [, url = 'http://localhost:6800/jsonrpc', secret = ''] =
             args.join('#').match(/^(https?:\/\/[^#]+)#?(.*)$/) ?? [];
         this.url = url;
@@ -12,34 +12,34 @@ class Aria2XMLRequest {
         this.method = 'POST';
     }
 
-    set url (string) {
+    set url(string) {
         let [, ssl = '', url = '://localhost:6800/jsonrpc'] =
             string.match(/^http(s)?(:\/\/.+)$/) ?? [];
         this.#url = this.#xml = `http${ssl}${url}`;
     }
-    get url () {
+    get url() {
         return this.#url;
     }
 
-    set secret (string) {
+    set secret(string) {
         this.#secret = `token:${string}`;
     }
-    get secret () {
+    get secret() {
         return this.#secret.slice(6);
     }
 
-    set method (string) {
+    set method(string) {
         let call = { 'POST': this.#post, 'GET': this.#get }[string];
         if (call) {
             this.#method = string;
             this.call = call;
         }
     }
-    get method () {
+    get method() {
         return this.#method;
     }
 
-    #json (id, arg) {
+    #json(arg) {
         if (Array.isArray(arg)) {
             let params = [ arg.map(({ method, params = [] }) => {
                 params.unshift(this.#secret);
@@ -50,19 +50,19 @@ class Aria2XMLRequest {
             (arg.params ??= []).unshift(this.#secret);
         }
         arg.jsonrpc = '2.0';
-        arg.id = id;
+        arg.id = '';
         return JSON.stringify(arg);
     }
-    #then (response) {
+    #then(response) {
         if (response.ok) {
             return response.json();
         }
         throw new Error(response.statusText);
     }
-    #post (arg) {
+    #post(arg) {
         return fetch(this.#xml, {method: 'POST', body: this.#json(arg)}).then(this.#then);
     }
-    #get (arg) {
+    #get(arg) {
         return fetch(`${this.#xml}?params=${btoa(unescape(encodeURIComponent(this.#json(arg))))}`).then(this.#then);
     }
 }
