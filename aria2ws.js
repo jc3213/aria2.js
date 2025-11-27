@@ -1,60 +1,76 @@
-class Aria2WebSocket {
+class Aria2 {
+    #url;
+    #wsa;
+    #ws;
+    #tries;
+    #secret;
+    #retries = 10;
+    #timeout = 10000;
+    #onopen = null;
+    #onmessage = null;
+    #onclose = null;
+
     constructor (...args) {
-        let [, url = 'ws://localhost:6800/jsonrpc', secret = ''] = args.join('#').match(/^(wss?:\/\/[^#]+)#?(.*)$/) ?? [];
+        let [, url = 'ws://localhost:6800/jsonrpc', secret = ''] =
+            args.join('#').match(/^(wss?:\/\/[^#]+)#?(.*)$/) ?? [];
+            console.log(url);
         this.url = url;
         this.secret = secret;
     }
-    #wsa;
-    #tries;
+
     set url (string) {
-        let url = string.match(/^wss?:\/\.+$/)?.[0];
-        this.#wsa = url ?? 'ws://localhost:6800/jsonrpc';
+        let [, ssl = '', url = '://localhost:6800/jsonrpc'] =
+            string.match(/^ws(s)?(:\/\/.+)$/) ?? [];
+            console.log(ssl, url);
+        this.#url = this.#wsa = `ws${ssl}${url}`;
         this.#tries = 0;
     }
     get url () {
-        return this.#wsa;
+        return this.#url;
+    }
+
+    set secret (string) {
+        this.#secret = `token:${string}`;
     }
     get secret () {
         return this.#secret.slice(6);
     }
-    #retries = 10;
+
     set retries (number) {
         this.#retries = Number.isInteger(number) && number >= 0 ? number : Infinity;
     }
     get retries () {
         return this.#retries;
     }
-    #timeout = 10000;
     set timeout (number) {
         this.#timeout = Number.isFinite(number) && number > 0 ? number * 1000 : 10000;
     }
     get timeout () {
         return this.#timeout / 1000;
     }
-    #onopen = null;
+
     set onopen (callback) {
         this.#onopen = typeof callback === 'function' ? callback : null;
     }
     get onopen () {
         return this.#onopen;
     }
-    #onmessage = null;
+
     set onmessage (callback) {
         this.#onmessage = typeof callback === 'function' ? callback : null;
     }
     get onmessage () {
         return this.#onmessage;
     }
-    #onclose = null;
+
     set onclose (callback) {
         this.#onclose = typeof callback === 'function' ? callback : null;
     }
     get onclose () {
         return this.#onclose;
     }
-    #onreceive = null;
-    #send (arg) {
-        let id = crypto.randomUUID();
+
+    #json (id, arg) {
         if (Array.isArray(arg)) {
             let params = [ arg.map(({ method, params = [] }) => {
                 params.unshift(this.#secret);
@@ -66,13 +82,19 @@ class Aria2WebSocket {
         }
         arg.jsonrpc = '2.0';
         arg.id = id;
+        return JSON.stringify(arg);
+    }
+    #send (arg) {
         return new Promise((resolve, reject) => {
+            let id = crypto.randomUUID();
             this[id] = resolve;
             this.#ws.onerror = reject;
-            this.#ws.send(JSON.stringify(arg));
+            this.#ws.send(this.#json(id, arg));
         });
     }
-    #ws;
+
+    call = this.#send;
+
     connect () {
         this.#ws = new WebSocket(this.#wsa);
         this.#ws.onopen = (event) => {
@@ -83,9 +105,8 @@ class Aria2WebSocket {
             let response = JSON.parse(event.data);
             if (response.method) {
                 this.#onmessage?.(response);
-            }
-            else {
-                let [{ id }] = response;
+            } else {
+                let { id } = response;
                 this[id](response);
                 delete this[id];
             }
@@ -100,5 +121,4 @@ class Aria2WebSocket {
     disconnect () {
         this.#ws.close();
     }
-    call = this.#send;
 }
