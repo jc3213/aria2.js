@@ -11,16 +11,18 @@ class Aria2WebSocket {
     #onclose = null;
 
     constructor(...args) {
-        let [, url = 'ws://localhost:6800/jsonrpc', secret = ''] =
-            args.join('#').match(/^(wss?:\/\/[^#]+)#?(.*)$/) ?? [];
-        this.url = url;
-        this.secret = secret;
+        let rpc = args.join('#').match(/^(wss?:\/\/[^#]+)#?(.*)$/);
+        this.url = rpc?.[1] ?? 'ws://localhost:6800/jsonrpc';
+        this.secret = rpc?.[2] ?? '';
+        this.call = this.#send;
     }
 
     set url(string) {
-        let [, ssl = '', url = '://localhost:6800/jsonrpc'] =
-            string.match(/^ws(s)?(:\/\/.+)$/) ?? [];
-        this.#url = this.#wsa = `ws${ssl}${url}`;
+        let rpc = string.match(/^wss?:\/\/.*$/);
+        if (!rpc) {
+            return;
+        }
+        this.#url = this.#wsa = string;
         this.#tries = 0;
     }
     get url() {
@@ -91,8 +93,6 @@ class Aria2WebSocket {
             this.#ws.send(this.#json(id, arg));
         });
     }
-
-    call = this.#send;
 
     connect() {
         this.#ws = new WebSocket(this.#wsa);
