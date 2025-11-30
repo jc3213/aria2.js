@@ -19,7 +19,7 @@ class Aria2WebSocket {
 
     set url(string) {
         let rpc = string.match(/^wss?:\/\/.*$/);
-        if (!rpc) {
+        if (rpc) {
             this.#url = this.#wsa = string;
             this.#tries = 0;
         }
