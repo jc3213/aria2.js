@@ -5,17 +5,17 @@ class Aria2XMLRequest {
     #method;
 
     constructor(...args) {
-        let [, url = 'http://localhost:6800/jsonrpc', secret = ''] =
-            args.join('#').match(/^(https?:\/\/[^#]+)#?(.*)$/) ?? [];
-        this.url = url;
-        this.secret = secret;
+        let rpc = args.join('#').match(/^(https?:\/\/[^#]+)#?(.*)$/);
+        this.url = rpc?.[1] ?? 'http://localhost:6800/jsonrpc';
+        this.secret = rpc?.[2] ?? '';
         this.method = 'POST';
     }
 
     set url(string) {
-        let [, ssl = '', url = '://localhost:6800/jsonrpc'] =
-            string.match(/^http(s)?(:\/\/.+)$/) ?? [];
-        this.#url = this.#xml = `http${ssl}${url}`;
+        let rpc = string.match(/^https?:\/\/.*$/);
+        if (rpc) {
+            this.#url = this.#xml = string;
+        }
     }
     get url() {
         return this.#url;
