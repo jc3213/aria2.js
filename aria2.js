@@ -20,7 +20,7 @@ class Aria2 {
     set url(string) {
         let rpc = string.match(/^(http|ws)(s?:\/\/.*)$/);
         if (!rpc) {
-            Aria2.#error('be a URI starting with "http(s)" or "ws(s)"');
+            throw new TypeError(`The "url" must be a URI starting with "http(s)" or "ws(s)"!`);
         }
         this.#url = string;
         this.#xml = `http${rpc[2]}`;
@@ -34,7 +34,7 @@ class Aria2 {
 
     set secret(string) {
         if (typeof string !== 'string') {
-            Aria2.#error('be a string');
+            throw new TypeError(`The "secret" must be a string!`);
         }
         this.#secret = `token:${string}`;
     }
@@ -44,7 +44,7 @@ class Aria2 {
 
     set retries(number) {
         if (!Number.isInteger(number)) {
-            Aria2.#error('be an integer');
+            throw new TypeError(`The "retries" must be an integer!`);
         }
         this.#retries = number >= 0 ? number : Infinity;
     }
@@ -54,7 +54,7 @@ class Aria2 {
 
     set timeout(number) {
         if (!Number.isInteger(number) || number <= 0) {
-            Aria2.#error('be a positive integer');
+            throw new TypeError(`The "timeout" must be a positive integer!`);
         }
         this.#timeout = number * 1000;
     }
@@ -64,7 +64,7 @@ class Aria2 {
 
     set onopen(callback) {
         if (callback !== null && typeof callback !== 'function') {
-            Aria2.#error('be a function or null');
+            throw new TypeError(`The "onopen" must be a function or null!`);
         }
         this.#onopen = callback;
     }
@@ -74,7 +74,7 @@ class Aria2 {
 
     set onmessage(callback) {
         if (callback !== null && typeof callback !== 'function') {
-            Aria2.#error('be a function or null');
+            throw new TypeError(`The "onmessage" must be a function or null!`);
         }
         this.#onmessage = callback;
     }
@@ -84,7 +84,7 @@ class Aria2 {
 
     set onclose(callback) {
         if (callback !== null && typeof callback !== 'function') {
-            Aria2.#error('be a function or null');
+            throw new TypeError(`The "onclose" must be a function or null!`);
         }
         this.#onclose = callback;
     }
@@ -148,9 +148,5 @@ class Aria2 {
     }
     disconnect() {
         this.#ws.close();
-    }
-
-    static #error(string) {
-        throw new TypeError(`Parameter 1 must ${string}!`);
     }
 }
