@@ -1,4 +1,4 @@
-class Aria2WebSocket {
+class Aria2 {
     #url;
     #wsa;
     #secret;
