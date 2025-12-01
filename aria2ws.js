@@ -19,16 +19,20 @@ class Aria2WebSocket {
 
     set url(string) {
         let rpc = string.match(/^wss?:\/\/.*$/);
-        if (rpc) {
-            this.#url = this.#wsa = string;
-            this.#tries = 0;
+        if (!rpc) {
+            Aria2.#error('be a URI starts with ws');
         }
+        this.#url = this.#wsa = string;
+        this.#tries = 0;
     }
     get url() {
         return this.#url;
     }
 
     set secret(string) {
+        if (typeof string !== 'string') {
+            Aria2.#error('be a string');
+        }
         this.#secret = `token:${string}`;
     }
     get secret() {
@@ -36,35 +40,50 @@ class Aria2WebSocket {
     }
 
     set retries(number) {
-        this.#retries = Number.isInteger(number) && number >= 0 ? number : Infinity;
+        if (!Number.isInteger(number)) {
+            Aria2.#error('be an integer');
+        }
+        this.#retries = number >= 0 ? number : Infinity;
     }
     get retries() {
         return this.#retries;
     }
 
     set timeout(number) {
-        this.#timeout = Number.isFinite(number) && number > 0 ? number * 1000 : 10000;
+        if (!Number.isInteger(number) || number <= 0) {
+            Aria2.#error('be a positive integer');
+        }
+        this.#timeout = number * 1000;
     }
     get timeout() {
         return this.#timeout / 1000;
     }
 
     set onopen(callback) {
-        this.#onopen = typeof callback === 'function' ? callback : null;
+        if (callback !== null && typeof callback !== 'function') {
+            Aria2.#error('be a function or null');
+        }
+        this.#onopen = callback;
     }
     get onopen() {
         return this.#onopen;
     }
 
     set onmessage(callback) {
-        this.#onmessage = typeof callback === 'function' ? callback : null;
+        if (callback !== null && typeof callback !== 'function') {
+            Aria2.#error('be a function or null');
+        }
+        this.#onmessage = callback;
     }
     get onmessage() {
         return this.#onmessage;
     }
 
     set onclose(callback) {
-        this.#onclose = typeof callback === 'function' ? callback : null;
+        if (callback !== null && typeof callback !== 'function') {
+            Aria2.#error('be a function or null');
+        }
+        this.#onclose = callback;
     }
     get onclose() {
         return this.#onclose;
@@ -118,5 +137,9 @@ class Aria2WebSocket {
     }
     disconnect() {
         this.#ws.close();
+    }
+
+    static #error(string) {
+        throw new TypeError(`Parameter 1 must ${string}!`);
     }
 }
