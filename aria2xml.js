@@ -14,7 +14,7 @@ class Aria2XMLRequest {
     set url(string) {
         let rpc = string.match(/^https?:\/\/.*$/);
         if (!rpc) {
-            Aria2XMLRequest.#error('be a URI starting with "http"');
+            Aria2XMLRequest.#error('be a URI starting with "http(s)"');
         }
         this.#url = this.#xml = string;
     }
