@@ -20,7 +20,7 @@ class Aria2WebSocket {
     set url(string) {
         let rpc = string.match(/^wss?:\/\/.*$/);
         if (!rpc) {
-            Aria2WebSocket.#error('be a URI starting with "ws"');
+            Aria2WebSocket.#error('be a URI starting with "ws(s)"');
         }
         this.#url = this.#wsa = string;
         this.#tries = 0;
