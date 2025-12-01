@@ -1,4 +1,4 @@
-class Aria2 {
+class Aria2WebSocket {
     #url;
     #wsa;
     #secret;
@@ -20,7 +20,7 @@ class Aria2 {
     set url(string) {
         let rpc = string.match(/^wss?:\/\/.*$/);
         if (!rpc) {
-            Aria2.#error('be a URI starts with ws');
+            Aria2WebSocket.#error('be a URI starts with ws');
         }
         this.#url = this.#wsa = string;
         this.#tries = 0;
@@ -31,7 +31,7 @@ class Aria2 {
 
     set secret(string) {
         if (typeof string !== 'string') {
-            Aria2.#error('be a string');
+            Aria2WebSocket.#error('be a string');
         }
         this.#secret = `token:${string}`;
     }
@@ -41,7 +41,7 @@ class Aria2 {
 
     set retries(number) {
         if (!Number.isInteger(number)) {
-            Aria2.#error('be an integer');
+            Aria2WebSocket.#error('be an integer');
         }
         this.#retries = number >= 0 ? number : Infinity;
     }
@@ -51,7 +51,7 @@ class Aria2 {
 
     set timeout(number) {
         if (!Number.isInteger(number) || number <= 0) {
-            Aria2.#error('be a positive integer');
+            Aria2WebSocket.#error('be a positive integer');
         }
         this.#timeout = number * 1000;
     }
@@ -61,7 +61,7 @@ class Aria2 {
 
     set onopen(callback) {
         if (callback !== null && typeof callback !== 'function') {
-            Aria2.#error('be a function or null');
+            Aria2WebSocket.#error('be a function or null');
         }
         this.#onopen = callback;
     }
@@ -71,7 +71,7 @@ class Aria2 {
 
     set onmessage(callback) {
         if (callback !== null && typeof callback !== 'function') {
-            Aria2.#error('be a function or null');
+            Aria2WebSocket.#error('be a function or null');
         }
         this.#onmessage = callback;
     }
@@ -81,7 +81,7 @@ class Aria2 {
 
     set onclose(callback) {
         if (callback !== null && typeof callback !== 'function') {
-            Aria2.#error('be a function or null');
+            Aria2WebSocket.#error('be a function or null');
         }
         this.#onclose = callback;
     }
