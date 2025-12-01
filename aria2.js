@@ -20,7 +20,7 @@ class Aria2 {
     set url(string) {
         let rpc = string.match(/^(http|ws)(s?:\/\/.*)$/);
         if (!rpc) {
-            Aria2.#error('be a URI starts with http or ws');
+            Aria2.#error('be a URI starting with "http(s)" or "ws(s)"');
         }
         this.#url = string;
         this.#xml = `http${rpc[2]}`;
