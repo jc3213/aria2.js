@@ -13,9 +13,10 @@ class Aria2XMLRequest {
 
     set url(string) {
         let rpc = string.match(/^https?:\/\/.*$/);
-        if (rpc) {
-            this.#url = this.#xml = string;
+        if (!rpc) {
+            Aria2XMLRequest.#error('be a URI starts with http');
         }
+        this.#url = this.#xml = string;
     }
     get url() {
         return this.#url;
@@ -29,11 +30,14 @@ class Aria2XMLRequest {
     }
 
     set method(string) {
-        let call = { 'POST': this.#post, 'GET': this.#get }[string];
-        if (call) {
-            this.#method = string;
-            this.call = call;
+        if (string === 'POST') {
+            this.call = this.#post;
+        } else if (string === 'GET') {
+            this.call = this.#get;
+        } else {
+            Aria2XMLRequest.#error('be "POST" or "GET"');
         }
+        this.#method = string;
     }
     get method() {
         return this.#method;
@@ -64,5 +68,9 @@ class Aria2XMLRequest {
     }
     #get(arg) {
         return fetch(`${this.#xml}?params=${btoa(unescape(encodeURIComponent(this.#json(arg))))}`).then(this.#then);
+    }
+
+    static #error(string) {
+        throw new TypeError(`Parameter 1 must ${string}!`);
     }
 }
