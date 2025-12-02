@@ -20,7 +20,7 @@ class Aria2WebSocket {
     set url(string) {
         let rpc = string.match(/^wss?:\/\/.*$/);
         if (!rpc) {
-            throw new TypeError(`The "url" must be a URI starting with "ws(s)"!`);
+            throw new TypeError('The "url" must be a JSON-RPC endpoint URL starting with "ws(s)"!');
         }
         this.#url = this.#wsa = string;
         this.#tries = 0;
