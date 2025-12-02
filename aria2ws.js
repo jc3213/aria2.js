@@ -12,15 +12,14 @@ class Aria2WebSocket {
 
     constructor(...args) {
         let rpc = args.join('#').match(/^(wss?:\/\/[^#]+)#?(.*)$/);
-        this.url = rpc?.[1] ?? 'ws://localhost:6800/jsonrpc';
+        this.url = rpc?.[1] ?? 'http://localhost:6800/jsonrpc';
         this.secret = rpc?.[2] ?? '';
         this.call = this.#send;
     }
 
     set url(string) {
-        let rpc = string.match(/^wss?:\/\/.*$/);
-        if (!rpc) {
-            throw new TypeError('Invalid url: expected a valid JSON-RPC endpoint (ws://).');
+        if (!string.startsWith('ws://') && !string.startsWith('wss://')) {
+            throw new TypeError('Invalid url: expected a valid JSON-RPC endpoint (ws:// or wss://).');
         }
         this.#url = this.#wsa = string;
         this.#tries = 0;
@@ -30,9 +29,6 @@ class Aria2WebSocket {
     }
 
     set secret(string) {
-        if (typeof string !== 'string') {
-            throw new TypeError('Invalid secret: expected a string value.');
-        }
         this.#secret = `token:${string}`;
     }
     get secret() {
@@ -40,50 +36,37 @@ class Aria2WebSocket {
     }
 
     set retries(number) {
-        if (!Number.isInteger(number)) {
-            throw new TypeError('Invalid retries: expected an integer.');
-        }
-        this.#retries = number >= 0 ? number : Infinity;
+        let n = number | 0;
+        this.#retries = n >= 0 ? n : Infinity;
     }
     get retries() {
         return this.#retries;
     }
 
     set timeout(number) {
-        if (!Number.isInteger(number) || number <= 0) {
-            throw new RangeError('Invalid timeout: expected a positive integer (seconds).');
-        }
-        this.#timeout = number * 1000;
+        let n = number | 0;
+        this.#timeout = n <= 1 ? 1000 : n * 1000;
     }
     get timeout() {
         return this.#timeout / 1000;
     }
 
     set onopen(callback) {
-        if (callback !== null && typeof callback !== 'function') {
-            throw new TypeError('Invalid onopen handler: expected a function or null.');
-        }
-        this.#onopen = callback;
+        this.#onopen = typeof callback === 'function' ? callback : null;
     }
     get onopen() {
         return this.#onopen;
     }
 
     set onmessage(callback) {
-        if (callback !== null && typeof callback !== 'function') {
-            throw new TypeError('Invalid onmessage handler: expected a function or null.');
-        }
-        this.#onmessage = callback;
+        this.#onmessage = typeof callback === 'function' ? callback : null;
     }
     get onmessage() {
         return this.#onmessage;
     }
 
     set onclose(callback) {
-        if (callback !== null && typeof callback !== 'function') {
-            throw new TypeError('Invalid onclose handler: expected a function or null.');
-        }
-        this.#onclose = callback;
+        this.#onclose = typeof callback === 'function' ? callback : null;
     }
     get onclose() {
         return this.#onclose;

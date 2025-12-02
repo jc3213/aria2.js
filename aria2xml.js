@@ -12,9 +12,8 @@ class Aria2XMLRequest {
     }
 
     set url(string) {
-        let rpc = string.match(/^https?:\/\/.*$/);
-        if (!rpc) {
-            throw new TypeError('Invalid url: expected a valid JSON-RPC endpoint (http://).');
+        if (!string.startsWith('http://') && !string.startsWith('https://')) {
+            throw new TypeError('Invalid url: expected a valid JSON-RPC endpoint (http:// or https://).');
         }
         this.#url = this.#xml = string;
     }
