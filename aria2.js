@@ -20,7 +20,7 @@ class Aria2 {
     set url(string) {
         let rpc = string.match(/^(http|ws)(s?:\/\/.*)$/);
         if (!rpc) {
-            throw new TypeError('The "url" must be a JSON-RPC endpoint URL!');
+            throw new TypeError('Invalid url: expected a valid JSON-RPC endpoint (http:// or ws://).');
         }
         this.#url = string;
         this.#xml = `http${rpc[2]}`;
@@ -34,7 +34,7 @@ class Aria2 {
 
     set secret(string) {
         if (typeof string !== 'string') {
-            throw new TypeError(`The "secret" must be a string!`);
+            throw new TypeError('Invalid secret: expected a string value.');
         }
         this.#secret = `token:${string}`;
     }
@@ -44,7 +44,7 @@ class Aria2 {
 
     set retries(number) {
         if (!Number.isInteger(number)) {
-            throw new TypeError(`The "retries" must be an integer!`);
+            throw new TypeError('Invalid retries: expected an integer.');
         }
         this.#retries = number >= 0 ? number : Infinity;
     }
@@ -54,7 +54,7 @@ class Aria2 {
 
     set timeout(number) {
         if (!Number.isInteger(number) || number <= 0) {
-            throw new TypeError(`The "timeout" must be a positive integer!`);
+            throw new RangeError('Invalid timeout: expected a positive integer (seconds).');
         }
         this.#timeout = number * 1000;
     }
@@ -64,7 +64,7 @@ class Aria2 {
 
     set onopen(callback) {
         if (callback !== null && typeof callback !== 'function') {
-            throw new TypeError(`The "onopen" must be a function or null!`);
+            throw new TypeError('Invalid onopen handler: expected a function or null.');
         }
         this.#onopen = callback;
     }
@@ -74,7 +74,7 @@ class Aria2 {
 
     set onmessage(callback) {
         if (callback !== null && typeof callback !== 'function') {
-            throw new TypeError(`The "onmessage" must be a function or null!`);
+            throw new TypeError('Invalid onmessage handler: expected a function or null.');
         }
         this.#onmessage = callback;
     }
@@ -84,7 +84,7 @@ class Aria2 {
 
     set onclose(callback) {
         if (callback !== null && typeof callback !== 'function') {
-            throw new TypeError(`The "onclose" must be a function or null!`);
+            throw new TypeError('Invalid onclose handler: expected a function or null.');
         }
         this.#onclose = callback;
     }
@@ -106,6 +106,7 @@ class Aria2 {
         arg.id = id;
         return JSON.stringify(arg);
     }
+
     #send(arg) {
         return new Promise((resolve, reject) => {
             let id = crypto.randomUUID();
@@ -114,12 +115,13 @@ class Aria2 {
             this.#ws.send(this.#json(id, arg));
         });
     }
+
     #post(arg) {
         return fetch(this.#xml, { method: 'POST', body: this.#json('', arg) }).then((response) => {
             if (response.ok) {
                 return response.json();
             }
-            throw new Error(response.statusText);
+            throw new Error(`Network error: ${response.status} ${response.statusText}`);
         });
     }
 
@@ -146,6 +148,7 @@ class Aria2 {
             this.#onclose?.(event);
         };
     }
+
     disconnect() {
         this.#ws.close();
     }
