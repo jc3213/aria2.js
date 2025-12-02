@@ -14,7 +14,7 @@ class Aria2XMLRequest {
     set url(string) {
         let rpc = string.match(/^https?:\/\/.*$/);
         if (!rpc) {
-            throw new TypeError('The "url" must be a JSON-RPC endpoint URL!');
+            throw new TypeError('Invalid url: expected a valid JSON-RPC endpoint (http://).');
         }
         this.#url = this.#xml = string;
     }
@@ -35,7 +35,7 @@ class Aria2XMLRequest {
         } else if (string === 'GET') {
             this.call = this.#get;
         } else {
-            throw new TypeError(`The "method" must be "POST" or "GET"!`);
+            throw new TypeError(`Invalid method: must be "POST" or "GET".`);
         }
         this.#method = string;
     }
@@ -57,15 +57,18 @@ class Aria2XMLRequest {
         arg.id = '';
         return JSON.stringify(arg);
     }
+
     #then(response) {
         if (response.ok) {
             return response.json();
         }
         throw new Error(response.statusText);
     }
+
     #post(arg) {
         return fetch(this.#xml, {method: 'POST', body: this.#json(arg)}).then(this.#then);
     }
+
     #get(arg) {
         return fetch(`${this.#xml}?params=${btoa(unescape(encodeURIComponent(this.#json(arg))))}`).then(this.#then);
     }
