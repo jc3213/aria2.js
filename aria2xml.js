@@ -35,7 +35,7 @@ class Aria2XMLRequest {
         } else if (string === 'GET') {
             this.call = this.#get;
         } else {
-            throw new TypeError(`Invalid method: must be "POST" or "GET".`);
+            throw new TypeError(`Invalid method: expected "POST" or "GET".`);
         }
         this.#method = string;
     }
