@@ -25,7 +25,7 @@ class Aria2XMLRequest {
         this.#secret = `token:${string}`;
     }
     get secret() {
-        return this.#secret.slice(6);
+        return this.#secret.substring(6);
     }
 
     set method(string) {
