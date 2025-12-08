@@ -44,11 +44,12 @@ class Aria2XMLRequest {
 
     #json(arg) {
         if (Array.isArray(arg)) {
-            let params = [ arg.map(({ method, params = [] }) => {
+            let result = [];
+            for (let { method, params = [] } of arg) {
                 params.unshift(this.#secret);
-                return { methodName: method, params };
-            }) ];
-            arg = { method: 'system.multicall', params };
+                result.push({ methodName: method, params });
+            }
+            arg = { method: 'system.multicall', params: result };
         } else {
             (arg.params ??= []).unshift(this.#secret);
         }
