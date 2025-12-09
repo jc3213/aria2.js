@@ -72,19 +72,19 @@ class Aria2WebSocket {
         return this.#onclose;
     }
 
-    #json(id, arg) {
+    #json(arg) {
         if (Array.isArray(arg)) {
-            let result = [];
+            let calls = [];
             for (let { method, params = [] } of arg) {
                 params.unshift(this.#secret);
-                result.push({ methodName: method, params });
+                calls.push({ methodName: method, params });
             }
-            arg = { method: 'system.multicall', params: result };
+            arg = { method: 'system.multicall', params: [calls] };
         } else {
             (arg.params ??= []).unshift(this.#secret);
         }
         arg.jsonrpc = '2.0';
-        arg.id = id;
+        arg.id = '';
         return JSON.stringify(arg);
     }
 
