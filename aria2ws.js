@@ -72,7 +72,7 @@ class Aria2WebSocket {
         return this.#onclose;
     }
 
-    #json(arg) {
+    #json(id, arg) {
         if (Array.isArray(arg)) {
             let calls = [];
             for (let { method, params = [] } of arg) {
@@ -84,7 +84,7 @@ class Aria2WebSocket {
             (arg.params ??= []).unshift(this.#secret);
         }
         arg.jsonrpc = '2.0';
-        arg.id = '';
+        arg.id = id;
         return JSON.stringify(arg);
     }
 
