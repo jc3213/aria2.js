@@ -181,23 +181,38 @@ aria2.onopen = async () => {
     session.waiting = {};
     session.stopped = {};
 
-    let {
-        result: [ [options], [version], [stats], [active], [waiting], [stopped] ]
-    } = await aria2.call([
-        { method: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' }, { method: 'aria2.getGlobalStat' },
-        { method: 'aria2.tellActive' }, { method: 'aria2.tellWaiting', params: [0, 999] }, { method: 'aria2.tellStopped', params: [0, 999] }
+    let { result: [
+        [options], [version], [stats], [active], [waiting], [stopped]
+    ] } = await aria2.call([
+        { method: 'aria2.getGlobalOption' },
+        { method: 'aria2.getVersion' },
+        { method: 'aria2.getGlobalStat' },
+        { method: 'aria2.tellActive' },
+        { method: 'aria2.tellWaiting', params: [0, 999] },
+        { method: 'aria2.tellStopped', params: [0, 999] }
     ]);
 
     jsonrpc.options = options;
     jsonrpc.version = version;
     jsonrpc.stats = stats;
 
-    active.forEach((a) => session.active[a.gid] = session.all[a.gid] = a);
-    waiting.forEach((w) => session.waiting[w.gid] = session.all[w.gid] = w);
-    stopped.forEach((s) => session.stopped[s.gid] = session.all[s.gid] = s);
+    for (let a of active) {
+        session.active[a.gid] = session.all[a.gid] = a;
+    }
+    for (let w of waiting) {
+        session.waiting[w.gid] = session.all[w.gid] = w;
+    }
+    for (let s of stopped) {
+        session.stopped[s.gid] = session.all[s.gid] = s;
+    }
 
     keeplive = setInterval(async () => {
-        let { result: [ [stats], [active] ] } = await aria2.call([ { method: 'aria2.getGlobalStat' }, { method: 'aria2.tellActive'} ]);
+        let { result: [
+            [stats], [active]
+         ] } = await aria2.call([
+            { method: 'aria2.getGlobalStat' },
+            { method: 'aria2.tellActive'}
+        ]);
         jsonrpc.stats = stats;
         active.forEach((a) => session.active[a.gid] = session.all[a.gid] = a);
     }, 10000);
