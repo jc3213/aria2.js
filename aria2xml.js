@@ -1,21 +1,16 @@
 class Aria2XMLRequest {
     #url;
-    #xml;
     #secret;
     #method;
 
     constructor(...args) {
-        let rpc = args.join('#').match(/^(https?:\/\/[^#]+)#?(.*)$/);
         this.url = rpc?.[1] ?? 'http://localhost:6800/jsonrpc';
         this.secret = rpc?.[2] ?? '';
         this.method = 'POST';
     }
 
     set url(string) {
-        if (!string.startsWith('http://') && !string.startsWith('https://')) {
-            throw new TypeError('Invalid url: expected a valid JSON-RPC endpoint (http:// or https://).');
-        }
-        this.#url = this.#xml = string;
+        this.#url = string.replace('ws', 'http');
     }
     get url() {
         return this.#url;
@@ -66,10 +61,10 @@ class Aria2XMLRequest {
     }
 
     #post(arg) {
-        return fetch(this.#xml, {method: 'POST', body: this.#json(arg)}).then(this.#then);
+        return fetch(this.#url, {method: 'POST', body: this.#json(arg)}).then(this.#then);
     }
 
     #get(arg) {
-        return fetch(`${this.#xml}?params=${btoa(unescape(encodeURIComponent(this.#json(arg))))}`).then(this.#then);
+        return fetch(`${this.#url}?params=${btoa(unescape(encodeURIComponent(this.#json(arg))))}`).then(this.#then);
     }
 }
