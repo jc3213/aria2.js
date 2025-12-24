@@ -1,6 +1,5 @@
 class Aria2WebSocket {
     #url;
-    #wsa;
     #secret;
     #ws;
     #tries;
@@ -10,18 +9,14 @@ class Aria2WebSocket {
     #onmessage = null;
     #onclose = null;
 
-    constructor(...args) {
-        let rpc = args.join('#').match(/^(wss?:\/\/[^#]+)#?(.*)$/);
-        this.url = rpc?.[1] ?? 'ws://localhost:6800/jsonrpc';
-        this.secret = rpc?.[2] ?? '';
-        this.call = this.#send;
+    constructor(url, secret) {
+        let rpc = url?.split('#');
+        this.url = rpc?.[0] ?? 'ws://localhost:6800/jsonrpc';
+        this.secret = rpc?.[1] ?? secret ?? '';
     }
 
     set url(string) {
-        if (!string.startsWith('ws://') && !string.startsWith('wss://')) {
-            throw new TypeError('Invalid url: expected a valid JSON-RPC endpoint (ws:// or wss://).');
-        }
-        this.#url = this.#wsa = string;
+        this.#url = string.replace('http', 'ws');
         this.#tries = 0;
     }
     get url() {
@@ -72,7 +67,8 @@ class Aria2WebSocket {
         return this.#onclose;
     }
 
-    #json(id, arg) {
+    call(arg) {
+        let id = crypto.randomUUID();
         if (Array.isArray(arg)) {
             let calls = [];
             for (let { method, params = [] } of arg) {
@@ -85,20 +81,15 @@ class Aria2WebSocket {
         }
         arg.jsonrpc = '2.0';
         arg.id = id;
-        return JSON.stringify(arg);
-    }
-
-    #send(arg) {
         return new Promise((resolve, reject) => {
-            let id = crypto.randomUUID();
             this[id] = resolve;
             this.#ws.onerror = reject;
-            this.#ws.send(this.#json(id, arg));
+            this.#ws.send(JSON.stringify(arg));
         });
     }
 
     connect() {
-        this.#ws = new WebSocket(this.#wsa);
+        this.#ws = new WebSocket(this.#url);
         this.#ws.onopen = (event) => {
             this.#tries = 0;
             this.#onopen?.(event);
