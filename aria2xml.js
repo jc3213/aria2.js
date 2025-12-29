@@ -1,6 +1,7 @@
 class Aria2XMLRequest {
     #url;
     #secret;
+    #id = 0;
     #method;
 
     constructor(...args) {
@@ -49,7 +50,7 @@ class Aria2XMLRequest {
             (arg.params ??= []).unshift(this.#secret);
         }
         arg.jsonrpc = '2.0';
-        arg.id = '';
+        arg.id = this.#id++;
         return JSON.stringify(arg);
     }
 
