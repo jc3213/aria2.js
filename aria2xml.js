@@ -1,8 +1,8 @@
 class Aria2XMLRequest {
     #url;
     #secret;
-    #id = 0;
     #method;
+    #id = 0;
 
     constructor(...args) {
         this.url = rpc?.[1] ?? 'http://localhost:6800/jsonrpc';
