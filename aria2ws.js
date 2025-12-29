@@ -1,6 +1,7 @@
 class Aria2WebSocket {
     #url;
     #secret;
+    #id = 0;
     #ws;
     #tries;
     #retries = 10;
@@ -68,7 +69,7 @@ class Aria2WebSocket {
     }
 
     call(arg) {
-        let id = crypto.randomUUID();
+        let id = this.#id++;
         if (Array.isArray(arg)) {
             let calls = [];
             for (let { method, params = [] } of arg) {
