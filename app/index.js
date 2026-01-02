@@ -308,15 +308,18 @@ function storageUpdated() {
     storageUpdated();
 })();
 
+const i18nItem = document.querySelectorAll('i18n');
+const i18nTitle = document.querySelectorAll('i18n-tips');
+
 async function i18nUserInterface(locale) {
     let lang = acceptLang.has(locale) ? locale : 'en-US';
     let i18n = await fetch('i18n/' + lang + '.json').then((res) => res.json());
 
-    for (let item of document.querySelectorAll('[i18n]')) {
+    for (let item of i18nItem) {
         item.textContent = i18n[item.getAttribute('i18n')] ?? '';
     }
 
-    for (let item of document.querySelectorAll('[i18n-tips]')) {
+    for (let item of i18nTitle) {
         item.title = i18n[item.getAttribute('i18n-tips')] ?? '';
     }
 
