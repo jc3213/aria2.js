@@ -94,10 +94,6 @@ button.checked {
     border-style: inset;
 }
 
-.hidden {
-    display: none;
-}
-
 #adduri, #setting {
     border-width: 1px;
     border-style: solid;
