@@ -7,7 +7,7 @@ optionsPane.innerHTML = `
     <div class="flex">
         <input name="url" type="url">
         <input name="secret" type="password" placeholder="$$secret$$">
-        <button i18n="common_save">Save</button>
+        <button id="json-rpc">⚙️</button>
     </div>
  </div>
 <div class="flex">
@@ -90,6 +90,158 @@ downPane.innerHTML = `
 </div>
 `;
 
+const jsonrpcPane = document.createElement('div');
+jsonrpcPane.id = 'jsonrpc';
+jsonrpcPane.className = 'config hidden';
+jsonrpcPane.innerHTML = `
+<h1 i18n="aria2_options"></h1>
+<div class="cfg-item" i18n-tips="tips_aria2_down_dir">
+    <h4 i18n="aria2_down_dir"></h4>
+    <input name="dir" type="text">
+    <i class="sample" title="&quot;C:\Aria2\Download&quot; (Windows)&#10;&#10;&quot;/home/aria2/download&quot; (Linux)"></i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_file_alloc">
+    <h4 i18n="aria2_file_alloc"></h4>
+    <select name="file-allocation">
+        <option value="none" i18n="option_disabled"></option>
+        <option value="prealloc" i18n="aria2_alloc_pre"></option>
+        <option value="falloc" i18n="aria2_alloc_fast"></option>
+        <option value="trunc" i18n="aria2_alloc_trunc"></option>
+    </select>
+    <i class="default" i18n="aria2_alloc_pre"></i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_disk_cache">
+    <h4 i18n="aria2_disk_cache"></h4>
+    <div>
+        <input name="disk-cache" type="text">
+        <span>B</span>
+    </div>
+    <i class="default">16M</i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_overwrite">
+    <h4 i18n="aria2_overwrite"></h4>
+    <select name="allow-overwrite">
+        <option value="true" i18n="common_true"></option>
+        <option value="false" i18n="common_false"></option>
+    </select>
+    <i class="default" i18n="common_false"></i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_max_concurrent">
+    <h4 i18n="aria2_max_concurrent"></h4>
+    <input name="max-concurrent-downloads" type="number">
+    <i class="default">5</i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_max_download">
+    <h4 i18n="aria2_max_download"></h4>
+    <div>
+        <input name="max-overall-download-limit" type="text">
+        <span>B/s</span>
+    </div>
+    <i class="disabled">0</i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_max_upload">
+    <h4 i18n="aria2_max_upload"></h4>
+    <div>
+        <input name="max-overall-upload-limit" type="text">
+        <span>B/s</span>
+    </div>
+    <i class="disabled">0</i>
+</div>
+<h1>HTTP/FTP</h1>
+<div class="cfg-item" i18n-tips="tips_aria2_http_retry">
+    <h4 i18n="aria2_http_retry"></h4>
+    <input name="max-tries" type="number">
+    <i class="default">5</i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_http_wait">
+    <h4 i18n="aria2_http_wait"></h4>
+    <div>
+        <input name="retry-wait" type="number">
+        <span i18n="time_second_full"></span>
+    </div>
+    <i class="default">0</i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_http_split">
+    <h4 i18n="aria2_http_split"></h4>
+    <input name="split" type="number">
+    <i class="default">5</i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_http_size">
+    <h4 i18n="aria2_http_size"></h4>
+    <div>
+        <input name="min-split-size" type="text">
+        <span>B</span>
+    </div>
+    <i class="default">20M</i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_http_connection">
+    <h4 i18n="aria2_http_connection"></h4>
+    <input name="max-connection-per-server" type="number">
+    <i class="default">1</i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_http_ua">
+    <h4 i18n="aria2_http_ua"></h4>
+    <input name="user-agent" type="text">
+    <i id="useragent" class="default"></i>
+</div>
+<h1>BitTorrent</h1>
+<div class="cfg-item" i18n-tips="tips_aria2_bt_port">
+    <h4 i18n="aria2_bt_port"></h4>
+    <input name="listen-port" type="text">
+    <i class="default">6881-6999</i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_bt_peers">
+    <h4 i18n="aria2_bt_peers"></h4>
+    <input name="bt-max-peers" type="number">
+    <i class="default">55</i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_bt_dht">
+    <h4 i18n="aria2_bt_dht"></h4>
+    <select name="enable-dht">
+        <option value="true" i18n="common_true"></option>
+        <option value="false" i18n="common_false"></option>
+    </select>
+    <i class="default" i18n="common_true"></i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_bt_dht6">
+    <h4 i18n="aria2_bt_dht6"></h4>
+    <select name="enable-dht6">
+        <option value="true" i18n="common_true"></option>
+        <option value="false" i18n="common_false"></option>
+    </select>
+    <i class="default" i18n="common_false"></i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_bt_follow">
+    <h4 i18n="aria2_bt_follow"></h4>
+    <select name="follow-torrent">
+        <option value="true" i18n="common_true"></option>
+        <option value="false" i18n="common_false"></option>
+    </select>
+    <i class="default" i18n="common_true"></i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_bt_remove">
+    <h4 i18n="aria2_bt_remove"></h4>
+    <select name="bt-remove-unselected-file">
+        <option value="true" i18n="common_true"></option>
+        <option value="false" i18n="common_false"></option>
+    </select>
+    <i class="default" i18n="common_false"></i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_bt_ratio">
+    <h4 i18n="aria2_bt_ratio"></h4>
+    <input name="seed-ratio" type="number" min="0" step="0.1">
+    <i class="default">1.0</i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_bt_seed">
+    <h4 i18n="aria2_bt_seed"></h4>
+    <div>
+        <input name="seed-time" type="number">
+        <span i18n="time_minute_full"></span>
+    </div>
+    <i class="default">30</i>
+</div>
+`;
+
 const extraCss = document.createElement('style');
 extraCss.textContent = `
 textarea {
@@ -106,7 +258,7 @@ button.checked {
     border-style: inset;
 }
 
-#adduri, #setting {
+#adduri, #setting, #jsonrpc {
     border-width: 1px;
     border-style: solid;
     grid-area: 1 / 2 / 2 / 3;
@@ -117,25 +269,30 @@ button.checked {
     z-index: 9;
 }
 
+#adduri .config, #setting .config, jsonrpc .config {
+    gap: 5px;
+}
+
 #adduri .flex > button, #setting .flex > button {
     height: 25px;
     padding: 0px 5px;
 }
 
-#adduri .config, #setting .config {
-    gap: 5px;
+input[name="url"] {
+    width: 200%;
 }
 `;
 
 const i18nCss = document.createElement('style');
 
-document.body.append(optionsPane, downPane, extraCss, i18nCss);
+document.body.append(optionsPane, downPane, jsonrpcPane, extraCss, i18nCss);
 
 let aria2Config = {};
 let aria2Storage = new Map();
 
-let optionEntries = optionsPane.querySelectorAll('[name]');
+let optionsEntries = optionsPane.querySelectorAll('[name]');
 let downloadEntries = downPane.querySelectorAll('[name]');
+let jsonrpcEntries = jsonrpcPane.querySelectorAll('[name]');
 let downEntry = downPane.querySelector('textarea');
 let metaFiles = downPane.querySelector('input[type="file"]');
 
@@ -162,19 +319,28 @@ optionsBtn.addEventListener('click', (event) => {
     optionsPane.classList.toggle('hidden');
     downBtn.classList.remove('checked');
     downPane.classList.add('hidden');
+    jsonrpcPane.classList.add('hidden');
 });
 
 optionsPane.addEventListener('change', (event) => {
-    let { name, value } = event.target;
+    let { name, type, value } = event.target;
+    if (type === 'number') {
+        value = value | 0;
+    }
     aria2Storage.set(name, value);
+    localStorage.setItem(name, value);
 });
 
 optionsPane.querySelector('button').addEventListener('click', (event) => {
     aria2RPC.disconnect();
-    for (let [key, value] of aria2Storage) {
-        localStorage.setItem(key, value);
-    }
-    storageUpdated();
+    optionsDispatch();
+    optionsBtn.click();
+    jsonrpcPane.classList.remove('hidden');
+});
+
+jsonrpcPane.addEventListener('change', (event) => {
+    let { name, value } = event.taregt;
+    aria2Config[name] = value;
 });
 
 function downEventSubmit() {
@@ -183,11 +349,12 @@ function downEventSubmit() {
         downBtn.click();
         return;
     }
-    let { out } = aria2Config;
-    aria2Config['out'] = urls.length !== 1 || !out ? null : out.replace(/[\\/:*?"<>|]/g, '_');
+    let options = { ...aria2Config };
+    let { out } = options;
+    options['out'] = urls.length !== 1 || !out ? null : out.replace(/[\\/:*?"<>|]/g, '_');
     let params = [];
     for (let url of urls) {
-        params.push({ method: 'aria2.addUri', params: [[url], aria2Config] });
+        params.push({ method: 'aria2.addUri', params: [[url], options] });
     }
     aria2RPC.call(params).then(() => {
         downBtn.click();
@@ -195,12 +362,13 @@ function downEventSubmit() {
 }
 
 async function metaFileDownload(files) {
-    aria2Config['out'] = aria2Config['referer'] = aria2Config['user-agent'] = null;
+    let options = { ...aria2Config };
     let datas = [];
+    options['out'] = options['referer'] = options['user-agent'] = null;
     for (let file of files) {
         let { name } = file;
         let method;
-        let params = [aria2Config];
+        let params = [options];
         if (name.endsWith('.torrent')) {
             method = 'aria2.addTorrent';
             params.unshift([]);
@@ -256,7 +424,7 @@ downPane.addEventListener('drop', (event) => {
     metaFileDownload(event.dataTransfer.files);
 });
 
-const defaultStorage = {
+const optionsDefault = {
     url: 'ws://localhost:6800/jsonrpc',
     secret: '',
     retries: 10,
@@ -266,19 +434,19 @@ const defaultStorage = {
     locale: 'en-US'
 };
 
-function getStorageValue(key) {
+function getOptionValue(key) {
     let value = localStorage.getItem(key);
     if (value === null) {
-        return defaultStorage[key];
+        return optionsDefault[key];
     }
     return value;
 }
 
-function storageUpdated() {
+function optionsDispatch() {
     aria2RPC.url = aria2Storage.get('url');
     aria2RPC.secret = aria2Storage.get('secret');
-    aria2RPC.retries = aria2Storage.get('retries') | 0;
-    aria2RPC.timeout = aria2Storage.get('timeout') | 0;
+    aria2RPC.retries = aria2Storage.get('retries');
+    aria2RPC.timeout = aria2Storage.get('timeout');
     aria2Proxy = aria2Storage.get('proxy');
     aria2Delay = aria2Storage.get('interval') * 1000;
     aria2RPC.connect();
@@ -287,9 +455,13 @@ function storageUpdated() {
             result['min-split-size'] = getFileSize(result['min-split-size']);
             result['max-download-limit'] = getFileSize(result['max-download-limit']);
             result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
-            for (let entry of downloadEntries) {
+            for (let entry of jsonrpcEntries) {
                 let { name } = entry;
                 aria2Config[name] = entry.value = result[name] ??= '';
+            }
+            for (let entry of downloadEntries) {
+                let { name } = entry;
+                entry.value = aria2Config[name];
             }
         });
     }, 500);
@@ -364,13 +536,16 @@ async function i18nUserInterface(lang) {
 }
 
 (function () {
-    let locale = getStorageValue('locale');
+    let locale = getOptionValue('locale');
     i18nEntry.value = locale;
     i18nUserInterface(locale);
-    for (let entry of optionEntries) {   
-        let { name } = entry;
-        let value = entry.value = getStorageValue(name);
+    for (let entry of optionsEntries) {   
+        let { name, type } = entry;
+        let value = entry.value = getOptionValue(name);
+        if (type === 'number') {
+           value = entry.value | 0;
+        }
         aria2Storage.set(name, value);
     }
-    storageUpdated();
+    optionsDispatch();
 })();
