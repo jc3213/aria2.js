@@ -117,7 +117,7 @@ button.checked {
 
 const i18nCss = document.createElement('style');
 
-document.body.append(optionsPane, downPane, extracss, i18nCss);
+document.body.append(optionsPane, downPane, extraCss, i18nCss);
 
 let aria2Config = {};
 let aria2Storage = new Map();
@@ -167,7 +167,11 @@ optionsPane.querySelector('button').addEventListener('click', (event) => {
 });
 
 function downEventSubmit() {
-    let urls = downEntry.value.match(/(https?:\/\/|ftp:\/\/|magnet:\?)[^\s\n]+/g) ?? [];
+    let urls = downEntry.value.match(/(https?:\/\/|ftp:\/\/|magnet:\?)[^\s\n]+/g);
+    if (!urls) {
+        downBtn.click();
+        return;
+    }
     let { out } = aria2Config;
     aria2Config['out'] = urls.length !== 1 || !out ? null : out.replace(/[\\/:*?"<>|]/g, '_');
     let params = [];
