@@ -63,7 +63,7 @@ downPane.innerHTML = `
     <h4 i18n="task_proxy">Proxy Server</h4>
     <div class="flexmenu">
         <input name="all-proxy" type="url">
-        <button id="all-proxy">⚡️</button>
+        <button id="all-proxy" i18n-tips="tips_proxy_server">⚡️</button>
     </div>
 </div>
 <div class="cfg-item">
