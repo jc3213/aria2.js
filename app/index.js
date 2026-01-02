@@ -46,8 +46,8 @@ downPane.innerHTML = `
     <h4 i18n="task_referer">Referer</h4>
     <div class="flex">
         <input type="text">
-        <button id="down-url" i18n="task_submit">Submit</button>
         <button id="down-file" i18n="task_base64">Upload</button>
+        <button id="down-url" i18n="task_submit">Submit</button>
         <input type="file" accept=".torrent, .metalink, .meta4" multiple>
     </div>
 </div>
