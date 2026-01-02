@@ -121,15 +121,10 @@ jsonrpcPane.innerHTML = `
 <div class="cfg-item" i18n-tips="tips_aria2_overwrite">
     <h4 i18n="aria2_overwrite"></h4>
     <select name="allow-overwrite">
-        <option value="true" i18n="common_true"></option>
-        <option value="false" i18n="common_false"></option>
+        <option value="true" i18n="aria2_true"></option>
+        <option value="false" i18n="aria2_false"></option>
     </select>
-    <i class="default" i18n="common_false"></i>
-</div>
-<div class="cfg-item" i18n-tips="tips_aria2_max_concurrent">
-    <h4 i18n="aria2_max_concurrent"></h4>
-    <input name="max-concurrent-downloads" type="number">
-    <i class="default">5</i>
+    <i class="default" i18n="aria2_false"></i>
 </div>
 <div class="cfg-item" i18n-tips="tips_aria2_max_download">
     <h4 i18n="aria2_max_download"></h4>
@@ -146,6 +141,11 @@ jsonrpcPane.innerHTML = `
         <span>B/s</span>
     </div>
     <i class="disabled">0</i>
+</div>
+<div class="cfg-item" i18n-tips="tips_aria2_max_concurrent">
+    <h4 i18n="aria2_max_concurrent"></h4>
+    <input name="max-concurrent-downloads" type="number">
+    <i class="default">5</i>
 </div>
 <h1>HTTP/FTP</h1>
 <div class="cfg-item" i18n-tips="tips_aria2_http_retry">
@@ -198,34 +198,34 @@ jsonrpcPane.innerHTML = `
 <div class="cfg-item" i18n-tips="tips_aria2_bt_dht">
     <h4 i18n="aria2_bt_dht"></h4>
     <select name="enable-dht">
-        <option value="true" i18n="common_true"></option>
-        <option value="false" i18n="common_false"></option>
+        <option value="true" i18n="aria2_true"></option>
+        <option value="false" i18n="aria2_false"></option>
     </select>
-    <i class="default" i18n="common_true"></i>
+    <i class="default" i18n="aria2_true"></i>
 </div>
 <div class="cfg-item" i18n-tips="tips_aria2_bt_dht6">
     <h4 i18n="aria2_bt_dht6"></h4>
     <select name="enable-dht6">
-        <option value="true" i18n="common_true"></option>
-        <option value="false" i18n="common_false"></option>
+        <option value="true" i18n="aria2_true"></option>
+        <option value="false" i18n="aria2_false"></option>
     </select>
-    <i class="default" i18n="common_false"></i>
+    <i class="default" i18n="aria2_false"></i>
 </div>
 <div class="cfg-item" i18n-tips="tips_aria2_bt_follow">
     <h4 i18n="aria2_bt_follow"></h4>
     <select name="follow-torrent">
-        <option value="true" i18n="common_true"></option>
-        <option value="false" i18n="common_false"></option>
+        <option value="true" i18n="aria2_true"></option>
+        <option value="false" i18n="aria2_false"></option>
     </select>
-    <i class="default" i18n="common_true"></i>
+    <i class="default" i18n="aria2_true"></i>
 </div>
 <div class="cfg-item" i18n-tips="tips_aria2_bt_remove">
     <h4 i18n="aria2_bt_remove"></h4>
     <select name="bt-remove-unselected-file">
-        <option value="true" i18n="common_true"></option>
-        <option value="false" i18n="common_false"></option>
+        <option value="true" i18n="aria2_true"></option>
+        <option value="false" i18n="aria2_false"></option>
     </select>
-    <i class="default" i18n="common_false"></i>
+    <i class="default" i18n="aria2_false"></i>
 </div>
 <div class="cfg-item" i18n-tips="tips_aria2_bt_ratio">
     <h4 i18n="aria2_bt_ratio"></h4>
@@ -258,10 +258,6 @@ button.checked {
     border-style: inset;
 }
 
-h1:first-of-type {
-    margin-top: 0px;
-}
-
 #adduri, #setting, #jsonrpc {
     border-width: 1px;
     border-style: solid;
@@ -273,7 +269,7 @@ h1:first-of-type {
     z-index: 9;
 }
 
-#adduri .config, #setting .config, jsonrpc .config {
+.config {
     gap: 5px;
 }
 
@@ -282,8 +278,16 @@ h1:first-of-type {
     padding: 0px 5px;
 }
 
-input[name="url"] {
+#setting input[name="url"] {
     width: 200%;
+}
+
+#jsonrpc > h1:first-of-type {
+    margin-top: 0px;
+}
+
+#jsonrpc i::before {
+    margin-right: 5px;
 }
 `;
 
@@ -538,7 +542,11 @@ async function i18nUserInterface(lang) {
 }
 
 .default::before {
-    content: "${locale.common_default}";
+    content: "${locale.option_default}";
+}
+
+.disabled::before {
+    content: "${locale.option_disabled}";
 }
 `;
 }
