@@ -163,7 +163,7 @@ optionsPane.querySelector('button').addEventListener('click', (event) => {
     for (let [key, value] of aria2Storage) {
         localStorage.setItem(key, value);
     }
-    aria2StorageUpdated();
+    storageUpdated();
 });
 
 function downEventSubmit() {
@@ -254,17 +254,15 @@ const defaultStorage = {
     locale: 'en-US'
 };
 
-function storageLoader(key) {
+function getStorageValue(key) {
     let value = localStorage.getItem(key);
     if (value === null) {
-        let new_value = defaultStorage[key];
-        localStorage.setItem(key, new_value);
-        return new_value;
+        return defaultStorage[key];
     }
     return value;
 }
 
-function aria2StorageUpdated() {
+function storageUpdated() {
     aria2RPC.scheme = aria2Storage.get('scheme');
     aria2RPC.url = aria2Storage.get('url');
     aria2RPC.secret = aria2Storage.get('secret');
@@ -287,15 +285,15 @@ function aria2StorageUpdated() {
 }
 
 (function () {
-    let locale = storageLoader('locale');
+    let locale = getStorageValue('locale');
     i18nEntry.value = locale;
     i18nUserInterface(locale);
     for (let entry of optionEntries) {   
         let { name } = entry;
-        let value = entry.value = storageLoader(name);
+        let value = entry.value = getStorageValue(name);
         aria2Storage.set(name, value);
     }
-    aria2StorageUpdated();
+    storageUpdated();
 })();
 
 async function i18nUserInterface(locale) {
