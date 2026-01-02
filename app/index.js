@@ -17,7 +17,19 @@ optionsPane.innerHTML = `
     </div>
     <div class="fl-1">
         <h4 i18n="option_jsonrpc_timeout">Retry Interval</h4>
-        <input name="timeout" type="number" min="5" max="30" step="1">
+        <div>
+            <input name="timeout" type="number" min="5" max="30" step="1">
+            <span i18n="time_second_full"></span>
+        </div>
+    </div>
+</div>
+<div class="flex">
+    <div class="fl-1">
+        <h4 i18n="option_manager_interval">Update Interval</h4>
+        <div>
+            <input name="interval" type="number" min="1" max="60" step="1">
+            <span i18n="time_second_full"></span>
+        </div>
     </div>
     <div class="fl-1">
         <h4 i18n="task_proxy">Proxy Server</h4>
@@ -250,6 +262,7 @@ const defaultStorage = {
     secret: '',
     retries: 10,
     timeout: 10,
+    interval: 10,
     proxy: '',
     locale: 'en-US'
 };
@@ -263,13 +276,12 @@ function getStorageValue(key) {
 }
 
 function storageUpdated() {
-    aria2RPC.scheme = aria2Storage.get('scheme');
     aria2RPC.url = aria2Storage.get('url');
     aria2RPC.secret = aria2Storage.get('secret');
     aria2RPC.retries = aria2Storage.get('retries') | 0;
     aria2RPC.timeout = aria2Storage.get('timeout') | 0;
     aria2Proxy = aria2Storage.get('proxy');
-    aria2Delay = aria2RPC.timeout * 1000;
+    aria2Delay = aria2Storage.get('interval') * 1000;
     aria2RPC.connect();
     setTimeout(() => {
         aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
@@ -301,11 +313,11 @@ async function i18nUserInterface(locale) {
     let i18n = await fetch('i18n/' + lang + '.json').then((res) => res.json());
 
     for (let item of document.querySelectorAll('[i18n]')) {
-        item.textContent = i18n[item.getAttribute('i18n')];
+        item.textContent = i18n[item.getAttribute('i18n')] ?? '';
     }
 
     for (let item of document.querySelectorAll('[i18n-tips]')) {
-        item.title = i18n[item.getAttribute('i18n-tips')];
+        item.title = i18n[item.getAttribute('i18n-tips')] ?? '';
     }
 
     i18nCss.textContent = `
