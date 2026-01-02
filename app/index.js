@@ -232,6 +232,17 @@ function aria2StorageUpdated() {
     aria2Proxy = aria2Storage.get('proxy');
     aria2Delay = aria2RPC.timeout * 1000;
     aria2RPC.connect();
+    setTimeout(() => {
+        aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
+            result['min-split-size'] = getFileSize(result['min-split-size']);
+            result['max-download-limit'] = getFileSize(result['max-download-limit']);
+            result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
+            for (let entry of downloadEntries) {
+                let { name } = entry;
+                aria2Config[name] = entry.value = result[name] ??= '';
+            }
+        });
+    }, 500);
 }
 
 (function () {
@@ -244,17 +255,6 @@ function aria2StorageUpdated() {
         aria2Storage.set(name, value);
     }
     aria2StorageUpdated();
-    setTimeout(() => {
-        aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
-            result['min-split-size'] = getFileSize(result['min-split-size']);
-            result['max-download-limit'] = getFileSize(result['max-download-limit']);
-            result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
-            for (let entry of downloadEntries) {
-                let { name } = entry;
-                aria2Config[name] = entry.value = result[name] ??= '';
-            }
-        });
-    }, 500);
 })();
 
 async function i18nUserInterface(locale) {
@@ -263,6 +263,10 @@ async function i18nUserInterface(locale) {
 
     for (let item of document.querySelectorAll('[i18n]')) {
         item.textContent = i18n[item.getAttribute('i18n')];
+    }
+
+    for (let item of document.querySelectorAll('[i18n-tips]')) {
+        item.title = i18n[item.getAttribute('i18n-tips')];
     }
 
     i18nCss.textContent = `
