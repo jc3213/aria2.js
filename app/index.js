@@ -80,6 +80,47 @@ downPane.innerHTML = `
 
 const i18nCss = document.createElement('style');
 
+const extraCss = document.createElement('style');
+extraCss.textContent = `
+textarea {
+    padding: 3px;
+    border-width: 1px;
+    border-style: inset;
+    overflow-y: auto;
+    overflow-x: hidden;
+    resize: none;
+    width: calc(100% - 12px);
+}
+
+button.checked {
+    border-style: inset;
+}
+
+.hidden {
+    display: none;
+}
+
+#adduri, #setting {
+    border-width: 1px;
+    border-style: solid;
+    grid-area: 1 / 2 / 2 / 3;
+    height: fit-content;
+    padding: 8px;
+    position: absolute;
+    width: 600px;
+    z-index: 9;
+}
+
+#adduri .flex > button, #setting .flex > button {
+    height: 25px;
+    padding: 0px 5px;
+}
+
+#adduri .config, #setting .config {
+    gap: 5px;
+}
+`;
+
 document.body.append(optionsPane, downPane, i18nCss);
 
 let aria2Config = {};
@@ -270,19 +311,55 @@ async function i18nUserInterface(locale) {
     }
 
     i18nCss.textContent = `
-:root {
-    --menu: "${i18n.popup_menu}";
-    --queue: "${i18n.popup_queue}";
-    --system: "${i18n.popup_system}";
-    --version: "${i18n.popup_version}";
-    --download: "${i18n.popup_download}";
-    --upload: "${i18n.popup_upload}";
-    --active: "${i18n.popup_active}";
-    --waiting: "${i18n.popup_waiting}";
-    --stopped: "${i18n.popup_stopped}";
-    --day: "${i18n.time_day}";
-    --hour: "${i18n.time_hour}";
-    --minute: "${i18n.time_minute}";
-    --second: "${i18n.time_second}";
-}`;
+#menu::before {
+    content: "${i18n.popup_menu}";
 }
+
+#filter::before {
+    content: "${i18n.popup_queue}";
+}
+
+#system::before {
+    content: "${i18n.popup_system}";
+}
+
+#version::before {
+    content: "${i18n.popup_version}";
+}
+
+#download::before {
+    content: "${i18n.popup_download}";
+}
+
+#upload::before {
+    content: "${i18n.popup_upload}";
+}
+
+#active::before {
+    content: "${i18n.popup_active}";
+}
+
+#waiting::before {
+    content: "${i18n.popup_waiting}";
+}
+
+#stopped::before {
+    content: "${i18n.popup_stopped}";
+}
+
+.day:not(:empty)::after {
+    content: "${i18n.time_day}";
+}
+
+.hour:not(:empty)::after {
+    content: "${i18n.time_hour}";
+}
+
+.minute:not(:empty)::after {
+    content: "${i18n.time_minute}";
+}
+
+.second:not(:empty)::after {
+    content: "${i18n.time_second}";
+}
+`;
