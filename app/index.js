@@ -78,8 +78,6 @@ downPane.innerHTML = `
 </div>
 `;
 
-const i18nCss = document.createElement('style');
-
 const extraCss = document.createElement('style');
 extraCss.textContent = `
 textarea {
@@ -121,7 +119,9 @@ button.checked {
 }
 `;
 
-document.body.append(optionsPane, downPane, i18nCss);
+const i18nCss = document.createElement('style');
+
+document.body.append(optionsPane, downPane, extracss, i18nCss);
 
 let aria2Config = {};
 let aria2Storage = new Map();
