@@ -300,67 +300,69 @@ const i18nItem = document.querySelectorAll('i18n');
 const i18nTitle = document.querySelectorAll('i18n-tips');
 
 async function i18nUserInterface(lang) {
-    let i18n = await fetch(`i18n/${i18nLang.has(lang) ? lang : 'en-US'}.json`).then((res) => res.json());
-console.log(i18n);
+    let locale = await fetch(`i18n/${i18nLang.has(lang) ? lang : 'en-US'}.json`).then((res) => res.json());
+
     for (let item of i18nItem) {
-        item.textContent = i18n[item.getAttribute('i18n')] ?? '';
+        console.log(item);
+        item.textContent = locale[item.getAttribute('i18n')] ?? '';
     }
 
     for (let item of i18nTitle) {
-        item.title = i18n[item.getAttribute('i18n-tips')] ?? '';
+        console.log(item);
+        item.title = locale[item.getAttribute('i18n-tips')] ?? '';
     }
 
     i18nCss.textContent = `
 #menu::before {
-    content: "${i18n.popup_menu}";
+    content: "${locale.popup_menu}";
 }
 
 #filter::before {
-    content: "${i18n.popup_queue}";
+    content: "${locale.popup_queue}";
 }
 
 #system::before {
-    content: "${i18n.popup_system}";
+    content: "${locale.popup_system}";
 }
 
 #version::before {
-    content: "${i18n.popup_version}";
+    content: "${locale.popup_version}";
 }
 
 #download::before {
-    content: "${i18n.popup_download}";
+    content: "${locale.popup_download}";
 }
 
 #upload::before {
-    content: "${i18n.popup_upload}";
+    content: "${locale.popup_upload}";
 }
 
 #active::before {
-    content: "${i18n.popup_active}";
+    content: "${locale.popup_active}";
 }
 
 #waiting::before {
-    content: "${i18n.popup_waiting}";
+    content: "${locale.popup_waiting}";
 }
 
 #stopped::before {
-    content: "${i18n.popup_stopped}";
+    content: "${locale.popup_stopped}";
 }
 
 .day:not(:empty)::after {
-    content: "${i18n.time_day}";
+    content: "${locale.time_day}";
 }
 
 .hour:not(:empty)::after {
-    content: "${i18n.time_hour}";
+    content: "${locale.time_hour}";
 }
 
 .minute:not(:empty)::after {
-    content: "${i18n.time_minute}";
+    content: "${locale.time_minute}";
 }
 
 .second:not(:empty)::after {
-    content: "${i18n.time_second}";
+    content: "${locale.time_second}";
 }
 `;
 }
