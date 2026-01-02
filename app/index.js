@@ -538,7 +538,7 @@ async function i18nUserInterface(lang) {
 }
 
 .default::before {
-    content: "${i18n.common_default}";
+    content: "${locale.common_default}";
 }
 `;
 }
