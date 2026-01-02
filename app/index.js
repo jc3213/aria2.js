@@ -89,7 +89,7 @@ let acceptLang = new Set(['en-US', 'zh-CN']);
 let optionEntries = optionsPane.querySelectorAll('[name]');
 let downloadEntries = downPane.querySelectorAll('[name]');
 let downEntry = downPane.querySelector('textarea');
-let metaFiles = downPane.querySelector('input');
+let metaFiles = downPane.querySelector('input[type="file"]');
 
 taskFilters(
     JSON.parse(localStorage.getItem('queue')) ?? [],
