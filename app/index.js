@@ -296,19 +296,17 @@ function storageUpdated() {
 }
 
 const i18nLang = new Set(['en-US', 'zh-CN']);
-const i18nItem = document.querySelectorAll('i18n');
-const i18nTitle = document.querySelectorAll('i18n-tips');
+const i18nItem = document.querySelectorAll('[i18n]');
+const i18nTitle = document.querySelectorAll('[i18n-tips]');
 
 async function i18nUserInterface(lang) {
     let locale = await fetch(`i18n/${i18nLang.has(lang) ? lang : 'en-US'}.json`).then((res) => res.json());
 
     for (let item of i18nItem) {
-        console.log(item);
         item.textContent = locale[item.getAttribute('i18n')] ?? '';
     }
 
     for (let item of i18nTitle) {
-        console.log(item);
         item.title = locale[item.getAttribute('i18n-tips')] ?? '';
     }
 
