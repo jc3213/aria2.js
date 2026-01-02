@@ -301,7 +301,7 @@ const i18nTitle = document.querySelectorAll('i18n-tips');
 
 async function i18nUserInterface(lang) {
     let i18n = await fetch(`i18n/${i18nLang.has(lang) ? lang : 'en-US'}.json`).then((res) => res.json());
-
+console.log(i18n);
     for (let item of i18nItem) {
         item.textContent = i18n[item.getAttribute('i18n')] ?? '';
     }
