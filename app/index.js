@@ -359,3 +359,4 @@ async function i18nUserInterface(locale) {
     content: "${i18n.time_second}";
 }
 `;
+}
