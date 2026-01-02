@@ -133,7 +133,6 @@ document.body.append(optionsPane, downPane, extraCss, i18nCss);
 
 let aria2Config = {};
 let aria2Storage = new Map();
-let acceptLang = new Set(['en-US', 'zh-CN']);
 
 let optionEntries = optionsPane.querySelectorAll('[name]');
 let downloadEntries = downPane.querySelectorAll('[name]');
@@ -308,12 +307,12 @@ function storageUpdated() {
     storageUpdated();
 })();
 
+const i18nLang = new Set(['en-US', 'zh-CN']);
 const i18nItem = document.querySelectorAll('i18n');
 const i18nTitle = document.querySelectorAll('i18n-tips');
 
-async function i18nUserInterface(locale) {
-    let lang = acceptLang.has(locale) ? locale : 'en-US';
-    let i18n = await fetch('i18n/' + lang + '.json').then((res) => res.json());
+async function i18nUserInterface(lang) {
+    let i18n = await fetch(`i18n/${i18nLang.has(lang) ? lang : 'en-US'}.json`).then((res) => res.json());
 
     for (let item of i18nItem) {
         item.textContent = i18n[item.getAttribute('i18n')] ?? '';
