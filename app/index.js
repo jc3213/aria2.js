@@ -1,15 +1,98 @@
+const optionsPane = document.createElement('div');
+optionsPane.id = 'setting';
+optionsPane.className = 'hidden';
+optionsPane.innerHTML = `
+<div>
+    <h4 i18n="option_jsonrpc">JSON-RPC Server</h4>
+    <div class="flex">
+        <input name="url" type="url">
+        <input name="secret" type="password" placeholder="$$secret$$">
+        <button i18n="common_save">Save</button>
+    </div>
+ </div>
+<div class="flex">
+    <div class="fl-1">
+        <h4 i18n="option_jsonrpc_retries">Max Retries</h4>
+        <input name="retries" type="number" min="-1" step="1">
+    </div>
+    <div class="fl-1">
+        <h4 i18n="option_jsonrpc_timeout">Retry Interval</h4>
+        <input name="timeout" type="number" min="5" max="30" step="1">
+    </div>
+    <div class="fl-1">
+        <h4 i18n="task_proxy">Proxy Server</h4>
+        <input name="proxy" type="url" placeholder="http://127.0.0.1:1230/">
+    </div>
+</div>
+`;
+
+const downPane = document.createElement('div');
+downPane.id = 'adduri';
+downPane.className = 'config hidden';
+downPane.innerHTML = `
+<div>
+    <h4 i18n="task_referer">Referer</h4>
+    <div class="flex">
+        <input type="text">
+        <button id="down-url" i18n="task_submit">Submit</button>
+        <button id="down-file" i18n="task_base64">Upload</button>
+        <input type="file" accept=".torrent, .metalink, .meta4" multiple>
+    </div>
+</div>
+<div>
+    <h4 i18n="task_entry">Download Urls</h4>
+    <textarea rows="3"></textarea>
+</div>
+<div class="cfg-item">
+    <h4 i18n="aria2_adv_dir">Download Folder</h4>
+    <input name="dir" type="text">
+</div>
+<div class="cfg-item">
+    <h4 i18n="task_proxy">Proxy Server</h4>
+    <div class="flexmenu">
+        <input name="all-proxy" type="url">
+        <button id="all-proxy">⚡️</button>
+    </div>
+</div>
+<div class="cfg-item">
+    <h4 i18n="aria2_http_split">Download Sections</h4>
+    <input name="split" type="number">
+</div>
+<div class="cfg-item">
+    <h4 i18n="aria2_http_size">Section Size</h4>
+    <div>
+        <input name="min-split-size" type="text">
+        <span class="float">B</span>
+    </div>
+</div>
+<div class="cfg-item">
+    <h4 i18n="aria2_max_connection">Max Connections per Server</h4>
+    <input name="max-connection-per-server" type="number">
+</div>
+<div class="cfg-item">
+    <h4 i18n="task_download">Max Download Speed</h4>
+    <div>
+        <input name="max-download-limit" type="text">
+        <span class="float">B/s</span>
+    </div>
+</div>
+`;
+
+const i18nCss = document.createElement('style');
+
+document.body.append(optionsPane, downPane, i18nCss);
+
 let aria2Config = {};
 let aria2Storage = new Map();
 let acceptLang = new Set(['en-US', 'zh-CN']);
 
-let [optionsPane, ...optionEntries] = document.querySelectorAll('#setting, #setting [name]');
-let [downPane, ...downloadEntries]= document.querySelectorAll('#adduri, #adduri [name]');
-let [saveBtn, submitBtn, metaBtn, metaEntry, UrlEntry, proxyBtn] = document.querySelectorAll('#adduri button, #setting button, textarea, input[type="file"');
-let i18nCss = document.createElement('style');
-document.head.append(i18nCss);
+let optionEntries = optionsPane.querySelectorAll('[name]');
+let downloadEntries = downPane.querySelectorAll('[name]');
+let downEntry = downPane.querySelector('textarea');
+let metaFiles = downPane.querySelector('input');
 
 taskFilters(
-    JSON.parse(localStorage.getItem('queue')),
+    JSON.parse(localStorage.getItem('queue')) ?? [],
     (array) => localStorage.setItem('queue', JSON.stringify(array))
 );
 
@@ -33,62 +116,96 @@ optionsBtn.addEventListener('click', (event) => {
     downPane.classList.add('hidden');
 });
 
-saveBtn.addEventListener('click', (event) => {
+optionsPane.addEventListener('change', (event) => {
+    let { name, value } = event.target;
+    aria2Storage.set(name, value);
+});
+
+optionsPane.querySelector('button').addEventListener('click', (event) => {
     aria2RPC.disconnect();
-    aria2Storage.forEach((value, key) => localStorage.setItem(key, value));
+    for (let [key, value] of aria2Storage) {
+        localStorage.setItem(key, value);
+    }
     aria2StorageUpdated();
 });
 
-submitBtn.addEventListener('click', (event) => {
-    let urls = UrlEntry.value.match(/(https?:\/\/|ftp:\/\/|magnet:\?)[^\s\n]+/g);
-    UrlEntry.value = '';
-    downBtn.classList.remove('checked');
-    downPane.classList.add('hidden');
-    let session = urls?.map((url) => ({ url, options: aria2Config }));
-    if (session) {
-        aria2RPC.call(...sessions);
+function downEventSubmit() {
+    let urls = downEntry.value.match(/(https?:\/\/|ftp:\/\/|magnet:\?)[^\s\n]+/g) ?? [];
+    let { out } = aria2Config;
+    aria2Config['out'] = urls.length !== 1 || !out ? null : out.replace(/[\\/:*?"<>|]/g, '_');
+    let params = [];
+    for (let url of urls) {
+        params.push({ method: 'aria2.addUri', params: [[url], aria2Config] });
     }
-});
-
-proxyBtn.addEventListener('click', (event) => {
-    event.target.previousElementSibling.value = localStorage.aria2Proxy || '';
-});
-
-optionsPane.addEventListener('change', (event) => {
-    aria2Storage.set(event.target.name, event.target.value);
-});
-
-downPane.addEventListener('change', (event) => {
-    aria2Config[event.target.name] = event.target.value;
-});
-
-metaEntry.addEventListener('change', async (event) => {
-    let sessions = [];
-    await Promise.all([...event.target.files].map(async (file) => {
-        let type = file.name.slice(file.name.lastIndexOf('.') + 1);
-        let b64encode = await promiseFileReader(file);
-        let download = type === 'torrent' ? { method: 'aria2.addTorrent', params: [b64encode, [], aria2Config] } : { method: 'aria2.addMetalink', params: [b64encode, aria2Config] };
-        sessions.push(download);
-    }));
-    await aria2RPC.call(...sessions);
-    event.target.value = '';
-    manager.remove('adduri');
-});
-
-function promiseFileReader(file) {
-    return new Promise((resolve) => {
-        let reader = new FileReader();
-        reader.onload = (event) => {
-            let base64 = reader.result.slice(reader.result.indexOf(',') + 1);
-            resolve(base64);
-        };
-        reader.readAsDataURL(file);
+    aria2RPC.call(params).then(() => {
+        downBtn.click();
     });
 }
 
+async function metaFileDownload(files) {
+    aria2Config['out'] = aria2Config['referer'] = aria2Config['user-agent'] = null;
+    let datas = [];
+    for (let file of files) {
+        let { name } = file;
+        let method;
+        let params = [aria2Config];
+        if (name.endsWith('.torrent')) {
+            method = 'aria2.addTorrent';
+            params.unshift([]);
+        } else if (name.endsWith('.meta4') || name.endsWith('.metalink')) {
+            method = 'aria2.addMetalink';
+        } else {
+            continue;
+        }
+        datas.push(new Promise((resolve) => {
+            let reader = new FileReader();
+            reader.onload = (event) => {
+                let { result } = reader;
+                params.unshift(result.substring(result.indexOf(',') + 1));
+                resolve({ method: params });
+            };
+            reader.readAsDataURL(file);
+        }));
+    }
+    let params = await Promise.all(datas);
+    aria2RPC.call(params).then(() => {
+        downBtn.click();
+    });
+}
+
+const downEventMap = {
+    'down-url': downEventSubmit,
+    'down-file': () => metaFiles.click(),
+    'all-proxy': (event) => event.target.previousElementSibling.value = aria2Storage.get('proxy')
+};
+
+downPane.addEventListener('click', (event) => {
+    let { id, localName } = event.target;
+    if (id || localName === 'button') {
+        downEventMap[id](event);
+    }
+});
+
+downPane.addEventListener('change', (event) => {
+    let { name, value, files } = event.target;
+    if (name) {
+        aria2Config[name] = value;
+    } else if (files) {
+        metaFileDownload(files);
+    }
+});
+
+downPane.addEventListener('dragover', (event) => {
+    event.preventDefault();
+});
+
+downPane.addEventListener('drop', (event) => {
+    event.preventDefault();
+    metaFileDownload(event.dataTransfer.files);
+});
+
 const defaultStorage = {
-    scheme: 'http',
-    url: 'localhost:6800/jsonrpc',
+    url: 'ws://localhost:6800/jsonrpc',
     secret: '',
     retries: 10,
     timeout: 10,
@@ -121,21 +238,21 @@ function aria2StorageUpdated() {
     let locale = storageLoader('locale');
     i18nEntry.value = locale;
     i18nUserInterface(locale);
-    optionEntries.forEach((entry) => {
+    for (let entry of optionEntries) {   
         let { name } = entry;
         let value = entry.value = storageLoader(name);
         aria2Storage.set(name, value);
-    });
+    }
     aria2StorageUpdated();
     setTimeout(() => {
-        aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(([{ result }]) => {
+        aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
             result['min-split-size'] = getFileSize(result['min-split-size']);
             result['max-download-limit'] = getFileSize(result['max-download-limit']);
             result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
-            downloadEntries.forEach((entry) => {
+            for (let entry of downloadEntries) {
                 let { name } = entry;
                 aria2Config[name] = entry.value = result[name] ??= '';
-            });
+            }
         });
     }, 500);
 })();
@@ -144,9 +261,9 @@ async function i18nUserInterface(locale) {
     let lang = acceptLang.has(locale) ? locale : 'en-US';
     let i18n = await fetch('i18n/' + lang + '.json').then((res) => res.json());
 
-    document.querySelectorAll('[i18n]').forEach((item) => {
+    for (let item of document.querySelectorAll('[i18n]')) {
         item.textContent = i18n[item.getAttribute('i18n')];
-    });
+    }
 
     i18nCss.textContent = `
 :root {
