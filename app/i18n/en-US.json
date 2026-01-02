@@ -49,5 +49,19 @@
     "aria2_false": "False",
     "option_jsonrpc": "JSON-RPC Server",
     "option_jsonrpc_retries": "Max Retries",
-    "option_jsonrpc_timeout": "Retry Interval"
+    "option_jsonrpc_timeout": "Retry Interval",
+    "tips_task_completed": "Completed size",
+    "tips_task_estimated": "Estimated time",
+    "tips_task_fulllength": "Total filesize",
+    "tips_task_network": "Connections (seeds)",
+    "tips_task_dlspeed": "Download speed",
+    "tips_task_upspeed": "Upload speed",
+    "tips_task_pause": "Pause/resume this task",
+    "tips_task_remove": "Remove this task",
+    "tips_task_detail": "Show task details",
+    "tips_task_apply": "Apply all modified options",
+    "tips_task_retry": "Restart this task",
+    "tips_task_adduri": "Add new download uri",
+    "tips_proxy_server": "Set the preset proxy server"
 }
+
