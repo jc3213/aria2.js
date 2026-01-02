@@ -295,18 +295,6 @@ function storageUpdated() {
     }, 500);
 }
 
-(function () {
-    let locale = getStorageValue('locale');
-    i18nEntry.value = locale;
-    i18nUserInterface(locale);
-    for (let entry of optionEntries) {   
-        let { name } = entry;
-        let value = entry.value = getStorageValue(name);
-        aria2Storage.set(name, value);
-    }
-    storageUpdated();
-})();
-
 const i18nLang = new Set(['en-US', 'zh-CN']);
 const i18nItem = document.querySelectorAll('i18n');
 const i18nTitle = document.querySelectorAll('i18n-tips');
@@ -376,3 +364,15 @@ async function i18nUserInterface(lang) {
 }
 `;
 }
+
+(function () {
+    let locale = getStorageValue('locale');
+    i18nEntry.value = locale;
+    i18nUserInterface(locale);
+    for (let entry of optionEntries) {   
+        let { name } = entry;
+        let value = entry.value = getStorageValue(name);
+        aria2Storage.set(name, value);
+    }
+    storageUpdated();
+})();
