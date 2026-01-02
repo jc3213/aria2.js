@@ -258,6 +258,10 @@ button.checked {
     border-style: inset;
 }
 
+h1:first-of-type {
+    margin-top: 0px;
+}
+
 #adduri, #setting, #jsonrpc {
     border-width: 1px;
     border-style: solid;
@@ -312,6 +316,7 @@ downBtn.addEventListener('click', async (event) => {
     downPane.classList.toggle('hidden');
     optionsBtn.classList.remove('checked');
     optionsPane.classList.add('hidden');
+    jsonrpcPane.classList.add('hidden');
 });
 
 optionsBtn.addEventListener('click', (event) => {
@@ -334,7 +339,6 @@ optionsPane.addEventListener('change', (event) => {
 optionsPane.querySelector('button').addEventListener('click', (event) => {
     aria2RPC.disconnect();
     optionsDispatch();
-    optionsBtn.click();
     jsonrpcPane.classList.remove('hidden');
 });
 
@@ -531,6 +535,10 @@ async function i18nUserInterface(lang) {
 
 .second:not(:empty)::after {
     content: "${locale.time_second}";
+}
+
+.default::before {
+    content: "${i18n.common_default}";
 }
 `;
 }
