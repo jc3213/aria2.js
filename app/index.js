@@ -42,7 +42,7 @@ const downPane = document.createElement('div');
 downPane.id = 'adduri';
 downPane.className = 'config hidden';
 downPane.innerHTML = `
-<div>
+<div i18n-tips="tips_task_referer">
     <h4 i18n="task_referer">Referer</h4>
     <div class="flex">
         <input type="text">
@@ -51,37 +51,37 @@ downPane.innerHTML = `
         <input type="file" accept=".torrent, .metalink, .meta4" multiple>
     </div>
 </div>
-<div>
+<div i18n-tips="tips_task_entry">
     <h4 i18n="task_entry">Download Urls</h4>
     <textarea rows="3"></textarea>
 </div>
-<div class="cfg-item">
-    <h4 i18n="aria2_adv_dir">Download Folder</h4>
+<div class="cfg-item" i18n-tips="tips_aria2_down_dir">
+    <h4 i18n="aria2_down_dir">Download Folder</h4>
     <input name="dir" type="text">
 </div>
-<div class="cfg-item">
+<div class="cfg-item" i18n-tips="tips_task_proxy">
     <h4 i18n="task_proxy">Proxy Server</h4>
     <div class="flexmenu">
         <input name="all-proxy" type="url">
         <button id="all-proxy" i18n-tips="tips_proxy_server">⚡️</button>
     </div>
 </div>
-<div class="cfg-item">
+<div class="cfg-item" i18n-tips="aria2_http_split">
     <h4 i18n="aria2_http_split">Download Sections</h4>
     <input name="split" type="number">
 </div>
-<div class="cfg-item">
+<div class="cfg-item" i18n-tips="tips_aria2_http_connection">
     <h4 i18n="aria2_http_size">Section Size</h4>
     <div>
         <input name="min-split-size" type="text">
         <span class="float">B</span>
     </div>
 </div>
-<div class="cfg-item">
-    <h4 i18n="aria2_max_connection">Max Connections per Server</h4>
+<div class="cfg-item" i18n-tips="tips_aria2_http_connection">
+    <h4 i18n="aria2_http_connection">Max Connections per Server</h4>
     <input name="max-connection-per-server" type="number">
 </div>
-<div class="cfg-item">
+<div class="cfg-item" i18n-tips="tips_task_download">
     <h4 i18n="task_download">Max Download Speed</h4>
     <div>
         <input name="max-download-limit" type="text">
@@ -465,7 +465,7 @@ function optionsDispatch() {
             }
             for (let entry of downloadEntries) {
                 let { name } = entry;
-                entry.value = aria2Config[name];
+                entry.value = aria2Config[name] ?? '';
             }
         });
     }, 500);
