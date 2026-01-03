@@ -1,12 +1,13 @@
-class Aria2XMLRequest {
+class Aria2 {
     #url;
     #secret;
     #method;
     #id = 0;
 
-    constructor(...args) {
-        this.url = rpc?.[1] ?? 'http://localhost:6800/jsonrpc';
-        this.secret = rpc?.[2] ?? '';
+    constructor(url = 'http://localhost:6800/jsonrpc', secret = '') {
+        let rpc = url.split('#');
+        this.url = rpc[0];
+        this.secret = rpc[1] ?? secret;
         this.method = 'POST';
     }
 
