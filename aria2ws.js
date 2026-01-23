@@ -3,7 +3,7 @@ class Aria2 {
     #secret;
     #id = 0;
     #ws;
-    #tries;
+    #tries = 0;
     #retries = 10;
     #timeout = 10000;
     #onopen = null;
@@ -18,7 +18,6 @@ class Aria2 {
 
     set url(string) {
         this.#url = string.replace('http', 'ws');
-        this.#tries = 0;
     }
     get url() {
         return this.#url;
