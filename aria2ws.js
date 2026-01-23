@@ -95,24 +95,27 @@ class Aria2 {
             this.#onopen?.(event);
         };
         this.#ws.onmessage = (event) => {
-            let message = JSON.parse(event.data);
-            if (message.method) {
-                this.#onmessage?.(message);
+            let obj = JSON.parse(event.data);
+            if (obj.method) {
+                this.#onmessage?.(obj);
             } else {
-                let { id } = message;
-                this[id](message);
+                let { id } = obj;
+                this[id](obj);
                 delete this[id];
             }
         };
         this.#ws.onclose = (event) => {
-            if (!event.wasClean && this.#tries++ < this.#retries) {
-                setTimeout(() => this.connect(), this.#timeout);
-            }
             this.#onclose?.(event);
+            if (this.#tries++ < this.#retries) {
+                setTimeout(() => this.connect(), this.#timeout);
+            } else {
+                this.#tries = 0;
+            }
         };
     }
 
     disconnect() {
+        this.#tries = Infinity;
         this.#ws.close();
     }
 }
