@@ -3,8 +3,8 @@ class Aria2 {
     #xml;
     #wsa;
     #secret;
-    #id = 0;
     #ws;
+    #id = 0;
     #tries = 0;
     #retries = 10;
     #timeout = 10000;
