@@ -1,3 +1,31 @@
+const hotkeys = {};
+
+for (let hotkey of document.querySelectorAll('[hotkey]')) {
+    let keys = hotkey.getAttribute('hotkey');
+    hotkeys[keys] = hotkey;
+}
+
+document.addEventListener('keydown', (event) => {
+    let { ctrlKey, altKey, shiftKey, key } = event;
+    let keys = [];
+    if (ctrlKey) {
+        keys.push('ctrl');
+    }
+    if (altKey) {
+        keys.push('alt');
+    }
+    if (shiftKey) {
+        keys.push('shift');
+    }
+    keys.push(key.toLowerCase());
+    let hotkey = hotkeys[keys.join('+')];
+    if (hotkey) {
+        event.preventDefault();
+        hotkey.click();
+    }
+});
+
+
 const optionsPane = document.createElement('div');
 optionsPane.id = 'setting';
 optionsPane.className = 'hidden';
