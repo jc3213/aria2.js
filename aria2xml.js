@@ -19,7 +19,7 @@ class Aria2 {
     }
 
     set secret(string) {
-        this.#secret = `token:${string}`;
+        this.#secret = 'token:' + string;
     }
     get secret() {
         return this.#secret.substring(6);
@@ -31,7 +31,7 @@ class Aria2 {
         } else if (string === 'GET') {
             this.call = this.#get;
         } else {
-            throw new TypeError(`Invalid method: expected "POST" or "GET".`);
+            throw new TypeError('Unsupported method: expected "POST" or "GET".');
         }
         this.#method = string;
     }
@@ -39,34 +39,34 @@ class Aria2 {
         return this.#method;
     }
 
-    #json(arg) {
-        if (Array.isArray(arg)) {
+    #json(obj) {
+        if (Array.isArray(obj)) {
             let calls = [];
-            for (let { method, params = [] } of arg) {
+            for (let { method, params = [] } of obj) {
                 params.unshift(this.#secret);
                 calls.push({ methodName: method, params });
             }
-            arg = { method: 'system.multicall', params: [calls] };
+            obj = { method: 'system.multicall', params: [calls] };
         } else {
-            (arg.params ??= []).unshift(this.#secret);
+            (obj.params ??= []).unshift(this.#secret);
         }
-        arg.jsonrpc = '2.0';
-        arg.id = this.#id++;
-        return JSON.stringify(arg);
+        obj.jsonrpc = '2.0';
+        obj.id = this.#id++;
+        return JSON.stringify(obj);
     }
 
     #then(response) {
         if (response.ok) {
             return response.json();
         }
-        throw new Error(response.statusText);
+        throw new Error('Network error: ' + response.status + ' ' + response.statusText);
     }
 
-    #post(arg) {
-        return fetch(this.#url, {method: 'POST', body: this.#json(arg)}).then(this.#then);
+    #post(obj) {
+        return fetch(this.#url, { method: 'POST', body: this.#json(obj) }).then(this.#then);
     }
 
-    #get(arg) {
-        return fetch(`${this.#url}?params=${btoa(unescape(encodeURIComponent(this.#json(arg))))}`).then(this.#then);
+    #get(obj) {
+        return fetch(this.#url + '?params=' + btoa(unescape(encodeURIComponent(this.#json(obj))))).then(this.#then);
     }
 }
