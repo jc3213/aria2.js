@@ -31,7 +31,7 @@ class Aria2 {
         } else if (string === 'GET') {
             this.call = this.#get;
         } else {
-            throw new TypeError('Unsupported method: expected "POST" or "GET".');
+            throw new TypeError('Invalid method: expected "POST" or "GET".');
         }
         this.#method = string;
     }
