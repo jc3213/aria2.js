@@ -35,7 +35,7 @@ class Aria2 {
     }
 
     set secret(string) {
-        this.#secret = `token:${string}`;
+        this.#secret = 'token:' + string;
     }
     get secret() {
         return this.#secret.substring(6);
@@ -78,37 +78,37 @@ class Aria2 {
         return this.#onclose;
     }
 
-    #json(arg) {
-        if (Array.isArray(arg)) {
+    #json(obj) {
+        if (Array.isArray(obj)) {
             let calls = [];
-            for (let { method, params = [] } of arg) {
+            for (let { method, params = [] } of obj) {
                 params.unshift(this.#secret);
                 calls.push({ methodName: method, params });
             }
-            arg = { method: 'system.multicall', params: [calls] };
+            obj = { method: 'system.multicall', params: [calls] };
         } else {
-            (arg.params ??= []).unshift(this.#secret);
+            (obj.params ??= []).unshift(this.#secret);
         }
-        arg.jsonrpc = '2.0';
-        arg.id = this.#id++;
-        return arg;
+        obj.jsonrpc = '2.0';
+        obj.id = this.#id++;
+        return obj;
     }
 
-    #send(arg) {
+    #send(obj) {
         return new Promise((resolve, reject) => {
-            let obj = this.#json(arg);
+            let obj = this.#json(obj);
             this[obj.id] = resolve;
             this.#ws.onerror = reject;
             this.#ws.send(JSON.stringify(obj));
         });
     }
 
-    #post(arg) {
-        return fetch(this.#xml, { method: 'POST', body: JSON.stringify(this.#json(arg)) }).then((response) => {
+    #post(obj) {
+        return fetch(this.#xml, { method: 'POST', body: JSON.stringify(this.#json(obj)) }).then((response) => {
             if (response.ok) {
                 return response.json();
             }
-            throw new Error(`Network error: ${response.status} ${response.statusText}`);
+            throw new Error('Network error: ' + response.status + ' ' + response.statusText);
         });
     }
 
