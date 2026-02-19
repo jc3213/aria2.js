@@ -96,10 +96,10 @@ class Aria2 {
 
     #send(obj) {
         return new Promise((resolve, reject) => {
-            let obj = this.#json(obj);
-            this[obj.id] = resolve;
+            let json = this.#json(obj);
+            this[json.id] = resolve;
             this.#ws.onerror = reject;
-            this.#ws.send(JSON.stringify(obj));
+            this.#ws.send(JSON.stringify(json));
         });
     }
 
