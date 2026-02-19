@@ -78,33 +78,33 @@ class Aria2 {
         return this.#onclose;
     }
 
-    #json(obj) {
-        if (Array.isArray(obj)) {
+    #json(arg) {
+        if (Array.isArray(arg)) {
             let calls = [];
-            for (let { method, params = [] } of obj) {
+            for (let { method, params = [] } of arg) {
                 params.unshift(this.#secret);
                 calls.push({ methodName: method, params });
             }
-            obj = { method: 'system.multicall', params: [calls] };
+            arg = { method: 'system.multicall', params: [calls] };
         } else {
-            (obj.params ??= []).unshift(this.#secret);
+            (arg.params ??= []).unshift(this.#secret);
         }
-        obj.jsonrpc = '2.0';
-        obj.id = this.#id++;
-        return obj;
+        arg.jsonrpc = '2.0';
+        arg.id = this.#id++;
+        return arg;
     }
 
-    #send(obj) {
+    #send(arg) {
         return new Promise((resolve, reject) => {
-            let json = this.#json(obj);
-            this[json.id] = resolve;
+            let obj = this.#json(arg);
+            this[obj.id] = resolve;
             this.#ws.onerror = reject;
-            this.#ws.send(JSON.stringify(json));
+            this.#ws.send(JSON.stringify(obj));
         });
     }
 
-    #post(obj) {
-        return fetch(this.#xml, { method: 'POST', body: JSON.stringify(this.#json(obj)) }).then((response) => {
+    #post(arg) {
+        return fetch(this.#xml, { method: 'POST', body: JSON.stringify(this.#json(arg)) }).then((response) => {
             if (response.ok) {
                 return response.json();
             }
