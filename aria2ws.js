@@ -24,7 +24,7 @@ class Aria2 {
     }
 
     set secret(string) {
-        this.#secret = `token:${string}`;
+        this.#secret = 'token:' + string;
     }
     get secret() {
         return this.#secret.substring(6);
@@ -67,23 +67,23 @@ class Aria2 {
         return this.#onclose;
     }
 
-    call(arg) {
-        if (Array.isArray(arg)) {
+    call(obj) {
+        let id = this.#id++;
+        if (Array.isArray(obj)) {
             let calls = [];
-            for (let { method, params = [] } of arg) {
+            for (let { method, params = [] } of obj) {
                 params.unshift(this.#secret);
                 calls.push({ methodName: method, params });
             }
-            arg = { method: 'system.multicall', params: [calls] };
+            obj = { method: 'system.multicall', params: [calls] };
         } else {
-            (arg.params ??= []).unshift(this.#secret);
+            (obj.params ??= []).unshift(this.#secret);
         }
-        let id = this.#id++;
-        arg.jsonrpc = '2.0';
-        arg.id = id;
+        obj.jsonrpc = '2.0';
+        obj.id = id;
         return new Promise((resolve) => {
             this[id] = resolve;
-            this.#ws.send(JSON.stringify(arg));
+            this.#ws.send(JSON.stringify(obj));
         });
     }
 
