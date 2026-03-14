@@ -465,7 +465,7 @@ const optionsDefault = {
     secret: '',
     retries: 10,
     timeout: 10,
-    interval: 10,
+    interval: 15,
     proxy: '',
     locale: 'en-US'
 };
@@ -488,6 +488,7 @@ function optionsDispatch() {
     aria2RPC.connect();
     setTimeout(() => {
         aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
+            result['disk-cache'] = getFileSize(result['disk-cache']);
             result['min-split-size'] = getFileSize(result['min-split-size']);
             result['max-download-limit'] = getFileSize(result['max-download-limit']);
             result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
