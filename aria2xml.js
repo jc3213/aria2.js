@@ -39,20 +39,20 @@ class Aria2 {
         return this.#method;
     }
 
-    #json(obj) {
-        if (Array.isArray(obj)) {
+    #json(args) {
+        if (Array.isArray(args)) {
             let calls = [];
-            for (let { method, params = [] } of obj) {
+            for (let { method, params = [] } of args) {
                 params.unshift(this.#secret);
                 calls.push({ methodName: method, params });
             }
-            obj = { method: 'system.multicall', params: [calls] };
+            args = { method: 'system.multicall', params: [calls] };
         } else {
-            (obj.params ??= []).unshift(this.#secret);
+            (args.params ??= []).unshift(this.#secret);
         }
-        obj.jsonrpc = '2.0';
-        obj.id = this.#id++;
-        return JSON.stringify(obj);
+        args.jsonrpc = '2.0';
+        args.id = this.#id++;
+        return JSON.stringify(args);
     }
 
     #then(response) {
