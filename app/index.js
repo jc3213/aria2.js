@@ -1,8 +1,23 @@
 const hotkeys = {};
 
-for (let hotkey of document.querySelectorAll('[hotkey]')) {
-    let keys = hotkey.getAttribute('hotkey');
-    hotkeys[keys] = hotkey;
+for (let el of document.querySelectorAll('[hotkey]')) {
+    let keys = el.getAttribute('hotkey').toLowerCase();
+    while (true) {
+        let i = keys.indexOf(';');
+        if (i === -1) {
+            let k = keys.trim();
+            if (k) {
+                hotkeys[k] = el;
+            }
+            break;
+        } else {
+            let k = keys.substring(0, i).trim();
+            if (k) {
+                hotkeys[k] = el;
+            }
+        }
+        keys = keys.substring(i + 1);
+    }
 }
 
 document.addEventListener('keydown', (event) => {
@@ -18,17 +33,17 @@ document.addEventListener('keydown', (event) => {
         keys.push('shift');
     }
     keys.push(key.toLowerCase());
-    let hotkey = hotkeys[keys.join('+')];
+    let combo = keys.join('+');
+    let hotkey = hotkeys[combo];
     if (hotkey) {
         event.preventDefault();
         hotkey.click();
     }
 });
 
-
 const optionsPane = document.createElement('div');
 optionsPane.id = 'setting';
-optionsPane.className = 'hidden';
+optionsPane.className = 'config hidden';
 optionsPane.innerHTML = `
 <div>
     <h4 i18n="option_jsonrpc">JSON-RPC Server</h4>
@@ -38,31 +53,27 @@ optionsPane.innerHTML = `
         <button id="json-rpc">⚙️</button>
     </div>
  </div>
-<div class="flex">
-    <div class="fl-1">
-        <h4 i18n="option_jsonrpc_retries">Max Retries</h4>
-        <input name="retries" type="number" min="-1" step="1">
-    </div>
-    <div class="fl-1">
-        <h4 i18n="option_jsonrpc_timeout">Retry Interval</h4>
-        <div>
-            <input name="timeout" type="number" min="5" max="30" step="1">
-            <span i18n="time_second_full"></span>
-        </div>
+<div class="cfg-item">
+    <h4 i18n="option_jsonrpc_retries">Max Retries</h4>
+    <input name="retries" type="number" min="-1" step="1">
+</div>
+<div class="cfg-item">
+    <h4 i18n="option_jsonrpc_timeout">Retry Interval</h4>
+    <div>
+        <input name="timeout" type="number" min="5" max="30" step="1">
+        <span i18n="time_second_full"></span>
     </div>
 </div>
-<div class="flex">
-    <div class="fl-1">
-        <h4 i18n="option_manager_interval">Update Interval</h4>
-        <div>
-            <input name="interval" type="number" min="1" max="60" step="1">
-            <span i18n="time_second_full"></span>
-        </div>
+<div class="cfg-item">
+    <h4 i18n="option_manager_interval">Update Interval</h4>
+    <div>
+        <input name="interval" type="number" min="1" max="60" step="1">
+        <span i18n="time_second_full"></span>
     </div>
-    <div class="fl-1">
-        <h4 i18n="task_proxy">Proxy Server</h4>
-        <input name="proxy" type="url" placeholder="http://127.0.0.1:1230/">
-    </div>
+</div>
+<div class="cfg-item">
+    <h4 i18n="task_proxy">Proxy Server</h4>
+    <input name="proxy" type="url" placeholder="http://127.0.0.1:1230/">
 </div>
 `;
 
