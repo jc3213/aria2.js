@@ -1,6 +1,5 @@
 class Aria2 {
     #url;
-    #wsa;
     #secret;
     #socket;
     #id = 0;
@@ -18,7 +17,7 @@ class Aria2 {
     }
 
     set url(string) {
-        this.#url = this.#wsa = string.replace('http', 'ws');
+        this.#url = string.replace('http', 'ws');
     }
     get url() {
         return this.#url;
@@ -90,7 +89,7 @@ class Aria2 {
     }
 
     connect() {
-        this.#socket = new WebSocket(this.#wsa);
+        this.#socket = new WebSocket(this.#url);
         this.#socket.onopen = (event) => {
             this.#tries = 0;
             this.#onopen?.(event);
