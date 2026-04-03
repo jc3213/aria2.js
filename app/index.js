@@ -348,26 +348,26 @@ taskFilters(
     (array) => localStorage.setItem('queue', JSON.stringify(array))
 );
 
-i18nEntry.addEventListener('change', (event) => {
-    let locale = i18nEntry.value;
-    localStorage.setItem('locale', locale);
-    i18nUserInterface(locale);
-});
-
-downBtn.addEventListener('click', async (event) => {
+mainMenus['popup_newdld'] = function() {
     downBtn.classList.toggle('checked');
     downPane.classList.toggle('hidden');
     optionsBtn.classList.remove('checked');
     optionsPane.classList.add('hidden');
     jsonrpcPane.classList.add('hidden');
-});
+};
 
-optionsBtn.addEventListener('click', (event) => {
+mainMenus['popup_options'] = function() {
     optionsBtn.classList.toggle('checked');
     optionsPane.classList.toggle('hidden');
     downBtn.classList.remove('checked');
     downPane.classList.add('hidden');
     jsonrpcPane.classList.add('hidden');
+};
+
+i18nEntry.addEventListener('change', (event) => {
+    let locale = i18nEntry.value;
+    localStorage.setItem('locale', locale);
+    i18nUserInterface(locale);
 });
 
 optionsPane.addEventListener('change', (event) => {
