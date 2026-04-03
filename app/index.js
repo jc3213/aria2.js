@@ -337,6 +337,7 @@ document.body.append(optionsPane, downPane, jsonrpcPane, extraCss, i18nCss);
 let aria2Config = {};
 let aria2Storage = new Map();
 
+let [downBtn, purgeBtn, optionsBtn] = menuPane.children;
 let optionsEntries = optionsPane.querySelectorAll('[name]');
 let downloadEntries = downPane.querySelectorAll('[name]');
 let jsonrpcEntries = jsonrpcPane.querySelectorAll('[name]');
