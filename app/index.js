@@ -293,10 +293,6 @@ textarea {
     width: calc(100% - 12px);
 }
 
-button.checked {
-    border-style: inset;
-}
-
 #adduri, #setting, #jsonrpc {
     border-width: 1px;
     border-style: solid;
@@ -306,10 +302,6 @@ button.checked {
     position: absolute;
     width: 600px;
     z-index: 9;
-}
-
-.config {
-    gap: 5px;
 }
 
 #adduri .flex > button, #setting .flex > button {
