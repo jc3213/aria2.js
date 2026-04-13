@@ -316,10 +316,6 @@ textarea {
 #jsonrpc > h1:first-of-type {
     margin-top: 0px;
 }
-
-#jsonrpc i::before {
-    margin-right: 5px;
-}
 `;
 
 const i18nCss = document.createElement('style');
