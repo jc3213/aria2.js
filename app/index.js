@@ -277,7 +277,7 @@ jsonrpcPane.innerHTML = `
         <input name="seed-time" type="number">
         <span i18n="time_minute_full"></span>
     </div>
-    <i class="default"></i>
+    <i class="disabled"></i>
 </div>
 `;
 
@@ -580,11 +580,11 @@ async function i18nUserInterface(lang) {
 }
 
 .default::before {
-    content: "${locale.options_default}";
+    content: "${locale.options_default} = ";
 }
 
 .disabled::before {
-    content: "${locale.options_disabled}";
+    content: "${locale.options_disabled} = ";
 }
 `;
 }
