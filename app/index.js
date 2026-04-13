@@ -87,7 +87,7 @@ downPane.innerHTML = `
         <input type="text">
         <button id="down-file" i18n="task_base64">Upload</button>
         <button id="down-url" i18n="task_submit">Submit</button>
-        <input type="file" accept=".torrent, .metalink, .meta4" multiple>
+        <input type="file" accept=".torrent, .metalink, .meta4" multiple class="hidden">
     </div>
 </div>
 <div i18n-tips="tips_task_entry">
