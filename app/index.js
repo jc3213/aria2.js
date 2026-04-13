@@ -46,7 +46,7 @@ optionsPane.id = 'setting';
 optionsPane.className = 'config hidden';
 optionsPane.innerHTML = `
 <div>
-    <h4 i18n="option_jsonrpc">JSON-RPC Server</h4>
+    <h4 i18n="options_jsonrpc">JSON-RPC Server</h4>
     <div class="flex">
         <input name="url" type="url">
         <input name="secret" type="password" placeholder="$$secret$$">
@@ -54,18 +54,18 @@ optionsPane.innerHTML = `
     </div>
  </div>
 <div class="cfg-item">
-    <h4 i18n="option_jsonrpc_retries">Max Retries</h4>
+    <h4 i18n="options_jsonrpc_retries">Max Retries</h4>
     <input name="retries" type="number" min="-1" step="1">
 </div>
 <div class="cfg-item">
-    <h4 i18n="option_jsonrpc_timeout">Retry Interval</h4>
+    <h4 i18n="options_jsonrpc_timeout">Retry Interval</h4>
     <div>
         <input name="timeout" type="number" min="5" max="30" step="1">
         <span i18n="time_second_full"></span>
     </div>
 </div>
 <div class="cfg-item">
-    <h4 i18n="option_manager_interval">Update Interval</h4>
+    <h4 i18n="options_manager_interval">Update Interval</h4>
     <div>
         <input name="interval" type="number" min="1" max="60" step="1">
         <span i18n="time_second_full"></span>
@@ -142,7 +142,7 @@ jsonrpcPane.innerHTML = `
 <div class="cfg-item" i18n-tips="tips_aria2_file_alloc">
     <h4 i18n="aria2_file_alloc"></h4>
     <select name="file-allocation">
-        <option value="none" i18n="option_disabled"></option>
+        <option value="none" i18n="options_disabled"></option>
         <option value="prealloc" i18n="aria2_alloc_pre"></option>
         <option value="falloc" i18n="aria2_alloc_fast"></option>
         <option value="trunc" i18n="aria2_alloc_trunc"></option>
@@ -277,7 +277,7 @@ jsonrpcPane.innerHTML = `
         <input name="seed-time" type="number">
         <span i18n="time_minute_full"></span>
     </div>
-    <i class="default">30</i>
+    <i class="default"></i>
 </div>
 `;
 
@@ -574,12 +574,17 @@ async function i18nUserInterface(lang) {
     content: "${locale.time_second}";
 }
 
+.sample::before {
+    content: "${locale.options_sample}";
+    text-decoration: underline;
+}
+
 .default::before {
-    content: "${locale.option_default}";
+    content: "${locale.options_default}";
 }
 
 .disabled::before {
-    content: "${locale.option_disabled}";
+    content: "${locale.options_disabled}";
 }
 `;
 }
