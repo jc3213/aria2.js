@@ -137,7 +137,7 @@ jsonrpcPane.innerHTML = `
 <div class="cfg-item" i18n-tips="tips_aria2_down_dir">
     <h4 i18n="aria2_down_dir"></h4>
     <input name="dir" type="text">
-    <i class="sample" title="&quot;C:\Aria2\Download&quot; (Windows)&#10;&#10;&quot;/home/aria2/download&quot; (Linux)"></i>
+    <i class="sample" title="&quot;C:\\Aria2\\Download&quot; (Windows)&#10;&#10;&quot;/home/aria2/download&quot; (Linux)"></i>
 </div>
 <div class="cfg-item" i18n-tips="tips_aria2_file_alloc">
     <h4 i18n="aria2_file_alloc"></h4>
