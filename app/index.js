@@ -341,7 +341,7 @@ taskFilters(
     (array) => localStorage.setItem('queue', JSON.stringify(array))
 );
 
-mainMenus['popup_newdld'] = function() {
+menuEvents['popup_newdld'] = function() {
     downBtn.classList.toggle('checked');
     downPane.classList.toggle('hidden');
     optionsBtn.classList.remove('checked');
@@ -349,7 +349,7 @@ mainMenus['popup_newdld'] = function() {
     jsonrpcPane.classList.add('hidden');
 };
 
-mainMenus['popup_options'] = function() {
+menuEvents['popup_options'] = function() {
     optionsBtn.classList.toggle('checked');
     optionsPane.classList.toggle('hidden');
     downBtn.classList.remove('checked');
