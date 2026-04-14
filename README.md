@@ -98,6 +98,8 @@ aria2.disconnect();
 - send message to JSON-RPC
 ```javascript
 const response = aria2.call( { method, params } );
+```
+```javascript
 const response = aria2.call([ { method, params }, { method, params }, ..., { method, params } ]);
 ```
 - use `WebSocket` or `POST` method based on [scheme](#scheme)
@@ -112,7 +114,8 @@ const response = aria2.call([ { method, params }, { method, params }, ..., { met
 ```javascript
 const { result } = await aria2.call( { method: 'aria2.tellActive' } );
 console.log(result) // All downloading sessions;
-
+```
+```javascript
 const { result } = await aria2.call([ { method: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
 const [ [globalOption], [version] ] = result;
 console.log(globalOption, version); // The options, version and enabled features of JSON-RPC;
