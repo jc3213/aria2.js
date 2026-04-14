@@ -16,15 +16,15 @@
 
 ## Syntax
 ```javascript
-let aria2 = new Aria2("http://localhost:6800/jsonrpc", "mysecret");
+const aria2 = new Aria2("http://localhost:6800/jsonrpc", "mysecret");
 ```
 
 ```javascript
-let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
+const aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
 ```
 
 ```javascript
-let aria2 = new Aria2();
+const aria2 = new Aria2();
 aria2.url = 'wss://example.com:433/jsonrpc';
 aria2.secret = 'mysecret';
 ```
@@ -97,8 +97,8 @@ aria2.disconnect();
 ### call
 - send message to JSON-RPC
 ```javascript
-let response = aria2.call( { method, params } );
-let response = aria2.call([ { method, params }, { method, params }, ..., { method, params } ]);
+const response = aria2.call( { method, params } );
+const response = aria2.call([ { method, params }, { method, params }, ..., { method, params } ]);
 ```
 - use `WebSocket` or `POST` method based on [scheme](#scheme)
 - response
@@ -110,11 +110,11 @@ let response = aria2.call([ { method, params }, { method, params }, ..., { metho
 
 #### Call Sample
 ```javascript
-let { result } = await aria2.call( { method: 'aria2.tellActive' } );
+const { result } = await aria2.call( { method: 'aria2.tellActive' } );
 console.log(result) // All downloading sessions;
 
-let { result } = await aria2.call([ { method: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
-let [ [globalOption], [version] ] = result;
+const { result } = await aria2.call([ { method: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
+const [ [globalOption], [version] ] = result;
 console.log(globalOption, version); // The options, version and enabled features of JSON-RPC;
 ```
 
@@ -143,12 +143,13 @@ aria2.onmessage = function (response: object[]) { ... };
 
 ## Code Sample
 ```javascript
-let jsonrpc = {};
-let session = {};
 let keeplive;
 
-let waiting = new Set([ 'waiting', 'paused' ]);
-let dispatch = {
+const jsonrpc = {};
+const session = {};
+
+const waiting = new Set([ 'waiting', 'paused' ]);
+const dispatch = {
     'aria2.onDownloadStart' (gid, result) {
         console.log("The session #" + gid + " has started");
         session.active[gid] = result;
@@ -172,7 +173,7 @@ let dispatch = {
     }
 };
 
-let aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
+const aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
 aria2.retries = -1;
 
 aria2.onopen = async () => {
@@ -181,7 +182,7 @@ aria2.onopen = async () => {
     session.waiting = {};
     session.stopped = {};
 
-    let { result: [
+    const { result: [
         [options], [version], [stats], [active], [waiting], [stopped]
     ] } = await aria2.call([
         { method: 'aria2.getGlobalOption' },
@@ -196,18 +197,18 @@ aria2.onopen = async () => {
     jsonrpc.version = version;
     jsonrpc.stats = stats;
 
-    for (let a of active) {
+    for (const a of active) {
         session.active[a.gid] = session.all[a.gid] = a;
     }
-    for (let w of waiting) {
+    for (const w of waiting) {
         session.waiting[w.gid] = session.all[w.gid] = w;
     }
-    for (let s of stopped) {
+    for (const s of stopped) {
         session.stopped[s.gid] = session.all[s.gid] = s;
     }
 
     keeplive = setInterval(async () => {
-        let { result: [
+        const { result: [
             [stats], [active]
          ] } = await aria2.call([
             { method: 'aria2.getGlobalStat' },
@@ -225,8 +226,8 @@ aria2.onmessage = async ({ method, params }) => {
         return;
     }
 
-    let [{ gid }] = params;
-    let { result } = await aria2.call({ method: 'aria2.tellStatus', params: [gid] });
+    const [{ gid }] = params;
+    const { result } = await aria2.call({ method: 'aria2.tellStatus', params: [gid] });
 
     (dispatch[method] ?? dispatch.default)(gid, result);
 };
