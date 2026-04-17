@@ -130,7 +130,6 @@ var Aria2 = (function() {
         }
         args.jsonrpc = '2.0';
         args.id = id++;
-        console.log(args);
         return args;
     }
 
