@@ -1,4 +1,4 @@
-var Aria2 = (() => {
+var Aria2 = (function() {
     var url;
     var xml;
     var wsa;
@@ -13,10 +13,16 @@ var Aria2 = (() => {
     var onclose = null;
     var calls = {};
 
-    function initiator(url = 'http://localhost:6800/jsonrpc', secret = '') {
+    function initiator(url, secret) {
+        if (!url) {
+            url = 'http://localhost:6800/jsonrpc';
+        }
+        if (!secret) {
+            secret = '';
+        }
         var rpc = url.split('#');
         this.url = rpc[0];
-        this.secret = rpc[1] ?? secret;
+        this.secret = rpc[1] || secret;
         this.call = xmlpost;
     }
 
@@ -26,79 +32,79 @@ var Aria2 = (() => {
     }
 
     Object.defineProperty(initiator.prototype, 'url', {
-        set(string) {
-            if (string.startsWith('http://') || string.startsWith('https://')) {
+        set: function(string) {
+            if (string.indexOf('http://') === 0 || string.indexOf('https://') === 0) {
                 url = xml = string;
                 wsa = string.replace('http', 'ws');
-            } else if (string.startsWith('ws://') || string.startsWith('wss://')) {
+            } else if (string.indexOf('ws://') === 0 || string.indexOf('wss://') === 0) {
                 xml = string.replace('ws', 'http');
                 url = wsa = string;
             } else {
                 throw new TypeError('Invalid JSON-RPC Endpoint: expected http(s):// or ws(s)://');
             }
         },
-        get() {
+        get: function() {
             return url;
         },
         enumerable: true
     });
 
     Object.defineProperty(initiator.prototype, 'secret', {
-        set(string) {
+        set: function(string) {
             secret = 'token:' + string;
         },
-        get() {
+        get: function() {
             return secret.substring(6);
         }
     });
 
     Object.defineProperty(initiator.prototype, 'retries', {
-        set(number) {
+        set: function(number) {
             var n = number | 0;
             retries = n >= 0 ? n : Infinity;
         },
-        get() {
+        get: function() {
             return retries;
         },
         enumerable: true
     });
 
     Object.defineProperty(initiator.prototype, 'timeout', {
-        set(number) {
+        set: function(number) {
             var n = number | 0;
             timeout = n <= 1 ? 1000 : n * 1000;
         },
-        get() {
+        get: function() {
             return timeout / 1000;
         },
         enumerable: true
     });
 
     Object.defineProperty(initiator.prototype, 'onopen', {
-        set(callback) {
+        set: function(callback) {
             onopen = typeof callback === 'function' ? callback : null;
         },
-        get() {
+        get: function() {
             return onopen;
         },
         enumerable: true
     });
 
     Object.defineProperty(initiator.prototype, 'onmessage', {
-        set(callback) {
+        set: function(callback) {
             onmessage = typeof callback === 'function' ? callback : null;
         },
-        get() {
+        get: function() {
             return onmessage;
         },
         enumerable: true
     });
 
     Object.defineProperty(initiator.prototype, 'onclose', {
-        set(callback) {
+        set: function(callback) {
             onclose = typeof callback === 'function' ? callback : null;
         },
-        get() {
+        get: function() {
             return onclose;
         },
         enumerable: true
@@ -107,16 +113,24 @@ var Aria2 = (() => {
     function request(args) {
         if (Array.isArray(args)) {
             var calls = [];
-            for (var { method, params = [] } of args) {
-                params.unshift(secret);
-                calls.push({ methodName: method, params });
+            for (var i = 0; i < args.length; i++) {
+                var req = {
+                    methodName: args[i].method,
+                    params: args[i].params || []
+                };
+                req.params.unshift(secret);
+                calls.push(req);
             }
             args = { method: 'system.multicall', params: [calls] };
         } else {
-            (args.params ??= []).unshift(secret);
+            if (!args.params) {
+                args.params = [];
+            }
+            args.params.unshift(secret);
         }
         args.jsonrpc = '2.0';
         args.id = id++;
+        console.log(args);
         return args;
     }
 
@@ -139,15 +153,16 @@ var Aria2 = (() => {
     }
 
     initiator.prototype.connect = function() {
+        var self = this;
         socket = new WebSocket(wsa);
-        socket.onopen = (event) => {
-            this.call = wssend;
+        socket.onopen = function(event) {
+            self.call = wssend;
             tries = 0;
             if (onopen) {
                 onopen(event);
             }
         };
-        socket.onmessage = (event) => {
+        socket.onmessage = function(event) {
             var json = JSON.parse(event.data);
             if (json.method) {
                 if (onmessage) {
@@ -155,17 +170,20 @@ var Aria2 = (() => {
                 }
             } else {
                 var id = json.id;
+                console.log(json);
                 calls[id](json);
                 delete calls[id];
             }
         };
-        socket.onclose = (event) => {
-            this.call = xmlpost;
+        socket.onclose = function(event) {
+            self.call = xmlpost;
             if (onclose) {
                 onclose(event);
             }
             if (tries++ < retries) {
-                setTimeout(() => this.connect(), timeout);
+                setTimeout(function() {
+                    self.connect()
+                }, timeout);
             } else {
                 tries = 0;
             }
