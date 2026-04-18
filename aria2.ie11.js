@@ -1,7 +1,5 @@
 var Aria2 = (function() {
-    var properties = new WeakMap();
-
-    var defaultProperties = `{
+    var properties = `{
     "url": null,
     "xml": null,
     "wsa": null,
@@ -18,7 +16,6 @@ var Aria2 = (function() {
 }`;
 
     function initiator(url, secret) {
-        properties.set(this, JSON.parse(defaultProperties));
         if (!url) {
             url = 'http://localhost:6800/jsonrpc';
         }
@@ -26,6 +23,7 @@ var Aria2 = (function() {
             secret = '';
         }
         var rpc = url.split('#');
+        this.props = JSON.parse(properties);
         this.url = rpc[0];
         this.secret = rpc[1] || secret;
         this.call = function(args, callback) {
@@ -35,29 +33,28 @@ var Aria2 = (function() {
 
     Object.defineProperty(initiator.prototype, 'url', {
         set: function(string) {
-            var props = properties.get(this);
             if (string.indexOf('http://') === 0 || string.indexOf('https://') === 0) {
-                props.url = props.xml = string;
-                props.wsa = string.replace('http', 'ws');
+                this.props.url = this.props.xml = string;
+                this.props.wsa = string.replace('http', 'ws');
             } else if (string.indexOf('ws://') === 0 || string.indexOf('wss://') === 0) {
-                props.xml = string.replace('ws', 'http');
-                props.url = props.wsa = string;
+                this.props.xml = string.replace('ws', 'http');
+                this.props.url = this.props.wsa = string;
             } else {
                 throw new TypeError('Invalid JSON-RPC Endpoint: expected http(s):// or ws(s)://');
             }
         },
         get: function() {
-            return properties.get(this).url;
+            return this.props.url;
         },
         enumerable: true
     });
 
     Object.defineProperty(initiator.prototype, 'secret', {
         set: function(string) {
-            properties.get(this).secret = 'token:' + string;
+            this.props.secret = 'token:' + string;
         },
         get: function() {
-            return properties.get(this).substring(6);
+            return this.props.substring(6);
         },
         enumerable: true
     });
@@ -65,10 +62,10 @@ var Aria2 = (function() {
     Object.defineProperty(initiator.prototype, 'retries', {
         set: function(number) {
             var n = number | 0;
-            properties.get(this).retries = n >= 0 ? n : Infinity;
+            this.props.retries = n >= 0 ? n : Infinity;
         },
         get: function() {
-            return properties.get(this).retries;
+            return this.props.retries;
         },
         enumerable: true
     });
@@ -76,40 +73,40 @@ var Aria2 = (function() {
     Object.defineProperty(initiator.prototype, 'timeout', {
         set: function(number) {
             var n = number | 0;
-            properties.get(this).timeout = n <= 1 ? 1000 : n * 1000;
+            this.props.timeout = n <= 1 ? 1000 : n * 1000;
         },
         get: function() {
-            return properties.get(this).timeout / 1000;
+            return this.props.timeout / 1000;
         },
         enumerable: true
     });
 
     Object.defineProperty(initiator.prototype, 'onopen', {
         set: function(callback) {
-            properties.get(this).onopen = typeof callback === 'function' ? callback : null;
+            this.props.onopen = typeof callback === 'function' ? callback : null;
         },
         get: function() {
-            return properties.get(this).onopen;
+            return this.props.onopen;
         },
         enumerable: true
     });
 
     Object.defineProperty(initiator.prototype, 'onmessage', {
         set: function(callback) {
-            properties.get(this).onmessage = typeof callback === 'function' ? callback : null;
+            this.props.onmessage = typeof callback === 'function' ? callback : null;
         },
         get: function() {
-            return properties.get(this).onmessage;
+            return this.props.onmessage;
         },
         enumerable: true
     });
 
     Object.defineProperty(initiator.prototype, 'onclose', {
         set: function(callback) {
-            properties.get(this).onclose = typeof callback === 'function' ? callback : null;
+            this.props.onclose = typeof callback === 'function' ? callback : null;
         },
         get: function() {
-            return properties.get(this).onclose;
+            return this.props.onclose;
         },
         enumerable: true
     });
@@ -139,7 +136,7 @@ var Aria2 = (function() {
     }
 
     function wssend(instance, args, callback) {
-        var props = properties.get(instance);
+        var props = instance.props;
         var json = request(args, props);
         var id = json.id;
         props.calls[id] = callback;
@@ -147,7 +144,7 @@ var Aria2 = (function() {
     }
 
     function xmlpost(instance, args, callback) {
-        var props = properties.get(instance);
+        var props = instance.props;
         var xhr = new XMLHttpRequest();
         xhr.open("POST", xml, true);
         xhr.setRequestHeader("Content-Type", "application/json");
@@ -160,52 +157,50 @@ var Aria2 = (function() {
 
     initiator.prototype.connect = function() {
         var self = this;
-        var props = properties.get(this);
-        props.socket = new WebSocket(props.wsa);
-        props.socket.onopen = function(event) {
+        self.props.socket = new WebSocket(self.props.wsa);
+        self.props.socket.onopen = function(event) {
             self.call = function(args, callback) {
                 return wssend(self, args, callback);
             };
-            props.tries = 0;
-            if (props.onopen) {
-                props.onopen(event);
+            self.props.tries = 0;
+            if (self.props.onopen) {
+                self.props.onopen(event);
             }
         };
-        props.socket.onmessage = function(event) {
+        self.props.socket.onmessage = function(event) {
             var json = JSON.parse(event.data);
             if (json.method) {
-                if (props.onmessage) {
-                    props.onmessage(json);
+                if (self.props.onmessage) {
+                    self.props.onmessage(json);
                 }
             } else {
                 var id = json.id;
-                if (props.calls[id]) {
-                    props.calls[id](json);
-                    delete props.calls[id];
+                if (self.props.calls[id]) {
+                    self.props.calls[id](json);
+                    delete self.props.calls[id];
                 }
             }
         };
-        props.socket.onclose = function(event) {
+        self.props.socket.onclose = function(event) {
             self.call = function(args, callback) {
                 return xmlpost(self, args, callback);
             };
-            if (props.onclose) {
-                props.onclose(event);
+            if (self.props.onclose) {
+                self.props.onclose(event);
             }
-            if (props.tries++ < props.retries) {
+            if (self.props.tries++ < self.props.retries) {
                 setTimeout(function() {
                     self.connect();
-                }, props.timeout);
+                }, self.props.timeout);
             } else {
-                props.tries = 0;
+                self.props.tries = 0;
             }
         };
     };
 
     initiator.prototype.disconnect = function() {
-        var props = properties.get(this);
-        props.tries = Infinity;
-        props.socket.close();
+        this.props.tries = Infinity;
+        this.props.socket.close();
     }
 
     return initiator;
