@@ -26,11 +26,6 @@ var Aria2 = (function() {
         this.call = xmlpost;
     }
 
-    function property(name, action) {
-        action.enumerable = true;
-        Object.defineProperty(initiator.prototype, name, action);
-    }
-
     Object.defineProperty(initiator.prototype, 'url', {
         set: function(string) {
             if (string.indexOf('http://') === 0 || string.indexOf('https://') === 0) {
