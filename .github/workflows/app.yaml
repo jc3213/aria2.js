@@ -1,0 +1,29 @@
+name: Fetch External Assets
+
+on:
+  workflow_dispatch:
+
+  push:
+    paths:
+      - "app/index.html"
+
+jobs:
+  fetch-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetch external JS/CSS
+        run: |
+          curl -L -o app/common.css https://jc3213.github.io/download_with_aria2/chromium/pages/common.css
+          curl -L -o app/popup.css https://jc3213.github.io/download_with_aria2/chromium/pages/popup/popup.css
+          curl -L -o app/popup.js https://jc3213.github.io/download_with_aria2/chromium/pages/popup/popup.js
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/common.css app/popup.css app/popup.js
+          git commit -m "Update external assets"
+          git push
