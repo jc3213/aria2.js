@@ -1,5 +1,4 @@
-name: sync-common-modules
-
+name: update-assets
 on:
   workflow_dispatch:
 
@@ -11,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  fetch-assets:
+  update-assets:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
