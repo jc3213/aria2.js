@@ -23,14 +23,6 @@ jobs:
           curl -L -o app/popup.css https://jc3213.github.io/download_with_aria2/chromium/pages/popup/popup.css
           curl -L -o app/popup.js https://jc3213.github.io/download_with_aria2/chromium/pages/popup/popup.js
 
-      - name: Commit changes
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/common.css app/popup.css app/popup.js
-          git commit -m "Update external assets"
-          git push
-
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
@@ -47,3 +39,11 @@ jobs:
         with:
           name: electron-build
           path: dist/
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/common.css app/popup.css app/popup.js
+          git commit -m "Update external assets" || echo "No changes to commit"
+          git push
