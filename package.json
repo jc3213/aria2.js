@@ -12,6 +12,7 @@
     },
     "build": {
         "appId": "com.aria2tm.jc3213",
+        "publish": null,
         "files": [
             "app/index.html",
             "app/style.css",
