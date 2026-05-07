@@ -1,4 +1,4 @@
-name: fetch-assets-and-build
+name: aria2-task-manager
 
 on:
   workflow_dispatch:
@@ -32,7 +32,9 @@ jobs:
         run: npm install
 
       - name: Build Electron App
-        run: npm run dist
+        run: |
+          export GH_TOKEN=""
+          npm run dist
 
       - name: Upload Electron build artifacts
         uses: actions/upload-artifact@v4
