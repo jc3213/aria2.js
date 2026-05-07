@@ -327,7 +327,7 @@ let aria2Storage = new Map();
 
 let [downBtn, purgeBtn, optionsBtn] = menuPane.children;
 let optionsEntries = optionsPane.querySelectorAll('[name]');
-let remoteBtn = jsonrpcPane.querySelector('button');
+let remoteBtn = optionsPane.querySelector('button');
 let jsonrpcEntries = jsonrpcPane.querySelectorAll('[name]');
 let downEntry = downPane.querySelector('textarea');
 let metaFiles = downPane.querySelector('input[type="file"]');
