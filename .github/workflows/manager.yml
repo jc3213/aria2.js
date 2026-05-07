@@ -41,7 +41,7 @@ jobs:
       - name: Upload Electron build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: electron-build
+          name: electron-build-${{ matrix.os }}
           path: dist/
 
       - name: Commit changes
