@@ -32,10 +32,7 @@ jobs:
         run: npm install
 
       - name: Build Electron App
-        run: |
-          export ELECTRON_BUILDER_DISABLE_PUBLISH=true
-          export CSC_IDENTITY_AUTO_DISCOVERY=false
-          npm run dist
+        run: npm run dist
 
       - name: Upload Electron build artifacts
         uses: actions/upload-artifact@v4
