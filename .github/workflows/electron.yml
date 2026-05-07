@@ -22,7 +22,6 @@ jobs:
           curl -L -o app/common.css https://jc3213.github.io/download_with_aria2/chromium/pages/common.css
           curl -L -o app/popup.css https://jc3213.github.io/download_with_aria2/chromium/pages/popup/popup.css
           curl -L -o app/popup.js https://jc3213.github.io/download_with_aria2/chromium/pages/popup/popup.js
-          curl -L -o app/aria2.js https://jc3213.github.io/aria2.js/aria2.js
 
       - name: Commit changes
         run: |
@@ -44,7 +43,7 @@ jobs:
         run: npm run dist
 
       - name: Upload Electron build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: electron-build
           path: dist/
