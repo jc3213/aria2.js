@@ -1,4 +1,4 @@
-name: fetch-assets-and-build
+name: aria2-task-manager
 
 on:
   workflow_dispatch:
