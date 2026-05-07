@@ -21,7 +21,7 @@
             "app/popup.css",
             "app/popup.js",
             "aria2.js",
-            "package.json",
+            "package.json"
         ]
-      }
+    }
 }
