@@ -11,7 +11,7 @@ const params = {
 
 function createWindow() {
     const new_window = new BrowserWindow(params);
-    new_window.loadFile(path.join(__dirname, 'index.html'));
+    new_window.loadFile(path.join(__dirname, 'app/index.html'));
 }
 
 app.whenReady().then(createWindow);

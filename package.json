@@ -13,13 +13,13 @@
     "build": {
         "appId": "com.aria2tm.jc3213",
         "files": [
-            "index.html",
-            "style.css",
-            "script.js",
-            "app.js",
-            "common.css",
-            "popup.css",
-            "popup.js",
+            "app/index.html",
+            "app/style.css",
+            "app/script.js",
+            "app/app.js",
+            "app/common.css",
+            "app/popup.css",
+            "app/popup.js",
             "aria2.js",
             "package.json",
         ]
