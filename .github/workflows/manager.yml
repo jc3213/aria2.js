@@ -1,4 +1,4 @@
-name: aria2-task-manager
+name: fetch-assets-and-build
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  update-assets:
+  build-task-manager:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,7 +33,8 @@ jobs:
 
       - name: Build Electron App
         run: |
-          export GH_TOKEN=""
+          export ELECTRON_BUILDER_DISABLE_PUBLISH=true
+          export CSC_IDENTITY_AUTO_DISCOVERY=false
           npm run dist
 
       - name: Upload Electron build artifacts
