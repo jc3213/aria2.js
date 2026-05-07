@@ -327,10 +327,11 @@ let aria2Storage = new Map();
 
 let [downBtn, purgeBtn, optionsBtn] = menuPane.children;
 let optionsEntries = optionsPane.querySelectorAll('[name]');
-let downloadEntries = downPane.querySelectorAll('[name]');
+let remoteBtn = jsonrpcPane.querySelector('button');
 let jsonrpcEntries = jsonrpcPane.querySelectorAll('[name]');
 let downEntry = downPane.querySelector('textarea');
 let metaFiles = downPane.querySelector('input[type="file"]');
+let downloadEntries = downPane.querySelectorAll('[name]');
 
 taskFilters(
     JSON.parse(localStorage.getItem('queue')) ?? [],
@@ -368,7 +369,7 @@ optionsPane.addEventListener('change', (event) => {
     localStorage.setItem(name, value);
 });
 
-optionsPane.querySelector('button').addEventListener('click', (event) => {
+remoteBtn.addEventListener('click', (event) => {
     aria2RPC.disconnect();
     optionsDispatch();
     jsonrpcPane.classList.remove('hidden');
@@ -487,6 +488,7 @@ function optionsDispatch() {
     aria2Delay = aria2Storage.get('interval') * 1000;
     aria2RPC.connect();
     setTimeout(() => {
+        downBtn.disabled = remoteBtn.disabled = false;
         aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
             result['disk-cache'] = getFileSize(result['disk-cache']);
             result['min-split-size'] = getFileSize(result['min-split-size']);
@@ -500,6 +502,8 @@ function optionsDispatch() {
                 let { name } = entry;
                 entry.value = aria2Config[name] ?? '';
             }
+        }).catch(() => {
+            downBtn.disabled = remoteBtn.disabled = true;
         });
     }, 500);
 }
