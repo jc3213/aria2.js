@@ -5,13 +5,17 @@ on:
   push:
     paths:
       - "app/**"
+      - "package.json"
 
 permissions:
   contents: write
 
 jobs:
-  build-task-manager:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Checkout repo
