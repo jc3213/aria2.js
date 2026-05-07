@@ -1,6 +1,6 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
-const params = {
+const wins = {
     width: 1200,
     height: 800,
     webPreferences: {
@@ -10,8 +10,9 @@ const params = {
 };
 
 function createWindow() {
-    const new_window = new BrowserWindow(params);
-    new_window.loadFile(path.join(__dirname, 'app/index.html'));
+    const newWindow = new BrowserWindow(wins);
+    const indexPath = path.join(app.getAppPath(), 'app/index.html');
+    newWndow.loadFile(indexPath);
 }
 
 app.whenReady().then(createWindow);
