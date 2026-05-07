@@ -1,0 +1,27 @@
+{
+    "name": "aria2-task-manager",
+    "version": "1.0.0",
+    "main": "app/app.js",
+    "scripts": {
+        "start": "electron .",
+        "dist": "electron-builder"
+    },
+    "devDependencies": {
+        "electron": "^30.0.0",
+        "electron-builder": "^24.0.0"
+    },
+    "build": {
+        "appId": "com.aria2tm.jc3213",
+        "files": [
+            "index.html",
+            "style.css",
+            "script.js",
+            "app.js",
+            "common.css",
+            "popup.css",
+            "popup.js",
+            "aria2.js",
+            "package.json",
+        ]
+      }
+}
