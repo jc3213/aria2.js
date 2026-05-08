@@ -328,10 +328,9 @@ let aria2Storage = new Map();
 let [downBtn, purgeBtn, optionsBtn] = menuPane.children;
 let optionsEntries = optionsPane.querySelectorAll('[name]');
 let remoteBtn = optionsPane.querySelector('button');
-let jsonrpcEntries = jsonrpcPane.querySelectorAll('[name]');
 let downEntry = downPane.querySelector('textarea');
 let metaFiles = downPane.querySelector('input[type="file"]');
-let downloadEntries = downPane.querySelectorAll('[name]');
+let remoteEntries = [jsonrpcPane.querySelectorAll('[name]'), downPane.querySelectorAll('[name]')];
 
 taskFilters(
     JSON.parse(localStorage.getItem('queue')) ?? [],
@@ -489,13 +488,14 @@ function getGlobalOption() {
         result['disk-cache'] = getFileSize(result['disk-cache']);
         result['min-split-size'] = getFileSize(result['min-split-size']);
         result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
-        for (let entry of jsonrpcEntries) {
-            let { name } = entry;
-            aria2Config[name] = entry.value = result[name] ??= '';
-        }
-        for (let entry of downloadEntries) {
-            let { name } = entry;
-            entry.value = aria2Config[name] ?? '';
+        for (let entries of remoteEntries) {
+            for (let entry of entries) {
+                let { name } = entry;
+                let value = result[name];
+                if (value) {
+                    entry.value = aria2Config[name] = value;
+                }
+            }
         }
         downBtn.disabled = remoteBtn.disabled = false;
     }).catch(() => {
