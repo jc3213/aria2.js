@@ -50,7 +50,7 @@ optionsPane.innerHTML = `
     <div class="flex">
         <input name="url" type="url">
         <input name="secret" type="password" placeholder="$$secret$$">
-        <button id="json-rpc">⚙️</button>
+        <button id="json-rpc" disabled>⚙️</button>
     </div>
  </div>
 <div class="cfg-item">
@@ -487,25 +487,6 @@ function optionsDispatch() {
     aria2Proxy = aria2Storage.get('proxy');
     aria2Delay = aria2Storage.get('interval') * 1000;
     aria2RPC.connect();
-    setTimeout(() => {
-        downBtn.disabled = remoteBtn.disabled = false;
-        aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
-            result['disk-cache'] = getFileSize(result['disk-cache']);
-            result['min-split-size'] = getFileSize(result['min-split-size']);
-            result['max-download-limit'] = getFileSize(result['max-download-limit']);
-            result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
-            for (let entry of jsonrpcEntries) {
-                let { name } = entry;
-                aria2Config[name] = entry.value = result[name] ??= '';
-            }
-            for (let entry of downloadEntries) {
-                let { name } = entry;
-                entry.value = aria2Config[name] ?? '';
-            }
-        }).catch(() => {
-            downBtn.disabled = remoteBtn.disabled = true;
-        });
-    }, 500);
 }
 
 const i18nLang = new Set(['en-US', 'zh-CN']);
@@ -593,6 +574,27 @@ async function i18nUserInterface(lang) {
     let locale = getOptionValue('locale');
     i18nEntry.value = locale;
     i18nUserInterface(locale);
+    let { onopen } = aria2RPC;
+    aria2RPC.onopen = () => {
+        onopen();
+        aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
+            result['disk-cache'] = getFileSize(result['disk-cache']);
+            result['min-split-size'] = getFileSize(result['min-split-size']);
+            result['max-download-limit'] = getFileSize(result['max-download-limit']);
+            result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
+            for (let entry of jsonrpcEntries) {
+                let { name } = entry;
+                aria2Config[name] = entry.value = result[name] ??= '';
+            }
+            for (let entry of downloadEntries) {
+                let { name } = entry;
+                entry.value = aria2Config[name] ?? '';
+            }
+            downBtn.disabled = remoteBtn.disabled = false;
+        }).catch(() => {
+            downBtn.disabled = remoteBtn.disabled = true;
+        })
+    }
     for (let entry of optionsEntries) {   
         let { name, type } = entry;
         let value = entry.value = getOptionValue(name);
