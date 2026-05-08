@@ -1,8 +1,8 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const wins = {
-    width: 1290,
-    height: 840,
+    width: 1310,
+    height: 1220,
     webPreferences: {
         contextIsolation: true,
         nodeIntegration: false
