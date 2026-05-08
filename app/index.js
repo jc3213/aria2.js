@@ -478,7 +478,7 @@ function getOptionValue(key) {
 }
 
 function getGlobalOption() {
-    return aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
+    aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
         result['disk-cache'] = getFileSize(result['disk-cache']);
         result['min-split-size'] = getFileSize(result['min-split-size']);
         result['max-download-limit'] = getFileSize(result['max-download-limit']);
@@ -593,7 +593,10 @@ async function i18nUserInterface(lang) {
     i18nEntry.value = locale;
     i18nUserInterface(locale);
     let { onopen } = aria2RPC;
-    aria2RPC.onopen = () => getGlobalOption.then(onopen);
+    aria2RPC.onopen = () => {
+        onopen();
+        getGlobalOption();
+    };
     for (let entry of optionsEntries) {   
         let { name, type } = entry;
         let value = entry.value = getOptionValue(name);
