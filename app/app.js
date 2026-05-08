@@ -11,13 +11,16 @@ const wins = {
     }
 };
 
-function createWindow() {
-    const newWindow = new BrowserWindow(wins);
+let newWindow = null;
+
+app.whenReady().then(() => {
+    newWindow = new BrowserWindow(wins);
     const indexPath = path.join(process.resourcesPath, 'app/index.html');
     newWindow.loadFile(indexPath);
-}
-
-app.whenReady().then(createWindow);
+    newWindow.on('close', () => {
+        newWindow = null;
+    };
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
