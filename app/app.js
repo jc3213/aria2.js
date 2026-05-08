@@ -2,7 +2,7 @@ const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const wins = {
     width: 1310,
-    height: 1186,
+    height: 1156,
     autoHideMenuBar: true,
     menuBarVisible: false,
     webPreferences: {
