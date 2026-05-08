@@ -123,7 +123,7 @@ downPane.innerHTML = `
 <div class="cfg-item" i18n-tips="tips_task_download">
     <h4 i18n="task_download">Max Download Speed</h4>
     <div>
-        <input name="max-download-limit" type="text">
+        <input name="max-download-limit" type="text" value="0">
         <span class="float">B/s</span>
     </div>
 </div>
@@ -488,7 +488,6 @@ function getGlobalOption() {
     aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
         result['disk-cache'] = getFileSize(result['disk-cache']);
         result['min-split-size'] = getFileSize(result['min-split-size']);
-        result['max-download-limit'] = getFileSize(result['max-download-limit']);
         result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
         for (let entry of jsonrpcEntries) {
             let { name } = entry;
