@@ -2,7 +2,9 @@ const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const wins = {
     width: 1310,
-    height: 1220,
+    height: 1186,
+    autoHideMenuBar: true,
+    menuBarVisible: false,
     webPreferences: {
         contextIsolation: true,
         nodeIntegration: false
@@ -11,7 +13,7 @@ const wins = {
 
 function createWindow() {
     const newWindow = new BrowserWindow(wins);
-    const indexPath = path.join(app.getAppPath(), 'app/index.html');
+    const indexPath = path.join(process.resourcesPath, 'app/index.html');
     newWindow.loadFile(indexPath);
 }
 
