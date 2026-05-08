@@ -370,8 +370,6 @@ optionsPane.addEventListener('change', (event) => {
 });
 
 remoteBtn.addEventListener('click', (event) => {
-    aria2RPC.disconnect();
-    optionsDispatch();
     jsonrpcPane.classList.remove('hidden');
 });
 
@@ -380,7 +378,7 @@ jsonrpcPane.addEventListener('change', (event) => {
     aria2Config[name] = value;
 });
 
-function downEventSubmit() {
+function downloadURLs() {
     let urls = downEntry.value.match(/(https?:\/\/|ftp:\/\/|magnet:\?)[^\s\n]+/g);
     if (!urls) {
         downBtn.click();
@@ -398,7 +396,7 @@ function downEventSubmit() {
     });
 }
 
-async function metaFileDownload(files) {
+async function downloadFiles(files) {
     let options = { ...aria2Config };
     let datas = [];
     options['out'] = options['referer'] = options['user-agent'] = null;
@@ -430,8 +428,8 @@ async function metaFileDownload(files) {
     });
 }
 
-const downEventMap = {
-    'down-url': downEventSubmit,
+const downEvents = {
+    'down-url': downloadURLs,
     'down-file': () => metaFiles.click(),
     'all-proxy': (event) => event.target.previousElementSibling.value = aria2Storage.get('proxy')
 };
@@ -439,7 +437,7 @@ const downEventMap = {
 downPane.addEventListener('click', (event) => {
     let { id, localName } = event.target;
     if (id || localName === 'button') {
-        downEventMap[id](event);
+        downEvents[id](event);
     }
 });
 
@@ -448,7 +446,7 @@ downPane.addEventListener('change', (event) => {
     if (name) {
         aria2Config[name] = value;
     } else if (files) {
-        metaFileDownload(files);
+        downloadFiles(files);
     }
 });
 
@@ -458,7 +456,7 @@ downPane.addEventListener('dragover', (event) => {
 
 downPane.addEventListener('drop', (event) => {
     event.preventDefault();
-    metaFileDownload(event.dataTransfer.files);
+    downloadFiles(event.dataTransfer.files);
 });
 
 const optionsDefault = {
@@ -477,6 +475,26 @@ function getOptionValue(key) {
         return optionsDefault[key];
     }
     return value;
+}
+
+function getGlobalOption() {
+    return aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
+        result['disk-cache'] = getFileSize(result['disk-cache']);
+        result['min-split-size'] = getFileSize(result['min-split-size']);
+        result['max-download-limit'] = getFileSize(result['max-download-limit']);
+        result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
+        for (let entry of jsonrpcEntries) {
+            let { name } = entry;
+            aria2Config[name] = entry.value = result[name] ??= '';
+        }
+        for (let entry of downloadEntries) {
+            let { name } = entry;
+            entry.value = aria2Config[name] ?? '';
+        }
+        downBtn.disabled = remoteBtn.disabled = false;
+    }).catch(() => {
+        downBtn.disabled = remoteBtn.disabled = true;
+    });
 }
 
 function optionsDispatch() {
@@ -575,26 +593,7 @@ async function i18nUserInterface(lang) {
     i18nEntry.value = locale;
     i18nUserInterface(locale);
     let { onopen } = aria2RPC;
-    aria2RPC.onopen = () => {
-        onopen();
-        aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
-            result['disk-cache'] = getFileSize(result['disk-cache']);
-            result['min-split-size'] = getFileSize(result['min-split-size']);
-            result['max-download-limit'] = getFileSize(result['max-download-limit']);
-            result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
-            for (let entry of jsonrpcEntries) {
-                let { name } = entry;
-                aria2Config[name] = entry.value = result[name] ??= '';
-            }
-            for (let entry of downloadEntries) {
-                let { name } = entry;
-                entry.value = aria2Config[name] ?? '';
-            }
-            downBtn.disabled = remoteBtn.disabled = false;
-        }).catch(() => {
-            downBtn.disabled = remoteBtn.disabled = true;
-        })
-    }
+    aria2RPC.onopen = () => getGlobalOption.then(onopen);
     for (let entry of optionsEntries) {   
         let { name, type } = entry;
         let value = entry.value = getOptionValue(name);
