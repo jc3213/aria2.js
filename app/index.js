@@ -360,6 +360,8 @@ i18nEntry.addEventListener('change', (event) => {
     i18nUserInterface(locale);
 });
 
+let updateStorage;
+
 optionsPane.addEventListener('change', (event) => {
     let { name, type, value } = event.target;
     if (type === 'number') {
@@ -367,6 +369,11 @@ optionsPane.addEventListener('change', (event) => {
     }
     aria2Storage.set(name, value);
     localStorage.setItem(name, value);
+    clearTimeout(updateStorage);
+    updateStorage = setTimeout(() => {
+        aria2RPC.disconnect();
+        optionsDispatch();
+    }, 2500);
 });
 
 remoteBtn.addEventListener('click', (event) => {
