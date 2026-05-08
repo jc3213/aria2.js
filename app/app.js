@@ -15,11 +15,11 @@ let newWindow = null;
 
 app.whenReady().then(() => {
     newWindow = new BrowserWindow(wins);
-    const indexPath = path.join(process.resourcesPath, 'app/index.html');
+    const indexPath = path.join(app.getAppPath(), 'app/index.html');
     newWindow.loadFile(indexPath);
     newWindow.on('close', () => {
         newWindow = null;
-    };
+    });
 });
 
 app.on('window-all-closed', () => {
