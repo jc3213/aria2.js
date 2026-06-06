@@ -132,7 +132,7 @@ var Aria2 = (function() {
         let calls = [];
         for (let i = 0, l = args.length; i < l; i++) {
             let { method, params = [] } = args[i];
-            calls.push({ methodName: method, params: [ this.props.secret, ...params ] });
+            calls[i] = { methodName: method, params: [ this.#secret, ...params ] };
         }
         this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method: 'system.multicall', params: [calls] }, callback);
     }
