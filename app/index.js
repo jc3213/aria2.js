@@ -1,22 +1,21 @@
 const hotkeys = {};
 
+for (let el of document.querySelectorAll('[i18n]')) {
+    let i18n = el.getAttribute('i18n');
+    el.textContent = chrome.i18n.getMessage(i18n);
+}
+
+for (let el of document.querySelectorAll('[i18n-tips]')) {
+    let tips = el.getAttribute('i18n-tips')
+    el.title = chrome.i18n.getMessage(tips);
+}
+
 for (let el of document.querySelectorAll('[hotkey]')) {
-    let keys = el.getAttribute('hotkey').toLowerCase();
-    while (true) {
-        let i = keys.indexOf(';');
-        if (i === -1) {
-            let k = keys.trim();
-            if (k) {
-                hotkeys[k] = el;
-            }
-            break;
-        } else {
-            let k = keys.substring(0, i).trim();
-            if (k) {
-                hotkeys[k] = el;
-            }
+    for (let keys of el.getAttribute('hotkey').toLowerCase().split('\n')) {
+        let combo = keys.trim();
+        if (combo) {
+            hotkeys[combo] = el;
         }
-        keys = keys.substring(i + 1);
     }
 }
 
@@ -397,7 +396,7 @@ function downloadURLs() {
     for (let url of urls) {
         params.push({ method: 'aria2.addUri', params: [[url], options] });
     }
-    aria2RPC.call(params).then(() => {
+    aria2RPC.multicall(params).then(() => {
         downBtn.click();
     });
 }
@@ -429,7 +428,7 @@ async function downloadFiles(files) {
         }));
     }
     let params = await Promise.all(datas);
-    aria2RPC.call(params).then(() => {
+    aria2RPC.multicall(params).then(() => {
         downBtn.click();
     });
 }
