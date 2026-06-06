@@ -26,9 +26,7 @@ var Aria2 = (function() {
         this.props = JSON.parse(properties);
         this.url = rpc[0];
         this.secret = rpc[1] || secret;
-        this.call = function(args, callback) {
-            return xmlpost(this, args, callback);
-        };
+        this.props.call = this.post;
     }
 
     Object.defineProperty(initiator.prototype, 'url', {
@@ -111,57 +109,27 @@ var Aria2 = (function() {
         enumerable: true
     });
 
-    function request(args, props) {
-        if (Array.isArray(args)) {
-            var calls = [];
-            for (var i = 0; i < args.length; i++) {
-                var req = {
-                    methodName: args[i].method,
-                    params: args[i].params || []
-                };
-                req.params.unshift(props.secret);
-                calls.push(req);
-            }
-            args = { method: 'system.multicall', params: [calls] };
-        } else {
-            if (!args.params) {
-                args.params = [];
-            }
-            args.params.unshift(props.secret);
-        }
-
-        args.jsonrpc = '2.0';
-        args.id = props.id++;
-        return args;
+    initiator.prototype.send = function(json, callback) {
+        this.props.calls[json.id] = callback;
+        this.props.socket.send(JSON.stringify(json));
     }
 
-    function wssend(instance, args, callback) {
-        var props = instance.props;
-        var json = request(args, props);
-        var id = json.id;
-        props.calls[id] = callback;
-        props.socket.send(JSON.stringify(json));
-    }
-
-    function xmlpost(instance, args, callback) {
-        var props = instance.props;
+    initiator.prototype.post = function(json, callback) {
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", xml, true);
-        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.open('POST', xml, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
             var json = JSON.parse(xhr.responseText);
             callback(json);
         };
-        xhr.send(JSON.stringify(request(args, props)));
+        xhr.send(JSON.stringify(json));
     }
 
     initiator.prototype.connect = function() {
         var self = this;
         self.props.socket = new WebSocket(self.props.wsa);
         self.props.socket.onopen = function(event) {
-            self.call = function(args, callback) {
-                return wssend(self, args, callback);
-            };
+            self.props.call = this.send;
             self.props.tries = 0;
             if (self.props.onopen) {
                 self.props.onopen(event);
@@ -182,9 +150,7 @@ var Aria2 = (function() {
             }
         };
         self.props.socket.onclose = function(event) {
-            self.call = function(args, callback) {
-                return xmlpost(self, args, callback);
-            };
+            self.props.call = this.post;
             if (self.props.onclose) {
                 self.props.onclose(event);
             }
@@ -201,6 +167,22 @@ var Aria2 = (function() {
     initiator.prototype.disconnect = function() {
         this.props.tries = Infinity;
         this.props.socket.close();
+    }
+
+    initiator.prototype.call = function() {
+        let { method, params = [] } = arg;
+        params.unshift(this.#secret);
+        return this.props.call({ jsonrpc: '2.0', id: this.#id++, method, params });
+    }
+
+    initiator.prototype.multicall = function() {
+        let calls = [];
+        for (let i = 0, l = args.length; i < l; i++) {
+            let { method, params = [] } = args[i];
+            params.unshift(this.#secret);
+            calls[i] = { methodName: method, params };
+        }
+        return this.props.call({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
     }
 
     return initiator;
