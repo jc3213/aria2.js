@@ -123,11 +123,12 @@ const response = aria2.multicall([ { method, params }, { method, params }, ..., 
 
 #### Call Sample
 ```javascript
-const { result } = await aria2.call( { method: 'aria2.tellActive' } );
+const { result } = await aria2.call('aria2.tellActive');
 console.log(result) // All downloading sessions;
 ```
+
 ```javascript
-const { result } = await aria2.call([ { method: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
+const { result } = await aria2.multicall([ { method: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
 const [ [globalOption], [version] ] = result;
 console.log(globalOption, version); // The options, version and enabled features of JSON-RPC;
 ```
@@ -198,7 +199,7 @@ aria2.onopen = async () => {
 
     const { result: [
         [options], [version], [stats], [active], [waiting], [stopped]
-    ] } = await aria2.call([
+    ] } = await aria2.multicall([
         { method: 'aria2.getGlobalOption' },
         { method: 'aria2.getVersion' },
         { method: 'aria2.getGlobalStat' },
@@ -224,7 +225,7 @@ aria2.onopen = async () => {
     keeplive = setInterval(async () => {
         const { result: [
             [stats], [active]
-         ] } = await aria2.call([
+         ] } = await aria2.multicall([
             { method: 'aria2.getGlobalStat' },
             { method: 'aria2.tellActive'}
         ]);
@@ -241,7 +242,7 @@ aria2.onmessage = async ({ method, params }) => {
     }
 
     const [{ gid }] = params;
-    const { result } = await aria2.call({ method: 'aria2.tellStatus', params: [gid] });
+    const { result } = await aria2.call('aria2.tellStatus', [gid]);
 
     (dispatch[method] ?? dispatch.default)(gid, result);
 };
