@@ -130,14 +130,17 @@ var Aria2 = (function() {
             callback = params;
             params = [];
         }
-        arg.params.unshift(this.props.secret);
+        params.unshift(this.props.secret);
         this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method, params }, callback);
     }
 
     initiator.prototype.multicall = function(args, callback) {
-        let calls = [];
-        for (let i = 0, l = args.length; i < l; i++) {
-            let { method, params = [] } = args[i];
+        var calls = [];
+        for (var i = 0, l = args.length; i < l; i++) {
+            var json = args[i];
+            var params = json.params || [];
+            var method = json.method;
+            params.unshift(this.props.secret);
             calls[i] = { methodName: method, params: [ this.#secret, ...params ] };
         }
         this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method: 'system.multicall', params: [calls] }, callback);
@@ -160,7 +163,7 @@ var Aria2 = (function() {
                     self.props.onmessage(json);
                 }
             } else {
-                let resolve = self.props.call[json.id];
+                var resolve = self.props.call[json.id];
                 if (typeof resolve === 'function') {
                     resolve(json);
                 }
