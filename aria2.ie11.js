@@ -174,13 +174,12 @@ var Aria2 = (function() {
     }
 
     initiator.prototype.multicall = function(args, callback) {
-        let calls = [];
         for (let i = 0, l = args.length; i < l; i++) {
             let { method, params = [] } = args[i];
-            params.unshift(this.props.secret);
-            calls[i] = { methodName: method, params };
+            params.unshift(this.#secret);
+            args[i] = { methodName: method, params };
         }
-        this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method: 'system.multicall', params: [calls] }, callback);
+        this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method: 'system.multicall', params: [args] }, callback);
     }
 
     return initiator;
