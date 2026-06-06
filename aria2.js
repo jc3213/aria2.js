@@ -2,7 +2,7 @@ class Aria2 {
     #url;
     #xml;
     #wsa;
-    #echo;
+    #call;
     #secret;
     #socket;
     #id = 0;
@@ -17,7 +17,7 @@ class Aria2 {
         let rpc = url.split('#');
         this.url = rpc[0];
         this.secret = rpc[1] ?? secret;
-        this.#echo = this.#post;
+        this.#call = this.#post;
     }
 
     set url(string) {
@@ -99,7 +99,7 @@ class Aria2 {
     call(arg) {
         let { method, params = [] } = arg;
         params.unshift(this.#secret);
-        return this.#echo({ jsonrpc: '2.0', id: this.#id++, method, params });
+        return this.#call({ jsonrpc: '2.0', id: this.#id++, method, params });
     }
 
     multicall(args) {
@@ -109,13 +109,13 @@ class Aria2 {
             params.unshift(this.#secret);
             calls[i] = { methodName: method, params };
         }
-        return this.#echo({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
+        return this.#call({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
     }
 
     connect() {
         this.#socket = new WebSocket(this.#wsa);
         this.#socket.onopen = (event) => {
-            this.#echo = this.#send;
+            this.#call = this.#send;
             this.#tries = 0;
             this.#onopen?.(event);
         };
@@ -130,7 +130,7 @@ class Aria2 {
             }
         };
         this.#socket.onclose = (event) => {
-            this.#echo = this.#post;
+            this.#call = this.#post;
             this.#onclose?.(event);
             if (this.#tries++ < this.#retries) {
                 setTimeout(() => this.connect(), this.#timeout);
