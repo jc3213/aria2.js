@@ -100,6 +100,10 @@ aria2.disconnect();
 ```javascript
 const response = aria2.call(method, params);
 ```
+```javascript
+const { result } = await aria2.call('aria2.tellActive');
+console.log(result) // All downloading sessions;
+```
 - response
     - `Promise` object, return response from JSON-RPC if fulfilled
 - [method](#method-1) **required**
@@ -109,6 +113,11 @@ const response = aria2.call(method, params);
 - send batch of messages to JSON-RPC
 ```javascript
 const response = aria2.multicall([ { method, params }, { method, params }, ..., { method, params } ]);
+```
+```javascript
+const { result } = await aria2.multicall([ { method: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
+const [ [globalOption], [version] ] = result;
+console.log(globalOption, version); // The options, version and enabled features of JSON-RPC;
 ```
 - response
     - `Promise` object, return an array of resposne from JSON-RPC if fulfilled
@@ -120,18 +129,6 @@ const response = aria2.multicall([ { method, params }, { method, params }, ..., 
 
 #### params
 - JSON-RPC method call parameters
-
-#### Call Sample
-```javascript
-const { result } = await aria2.call('aria2.tellActive');
-console.log(result) // All downloading sessions;
-```
-
-```javascript
-const { result } = await aria2.multicall([ { method: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
-const [ [globalOption], [version] ] = result;
-console.log(globalOption, version); // The options, version and enabled features of JSON-RPC;
-```
 
 ## Events
 - [onopen](#onopen)
