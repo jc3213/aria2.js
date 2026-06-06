@@ -3,6 +3,7 @@ class Aria2 {
     #secret;
     #method;
     #id = 0;
+    #call;
 
     constructor(url = 'http://localhost:6800/jsonrpc', secret = '') {
         let rpc = url.split('#');
@@ -27,9 +28,9 @@ class Aria2 {
 
     set method(string) {
         if (string === 'POST') {
-            this.call = this.#post;
+            this.#call = this.#post;
         } else if (string === 'GET') {
-            this.call = this.#get;
+            this.#call = this.#get;
         } else {
             throw new TypeError('Invalid method: expected "POST" or "GET".');
         }
@@ -42,7 +43,7 @@ class Aria2 {
     call(arg) {
         let { method, params = [] } = arg;
         params.unshift(this.#secret);
-        return this.#echo({ jsonrpc: '2.0', id: this.#id++, method, params });
+        return this.#call({ jsonrpc: '2.0', id: this.#id++, method, params });
     }
 
     multicall(args) {
@@ -52,7 +53,7 @@ class Aria2 {
             params.unshift(this.#secret);
             calls[i] = { methodName: method, params };
         }
-        return this.#echo({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
+        return this.#call({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
     }
 
     #then(response) {
