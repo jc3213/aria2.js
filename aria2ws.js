@@ -67,25 +67,28 @@ class Aria2 {
         return this.#onclose;
     }
 
-    call(args) {
-        let id = this.#id++;
-        if (Array.isArray(args)) {
-            let calls = [];
-            for (let { method, params = [] } of args) {
-                params.unshift(this.#secret);
-                calls.push({ methodName: method, params });
-            }
-            args = { method: 'system.multicall', params: [calls] };
-        } else {
-            (args.params ??= []).unshift(this.#secret);
-        }
-        args.jsonrpc = '2.0';
-        args.id = id;
+    #send(json) {
         return new Promise((resolve, reject) => {
-            this[id] = resolve;
+            this[json.id] = resolve;
             this.#socket.onerror = reject;
-            this.#socket.send(JSON.stringify(args));
+            this.#socket.send(JSON.stringify(json));
         });
+    }
+
+    call(arg) {
+        let { method, params = [] } = arg;
+        params.unshift(this.#secret);
+        return this.#send({ jsonrpc: '2.0', id: this.#id++, method, params });
+    }
+
+    multicall(args) {
+        let calls = [];
+        for (let i = 0, l = args.length; i < l; i++) {
+            let { method, params = [] } = args[i];
+            params.unshift(this.#secret);
+            calls[i] = { methodName: method, params };
+        }
+        return this.#send({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
     }
 
     connect() {
