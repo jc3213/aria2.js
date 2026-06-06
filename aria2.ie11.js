@@ -123,6 +123,20 @@ var Aria2 = (function() {
         xhr.send(JSON.stringify(json));
     }
 
+    initiator.prototype.call = function(arg, callback) {
+        let { method, params = [] } = arg;
+        this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method, params: [ this.props.secret, ...params ] }, callback);
+    }
+
+    initiator.prototype.multicall = function(args, callback) {
+        let calls = [];
+        for (let i = 0, l = args.length; i < l; i++) {
+            let { method, params = [] } = args[i];
+            calls.push({ methodName: method, params: [ this.props.secret, ...params ] });
+        }
+        this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method: 'system.multicall', params: [calls] }, callback);
+    }
+
     initiator.prototype.connect = function() {
         var self = this;
         self.props.socket = new WebSocket(self.props.wsa);
@@ -165,21 +179,6 @@ var Aria2 = (function() {
     initiator.prototype.disconnect = function() {
         this.props.tries = Infinity;
         this.props.socket.close();
-    }
-
-    initiator.prototype.call = function(arg, callback) {
-        let { method, params = [] } = arg;
-        params.unshift(this.props.secret);
-        this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method, params }, callback);
-    }
-
-    initiator.prototype.multicall = function(args, callback) {
-        for (let i = 0, l = args.length; i < l; i++) {
-            let { method, params = [] } = args[i];
-            params.unshift(this.#secret);
-            args[i] = { methodName: method, params };
-        }
-        this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method: 'system.multicall', params: [args] }, callback);
     }
 
     return initiator;
