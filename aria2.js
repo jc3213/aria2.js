@@ -2,7 +2,6 @@ class Aria2 {
     #url;
     #xml;
     #wsa;
-    #call;
     #secret;
     #socket;
     #id = 0;
@@ -12,6 +11,7 @@ class Aria2 {
     #onopen = null;
     #onmessage = null;
     #onclose = null;
+    #call;
 
     constructor(url = 'http://localhost:6800/jsonrpc', secret = '') {
         let rpc = url.split('#');
