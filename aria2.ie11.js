@@ -123,9 +123,15 @@ var Aria2 = (function() {
         xhr.send(JSON.stringify(json));
     }
 
-    initiator.prototype.call = function(arg, callback) {
-        let { method, params = [] } = arg;
-        this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method, params: [ this.props.secret, ...params ] }, callback);
+    initiator.prototype.call = function(method, params, callback) {
+        if (!params) {
+            params = [];
+        } else if (typeof params === 'function') {
+            callback = params;
+            params = [];
+        }
+        arg.params.unshift(this.props.secret);
+        this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method, params }, callback);
     }
 
     initiator.prototype.multicall = function(args, callback) {
@@ -143,27 +149,27 @@ var Aria2 = (function() {
         self.props.socket.onopen = function(event) {
             self.props.call = self.send;
             self.props.tries = 0;
-            if (self.props.onopen) {
+            if (typeof self.props.onopen === 'function') {
                 self.props.onopen(event);
             }
         };
         self.props.socket.onmessage = function(event) {
             var json = JSON.parse(event.data);
             if (json.method) {
-                if (self.props.onmessage) {
+                if (typeof self.props.onmessage === 'function') {
                     self.props.onmessage(json);
                 }
             } else {
-                var id = json.id;
-                if (self.props.calls[id]) {
-                    self.props.calls[id](json);
-                    delete self.props.calls[id];
+                let resolve = self.props.call[json.id];
+                if (typeof resolve === 'function') {
+                    resolve(json);
                 }
+                delete self.props.calls[id];
             }
         };
         self.props.socket.onclose = function(event) {
             self.props.call = self.post;
-            if (self.props.onclose) {
+            if (typeof self.props.onclose === 'function') {
                 self.props.onclose(event);
             }
             if (self.props.tries++ < self.props.retries) {

@@ -40,8 +40,7 @@ class Aria2 {
         return this.#method;
     }
 
-    call(arg) {
-        let { method, params = [] } = arg;
+    call(method, params = []) {
         return this.#call({ jsonrpc: '2.0', id: this.#id++, method, params: [ this.#secret, ...params ] });
     }
 
