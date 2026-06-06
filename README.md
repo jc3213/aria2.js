@@ -97,14 +97,24 @@ aria2.disconnect();
 ### call
 - send message to JSON-RPC
 ```javascript
-const response = aria2.call( { method, params } );
-```
-```javascript
-const response = aria2.call([ { method, params }, { method, params }, ..., { method, params } ]);
+const response = aria2.call({ method, params });
 ```
 - use `WebSocket` or `POST` method based on [scheme](#scheme)
 - response
-    - `Promise` object, return an array that contains the response from JSON-RPC if fulfilled
+    - `Promise` object, return an object from JSON-RPC if fulfilled
+- method **required**
+    - Read [RPC method calls](https://aria2.github.io/manual/en/html/aria2c.html#methods)
+- params *optional*
+    - JSON-RPC method call parameters
+
+### multicall
+- send batch of messages to JSON-RPC
+```javascript
+const response = aria2.multicall([ { method, params }, { method, params }, ..., { method, params } ]);
+```
+- use `WebSocket` or `POST` method based on [scheme](#scheme)
+- response
+    - `Promise` object, return an array of objects from JSON-RPC if fulfilled
 - method **required**
     - Read [RPC method calls](https://aria2.github.io/manual/en/html/aria2c.html#methods)
 - params *optional*
