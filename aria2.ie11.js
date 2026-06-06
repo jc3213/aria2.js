@@ -127,7 +127,7 @@ var Aria2 = (function() {
         var self = this;
         self.props.socket = new WebSocket(self.props.wsa);
         self.props.socket.onopen = function(event) {
-            self.props.call = this.send;
+            self.props.call = self.send;
             self.props.tries = 0;
             if (self.props.onopen) {
                 self.props.onopen(event);
@@ -148,7 +148,7 @@ var Aria2 = (function() {
             }
         };
         self.props.socket.onclose = function(event) {
-            self.props.call = this.post;
+            self.props.call = self.post;
             if (self.props.onclose) {
                 self.props.onclose(event);
             }
@@ -170,7 +170,7 @@ var Aria2 = (function() {
     initiator.prototype.call = function(arg, callback) {
         let { method, params = [] } = arg;
         params.unshift(this.props.secret);
-        this.props.call({ jsonrpc: '2.0', id: this.props.id++, method, params }, callback);
+        this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method, params }, callback);
     }
 
     initiator.prototype.multicall = function(args, callback) {
@@ -180,7 +180,7 @@ var Aria2 = (function() {
             params.unshift(this.props.secret);
             calls[i] = { methodName: method, params };
         }
-        this.props.call({ jsonrpc: '2.0', id: this.props.id++, method: 'system.multicall', params: [calls] }, callback);
+        this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method: 'system.multicall', params: [calls] }, callback);
     }
 
     return initiator;
