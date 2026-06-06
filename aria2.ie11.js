@@ -1,20 +1,4 @@
 var Aria2 = (function() {
-    var properties = `{
-    "url": null,
-    "xml": null,
-    "wsa": null,
-    "secret": "",
-    "socket": null,
-    "id": 0,
-    "tries": 0,
-    "retries": 10,
-    "timeout": 10000,
-    "onopen": null,
-    "onmessage": null,
-    "onclose": null,
-    "calls": {}
-}`;
-
     function initiator(url, secret) {
         if (!url) {
             url = 'http://localhost:6800/jsonrpc';
@@ -23,7 +7,21 @@ var Aria2 = (function() {
             secret = '';
         }
         var rpc = url.split('#');
-        this.props = JSON.parse(properties);
+        this.props = {
+            url: null,
+            xml: null,
+            wsa: null,
+            secret: '',
+            socket: null,
+            id: 0,
+            tries: 0,
+            retries: 10,
+            timeout: 10000,
+            onopen: null,
+            onmessage: null,
+            onclose: null,
+            calls: {}
+        };
         this.url = rpc[0];
         this.secret = rpc[1] || secret;
         this.props.call = this.post;
@@ -169,20 +167,20 @@ var Aria2 = (function() {
         this.props.socket.close();
     }
 
-    initiator.prototype.call = function() {
+    initiator.prototype.call = function(arg, callback) {
         let { method, params = [] } = arg;
-        params.unshift(this.#secret);
-        return this.props.call({ jsonrpc: '2.0', id: this.#id++, method, params });
+        params.unshift(this.props.secret);
+        this.props.call({ jsonrpc: '2.0', id: this.props.id++, method, params }, callback);
     }
 
-    initiator.prototype.multicall = function() {
+    initiator.prototype.multicall = function(args, callback) {
         let calls = [];
         for (let i = 0, l = args.length; i < l; i++) {
             let { method, params = [] } = args[i];
-            params.unshift(this.#secret);
+            params.unshift(this.props.secret);
             calls[i] = { methodName: method, params };
         }
-        return this.props.call({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
+        this.props.call({ jsonrpc: '2.0', id: this.props.id++, method: 'system.multicall', params: [calls] }, callback);
     }
 
     return initiator;
