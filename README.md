@@ -81,6 +81,7 @@ aria2.timeout = timeout;
 - [connect](#connect)
 - [disconnect](#disconnect)
 - [call](#call)
+- [multicall](#multicall)
 
 ### connect
 - connect to `WebSocket` of aria2 JSON-RPC
