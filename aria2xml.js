@@ -39,20 +39,20 @@ class Aria2 {
         return this.#method;
     }
 
-    #json(args) {
-        if (Array.isArray(args)) {
-            let calls = [];
-            for (let { method, params = [] } of args) {
-                params.unshift(this.#secret);
-                calls.push({ methodName: method, params });
-            }
-            args = { method: 'system.multicall', params: [calls] };
-        } else {
-            (args.params ??= []).unshift(this.#secret);
+    call(arg) {
+        let { method, params = [] } = arg;
+        params.unshift(this.#secret);
+        return this.#echo({ jsonrpc: '2.0', id: this.#id++, method, params });
+    }
+
+    multicall(args) {
+        let calls = [];
+        for (let i = 0, l = args.length; i < l; i++) {
+            let { method, params = [] } = args[i];
+            params.unshift(this.#secret);
+            calls[i] = { methodName: method, params };
         }
-        args.jsonrpc = '2.0';
-        args.id = this.#id++;
-        return JSON.stringify(args);
+        return this.#echo({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
     }
 
     #then(response) {
@@ -62,11 +62,11 @@ class Aria2 {
         throw new Error('Network error: ' + response.status + ' ' + response.statusText);
     }
 
-    #post(obj) {
-        return fetch(this.#url, { method: 'POST', body: this.#json(obj) }).then(this.#then);
+    #post(json) {
+        return fetch(this.#xml, { method: 'POST', body: JSON.stringify(json) }).then(this.#then);
     }
 
-    #get(obj) {
-        return fetch(this.#url + '?params=' + btoa(unescape(encodeURIComponent(this.#json(obj))))).then(this.#then);
+    #get(json) {
+        return fetch(this.#url + '?params=' + btoa(unescape(encodeURIComponent(JSON.stringify(json))))).then(this.#then);
     }
 }
