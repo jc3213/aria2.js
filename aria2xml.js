@@ -1,19 +1,24 @@
 class Aria2 {
     #url;
+    #xml;
     #secret;
-    #method;
     #id = 0;
+    #method;
     #call;
 
     constructor(url = 'http://localhost:6800/jsonrpc', secret = '') {
         let rpc = url.split('#');
         this.url = rpc[0];
-        this.secret = rpc[1] ?? secret;
+        this.secret = rpc[1] || secret;
         this.method = 'POST';
     }
 
     set url(string) {
-        this.#url = string.replace('ws', 'http');
+        if (string.startsWith('http://') || string.startsWith('https://')) {
+            this.#url = this.#xml = string;
+        } else {
+            throw new TypeError('Invalid JSON-RPC Endpoint: expected http(s):// or ws(s)://');
+        }
     }
     get url() {
         return this.#url;
@@ -27,30 +32,26 @@ class Aria2 {
     }
 
     set method(string) {
-        if (string === 'POST') {
+        let method = string.toUpperCase();
+        if (method === 'POST') {
             this.#call = this.#post;
-        } else if (string === 'GET') {
+        } else if (method === 'GET') {
             this.#call = this.#get;
         } else {
             throw new TypeError('Invalid method: expected "POST" or "GET".');
         }
-        this.#method = string;
+        this.#method = method;
     }
     get method() {
         return this.#method;
     }
 
-    call(method, params = []) {
-        return this.#call({ jsonrpc: '2.0', id: this.#id++, method, params: [ this.#secret, ...params ] });
+    #post(json) {
+        return fetch(this.#xml, { method: 'POST', body: JSON.stringify(json) }).then(this.#then);
     }
 
-    multicall(args) {
-        let calls = [];
-        for (let i = 0, l = args.length; i < l; i++) {
-            let { method, params = [] } = args[i];
-            calls[i] = { methodName: method, params: [ this.#secret, ...params ] };
-        }
-        return this.#call({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
+    #get(json) {
+        return fetch(this.#url + '?params=' + btoa(unescape(encodeURIComponent(JSON.stringify(json))))).then(this.#then);
     }
 
     #then(response) {
@@ -60,11 +61,18 @@ class Aria2 {
         throw new Error('Network error: ' + response.status + ' ' + response.statusText);
     }
 
-    #post(json) {
-        return fetch(this.#xml, { method: 'POST', body: JSON.stringify(json) }).then(this.#then);
+    call(method, params = []) {
+        return this.#call({ jsonrpc: '2.0', id: this.#id++, method, params: [ this.#secret, ...params ] });
     }
 
-    #get(json) {
-        return fetch(this.#url + '?params=' + btoa(unescape(encodeURIComponent(JSON.stringify(json))))).then(this.#then);
+    multicall(args) {
+        let calls = [];
+        for (let i = 0, l = args.length; i < l; i++) {
+            let arg = args[i];
+            let methodName = arg.methodName || arg.method;
+            let params = arg.params ? [ this.#secret, ...arg.params ] : [ this.#secret ];
+            calls[i] = { methodName, params };
+        }
+        return this.#call({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
     }
 }
