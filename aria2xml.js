@@ -17,7 +17,7 @@ class Aria2 {
         if (string.startsWith('http://') || string.startsWith('https://')) {
             this.#url = this.#xml = string;
         } else {
-            throw new TypeError('Invalid JSON-RPC Endpoint: expected http(s):// or ws(s)://');
+            throw new TypeError('Invalid JSON-RPC Endpoint: expected http(s)://');
         }
     }
     get url() {
