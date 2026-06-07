@@ -105,8 +105,8 @@ aria2.disconnect();
 const response = aria2.call(method, params);
 ```
 ```javascript
-const { result } = await aria2.call('aria2.tellActive');
-console.log(result) // All downloading sessions;
+const response = await aria2.call('aria2.tellActive');
+console.log(response.result) // All downloading sessions;
 ```
 - response
     - `Promise` object, return response from JSON-RPC if fulfilled
@@ -119,8 +119,10 @@ console.log(result) // All downloading sessions;
 const response = aria2.multicall([ { methodName, params }, { method, params }, ... ]);
 ```
 ```javascript
-const { result } = await aria2.multicall([ { methodName: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
-const [ [globalOption], [version] ] = result;
+const response = await aria2.multicall([ { methodName: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
+const result = response.result;
+const globalOption = result[0][0];
+const version = result[1][0];
 console.log(globalOption, version); // The options, version and enabled features of JSON-RPC;
 ```
 - response
@@ -167,24 +169,28 @@ aria2.onmessage = function (response: object[]) { ... };
 let keeplive;
 
 const jsonrpc = {};
+
 const session = {};
 
 const waiting = new Set([ 'waiting', 'paused' ]);
+
 const dispatch = {
-    'aria2.onDownloadStart' (gid, result) {
+    'aria2.onDownloadStart'(gid, result) {
         console.log("The session #" + gid + " has started");
         session.active[gid] = result;
+
         if (session.waiting[gid]) {
             delete session.waiting[gid];
         }
     },
-    'aria2.onDownloadComplete' (gid, result) {
+    'aria2.onDownloadComplete'(gid, result) {
         console.log("The session #" + gid + " has completed");
         dispatch.default(gid, result);
     },
-    default (gid, result) {
+    default(gid, result) {
         if (session.active[gid]) {
             delete session.active[gid];
+
             if (waiting.has(result.status)) {
                 session.waiting[gid] = result;
             } else {
@@ -195,6 +201,7 @@ const dispatch = {
 };
 
 const aria2 = new Aria2("http://localhost:6800/jsonrpc#mysecret");
+
 aria2.retries = -1;
 
 aria2.onopen = async () => {
@@ -203,9 +210,7 @@ aria2.onopen = async () => {
     session.waiting = {};
     session.stopped = {};
 
-    const { result: [
-        [options], [version], [stats], [active], [waiting], [stopped]
-    ] } = await aria2.multicall([
+    const response = await aria2.multicall([
         { methodName: 'aria2.getGlobalOption' },
         { methodName: 'aria2.getVersion' },
         { methodName: 'aria2.getGlobalStat' },
@@ -213,44 +218,62 @@ aria2.onopen = async () => {
         { methodName: 'aria2.tellWaiting', params: [0, 999] },
         { methodName: 'aria2.tellStopped', params: [0, 999] }
     ]);
+    const result = response.result;
 
-    jsonrpc.options = options;
-    jsonrpc.version = version;
-    jsonrpc.stats = stats;
+    jsonrpc.options = result[0][0];
+    jsonrpc.version = result[1][0];
+    jsonrpc.stats = result[2][0];;
 
-    for (const a of active) {
+    const active = result[3][0];
+    const waiting = result[4][0];
+    const stopped = result[5][0];
+
+    for (let i = 0, l = active.length; i < l; i++) {
+        const a = active[i];
         session.active[a.gid] = session.all[a.gid] = a;
     }
-    for (const w of waiting) {
+    for (let i = 0, l = waiting.length; i < l; i++) {
+        const w = waiting[i];
         session.waiting[w.gid] = session.all[w.gid] = w;
     }
-    for (const s of stopped) {
+    for (let i = 0, l = stopped.length; i < l; i++) {
+        const s = stopped[i];
         session.stopped[s.gid] = session.all[s.gid] = s;
     }
 
     keeplive = setInterval(async () => {
-        const { result: [
-            [stats], [active]
-         ] } = await aria2.multicall([
+        const response = await aria2.multicall([
             { methodName: 'aria2.getGlobalStat' },
             { methodName: 'aria2.tellActive'}
         ]);
-        jsonrpc.stats = stats;
-        active.forEach((a) => session.active[a.gid] = session.all[a.gid] = a);
+        const result = response.result;
+
+        jsonrpc.stats = result[0][0];
+
+        const active = result[1][0];
+
+        for (let i = 0, l = active.length; i < l; i++) {
+            const a = active[i];
+            session.active[a.gid] = session.all[a.gid] = a;
+        }
     }, 10000);
 };
 
 aria2.onclose = () => clearInterval(keeplive);
 
-aria2.onmessage = async ({ method, params }) => {
+aria2.onmessage = async (message) => {
+    const method = message.method;
+
     if (method === 'aria2.onBtDownloadComplete') {
         return;
     }
 
-    const [{ gid }] = params;
-    const { result } = await aria2.call('aria2.tellStatus', [gid]);
+    const gid = message.params[0].gid;
 
-    (dispatch[method] ?? dispatch.default)(gid, result);
+    const response = await aria2.call('aria2.tellStatus', [gid]);
+
+    const handler = dispatch[method] || dispatch.default;
+    handler(gid, response.result);
 };
 
 aria2.connect();
