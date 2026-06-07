@@ -1,6 +1,5 @@
 class Aria2 {
     #url;
-    #wsa;
     #secret;
     #socket;
     #id = 0;
@@ -10,6 +9,7 @@ class Aria2 {
     #onopen = null;
     #onmessage = null;
     #onclose = null;
+    #call;
 
     constructor(url = 'ws://localhost:6800/jsonrpc', secret = '') {
         let rpc = url.split('#');
@@ -20,7 +20,7 @@ class Aria2 {
 
     set url(string) {
         if (string.startsWith('ws://') || string.startsWith('wss://')) {
-            this.#url = this.#wsa = string;
+            this.#url = string;
         } else {
             throw new TypeError('Invalid JSON-RPC Endpoint: expected ws(s)://');
         }
@@ -117,9 +117,8 @@ class Aria2 {
     }
 
     connect() {
-        this.#socket = new WebSocket(this.#wsa);
+        this.#socket = new WebSocket(this.#url);
         this.#socket.onopen = (event) => {
-            this.#call = this.#send;
             this.#tries = 0;
             if (this.#onopen) {
                 this.#onopen(event);
@@ -138,7 +137,6 @@ class Aria2 {
             }
         };
         this.#socket.onclose = (event) => {
-            this.#call = this.#post;
             if (this.#onclose) {
                 this.#onclose(event);
             }
