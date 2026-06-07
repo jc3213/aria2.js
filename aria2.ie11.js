@@ -139,7 +139,7 @@ var Aria2 = (function() {
         for (var i = 0, l = args.length; i < l; i++) {
             var json = args[i];
             var params = json.params || [];
-            var method = json.method;
+            var method = json.methodName || json.method;
             params.unshift(this.props.secret);
             calls[i] = { methodName: method, params: [ this.#secret, ...params ] };
         }
