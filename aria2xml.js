@@ -1,6 +1,5 @@
 class Aria2 {
     #url;
-    #xml;
     #secret;
     #id = 0;
     #method;
@@ -15,7 +14,7 @@ class Aria2 {
 
     set url(string) {
         if (string.startsWith('http://') || string.startsWith('https://')) {
-            this.#url = this.#xml = string;
+            this.#url = string;
         } else {
             throw new TypeError('Invalid JSON-RPC Endpoint: expected http(s)://');
         }
@@ -47,11 +46,11 @@ class Aria2 {
     }
 
     #post(json) {
-        return fetch(this.#xml, { method: 'POST', body: JSON.stringify(json) }).then(this.#then);
+        return fetch(this.#url, { method: 'POST', body: JSON.stringify(json) }).then(this.#then);
     }
 
     #get(json) {
-        return fetch(this.#xml + '?params=' + btoa(unescape(encodeURIComponent(JSON.stringify(json))))).then(this.#then);
+        return fetch(this.#url + '?params=' + btoa(unescape(encodeURIComponent(JSON.stringify(json))))).then(this.#then);
     }
 
     #then(response) {
