@@ -22,7 +22,7 @@ class Aria2 {
         if (string.startsWith('ws://') || string.startsWith('wss://')) {
             this.#url = this.#wsa = string;
         } else {
-            throw new TypeError('Invalid JSON-RPC Endpoint: expected http(s):// or ws(s)://');
+            throw new TypeError('Invalid JSON-RPC Endpoint: expected ws(s)://');
         }
     }
     get url() {
