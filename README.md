@@ -36,6 +36,7 @@ aria2.secret = 'mysecret';
 - [timeout](#timeout)
 
 ### url
+- `String`
 - the URL of JSON-RPC
 ```javascript
 aria2.url = url;
@@ -53,6 +54,7 @@ aria2.url = url;
         - `443`  *ssl*
 
 ### secret
+- `String`
 - the secret token `secret=your-secret-token` in JSON-RPC configuration
 ```javascript
 aria2.secret = secret;
@@ -60,6 +62,7 @@ aria2.secret = secret;
 - `string`
 
 ### retries
+- `Number`
 - maximum retries when connection to JSON-RPC is closed
 ```javascript
 aria2.retries = retries;
@@ -69,6 +72,7 @@ aria2.retries = retries;
 - `-1` or other negative numbers for unlimited retries
  
 ### timeout
+- `Number`
 - time interval between retries
 ```javascript
 aria2.timeout = timeout;
@@ -112,22 +116,24 @@ console.log(result) // All downloading sessions;
 ### multicall
 - send batch of messages to JSON-RPC
 ```javascript
-const response = aria2.multicall([ { method, params }, { method, params }, ..., { method, params } ]);
+const response = aria2.multicall([ { methodName, params }, { method, params }, ... ]);
 ```
 ```javascript
-const { result } = await aria2.multicall([ { method: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
+const { result } = await aria2.multicall([ { methodName: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
 const [ [globalOption], [version] ] = result;
 console.log(globalOption, version); // The options, version and enabled features of JSON-RPC;
 ```
 - response
     - `Promise` object, return an array of resposne from JSON-RPC if fulfilled
-- [method](#method-1) **required**
+- [methodName](#method-1) or [method](#method-1)**required**
 - [params](#params) *optional*
 
 #### method
+- `String`
 - Read [RPC method calls](https://aria2.github.io/manual/en/html/aria2c.html#methods)
 
 #### params
+- `Array`
 - JSON-RPC method call parameters
 
 ## Events
@@ -136,19 +142,22 @@ console.log(globalOption, version); // The options, version and enabled features
 - [onmessage](#onmessage)
 
 ### onopen
-- callback function triggered when JSON-RPC connection is opened.
+- `Function`
+- Triggered when `WebSocket` connection to JSON-RPC is opened.
 ```javascript
 aria2.onopen = function(event) { ... };
 ```
 
 ### onclose
-- callback function triggered when JSON-RPC connection is closed.
+- `Function`
+- Triggered when `WebSocket` connection to JSON-RPC is closed.
 ```javascript
 aria2.onclose = function(event) { ... };
 ```
 
 ### onmessage
-- callback function triggered when a message is received from JSON-RPC.
+- `Function`
+- Triggered when recive messages from JSON-RPC via `WebSocket`.
 ```javascript
 aria2.onmessage = function (response: object[]) { ... };
 ```
@@ -197,12 +206,12 @@ aria2.onopen = async () => {
     const { result: [
         [options], [version], [stats], [active], [waiting], [stopped]
     ] } = await aria2.multicall([
-        { method: 'aria2.getGlobalOption' },
-        { method: 'aria2.getVersion' },
-        { method: 'aria2.getGlobalStat' },
-        { method: 'aria2.tellActive' },
-        { method: 'aria2.tellWaiting', params: [0, 999] },
-        { method: 'aria2.tellStopped', params: [0, 999] }
+        { methodName: 'aria2.getGlobalOption' },
+        { methodName: 'aria2.getVersion' },
+        { methodName: 'aria2.getGlobalStat' },
+        { methodName: 'aria2.tellActive' },
+        { methodName: 'aria2.tellWaiting', params: [0, 999] },
+        { methodName: 'aria2.tellStopped', params: [0, 999] }
     ]);
 
     jsonrpc.options = options;
@@ -223,8 +232,8 @@ aria2.onopen = async () => {
         const { result: [
             [stats], [active]
          ] } = await aria2.multicall([
-            { method: 'aria2.getGlobalStat' },
-            { method: 'aria2.tellActive'}
+            { methodName: 'aria2.getGlobalStat' },
+            { methodName: 'aria2.tellActive'}
         ]);
         jsonrpc.stats = stats;
         active.forEach((a) => session.active[a.gid] = session.all[a.gid] = a);
