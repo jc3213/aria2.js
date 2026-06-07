@@ -1,5 +1,6 @@
 class Aria2 {
     #url;
+    #wsa;
     #secret;
     #socket;
     #id = 0;
@@ -13,12 +14,16 @@ class Aria2 {
     constructor(url = 'ws://localhost:6800/jsonrpc', secret = '') {
         let rpc = url.split('#');
         this.url = rpc[0];
-        this.secret = rpc[1] ?? secret;
+        this.secret = rpc[1] || secret;
         this.#call = this.#send;
     }
 
     set url(string) {
-        this.#url = string.replace('http', 'ws');
+        if (string.startsWith('ws://') || string.startsWith('wss://')) {
+            this.#url = this.#wsa = string;
+        } else {
+            throw new TypeError('Invalid JSON-RPC Endpoint: expected http(s):// or ws(s)://');
+        }
     }
     get url() {
         return this.#url;
@@ -33,7 +38,11 @@ class Aria2 {
 
     set retries(number) {
         let n = number | 0;
-        this.#retries = n >= 0 ? n : Infinity;
+        if (n >= 0) {
+            this.#retries = n;
+        } else {
+            this.#retries = Infinity;
+        }
     }
     get retries() {
         return this.#retries;
@@ -41,28 +50,44 @@ class Aria2 {
 
     set timeout(number) {
         let n = number | 0;
-        this.#timeout = n <= 1 ? 1000 : n * 1000;
+        if (n <= 1) {
+            this.#timeout = 1000;
+        } else {
+            this.#timeout = n * 1000;
+        }
     }
     get timeout() {
         return this.#timeout / 1000;
     }
 
     set onopen(callback) {
-        this.#onopen = typeof callback === 'function' ? callback : null;
+        if (typeof callback === 'function') {
+            this.#onopen = callback;
+        } else {
+            this.#onopen = null;
+        }
     }
     get onopen() {
         return this.#onopen;
     }
 
     set onmessage(callback) {
-        this.#onmessage = typeof callback === 'function' ? callback : null;
+        if (typeof callback === 'function') {
+            this.#onmessage = callback;
+        } else {
+            this.#onmessage = null;
+        }
     }
     get onmessage() {
         return this.#onmessage;
     }
 
     set onclose(callback) {
-        this.#onclose = typeof callback === 'function' ? callback : null;
+        if (typeof callback === 'function') {
+            this.#onclose = callback;
+        } else {
+            this.#onclose = null;
+        }
     }
     get onclose() {
         return this.#onclose;
@@ -83,30 +108,40 @@ class Aria2 {
     multicall(args) {
         let calls = [];
         for (let i = 0, l = args.length; i < l; i++) {
-            let { method, params = [] } = args[i];
-            calls[i] = { methodName: method, params: [ this.#secret, ...params ] };
+            let arg = args[i];
+            let methodName = arg.methodName || arg.method;
+            let params = arg.params ? [ this.#secret, ...arg.params ] : [ this.#secret ];
+            calls[i] = { methodName, params };
         }
         return this.#call({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
     }
 
     connect() {
-        this.#socket = new WebSocket(this.#url);
+        this.#socket = new WebSocket(this.#wsa);
         this.#socket.onopen = (event) => {
+            this.#call = this.#send;
             this.#tries = 0;
-            this.#onopen?.(event);
+            if (this.#onopen) {
+                this.#onopen(event);
+            }
         };
         this.#socket.onmessage = (event) => {
             let json = JSON.parse(event.data);
             if (json.method) {
-                this.#onmessage?.(json);
+                if (this.#onmessage) {
+                    this.#onmessage(json);
+                }
             } else {
-                let { id } = json;
+                let id = json.id;
                 this[id](json);
                 delete this[id];
             }
         };
         this.#socket.onclose = (event) => {
-            this.#onclose?.(event);
+            this.#call = this.#post;
+            if (this.#onclose) {
+                this.#onclose(event);
+            }
             if (this.#tries++ < this.#retries) {
                 setTimeout(() => this.connect(), this.#timeout);
             } else {
