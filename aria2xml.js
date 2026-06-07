@@ -51,7 +51,7 @@ class Aria2 {
     }
 
     #get(json) {
-        return fetch(this.#url + '?params=' + btoa(unescape(encodeURIComponent(JSON.stringify(json))))).then(this.#then);
+        return fetch(this.#xml + '?params=' + btoa(unescape(encodeURIComponent(JSON.stringify(json))))).then(this.#then);
     }
 
     #then(response) {
