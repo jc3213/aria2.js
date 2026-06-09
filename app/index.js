@@ -1,29 +1,31 @@
-const hotkeys = {};
+const hotkeyMap = document.querySelectorAll('[hotkey]')
+const hotkeyCombo = {};
 
-for (let el of document.querySelectorAll('[hotkey]')) {
-    for (let keys of el.getAttribute('hotkey').toLowerCase().split('\n')) {
-        let combo = keys.trim();
-        if (combo) {
-            hotkeys[combo] = el;
+for (let i = 0, l = hotkeyMap.length; i < l; i++) {
+    let el = hotkeyMap[i];
+    let keys = el.getAttribute('hotkey').toLowerCase().split('\n');
+    for (let j = 0, m = keys.length; j < m; j++) {
+        let k = keys[j].trim();
+        if (k) {
+            hotkeyCombo[k] = el;
         }
     }
 }
 
 document.addEventListener('keydown', (event) => {
-    let { ctrlKey, altKey, shiftKey, key } = event;
     let keys = [];
-    if (ctrlKey) {
+    if (event.ctrlKey) {
         keys.push('ctrl');
     }
-    if (altKey) {
+    if (event.altKey) {
         keys.push('alt');
     }
-    if (shiftKey) {
+    if (event.shiftKey) {
         keys.push('shift');
     }
-    keys.push(key.toLowerCase());
+    keys.push(event.key.toLowerCase());
     let combo = keys.join('+');
-    let hotkey = hotkeys[combo];
+    let hotkey = hotkeyCombo[combo];
     if (hotkey) {
         event.preventDefault();
         hotkey.click();
@@ -314,12 +316,15 @@ document.body.append(optionsPane, downPane, jsonrpcPane, extraCss, i18nCss);
 let aria2Config = {};
 let aria2Storage = new Map();
 
-let [downBtn, purgeBtn, optionsBtn] = menuPane.children;
+let menuTree = menuPane.children;
+let downBtn = menuTree[0];
+let purgeBtn = menuTree[1];
+let optionsBtn = menuTree[2];
 let optionsEntries = optionsPane.querySelectorAll('[name]');
 let remoteBtn = optionsPane.querySelector('button');
 let downEntry = downPane.querySelector('textarea');
 let metaFiles = downPane.querySelector('input[type="file"]');
-let remoteEntries = [jsonrpcPane.querySelectorAll('[name]'), downPane.querySelectorAll('[name]')];
+let remoteEntries = [ ...jsonrpcPane.querySelectorAll('[name]'), ...downPane.querySelectorAll('[name]') ];
 
 taskFilters(
     JSON.parse(localStorage.getItem('queue')) ?? [],
@@ -351,8 +356,10 @@ i18nEntry.addEventListener('change', (event) => {
 let updateStorage;
 
 optionsPane.addEventListener('change', (event) => {
-    let { name, type, value } = event.target;
-    if (type === 'number') {
+    let entry= event.target;
+    let name = entry.name;
+    let value = entry.value;
+    if (entry.type === 'number') {
         value = value | 0;
     }
     aria2Storage.set(name, value);
@@ -369,8 +376,9 @@ remoteBtn.addEventListener('click', (event) => {
 });
 
 jsonrpcPane.addEventListener('change', (event) => {
-    let { name, value } = event.taregt;
-    aria2Config[name] = value;
+    let entry = event.target;
+    let name = entry.name;
+    aria2Config[name] = entry.value;
 });
 
 function downloadURLs() {
@@ -380,11 +388,11 @@ function downloadURLs() {
         return;
     }
     let options = { ...aria2Config };
-    let { out } = options;
-    options['out'] = urls.length !== 1 || !out ? null : out.replace(/[\\/:*?"<>|]/g, '_');
+    let out = options.out;
+    options.out = urls.length !== 1 || !out ? null : out.replace(/[\\/:*?"<>|]/g, '_');
     let params = [];
-    for (let url of urls) {
-        params.push({ method: 'aria2.addUri', params: [[url], options] });
+    for (let i = 0, l = urls.length; i < l; i++) {
+        params.push({ method: 'aria2.addUri', params: [ [urls[i] ], options] });
     }
     aria2RPC.multicall(params).then(() => {
         downBtn.click();
@@ -395,8 +403,9 @@ async function downloadFiles(files) {
     let options = { ...aria2Config };
     let datas = [];
     options['out'] = options['referer'] = options['user-agent'] = null;
-    for (let file of files) {
-        let { name } = file;
+    for (let i = 0, l = files.length; i < l; i++) {
+        let file = files[i];
+        let name = file.name;
         let method;
         let params = [options];
         if (name.endsWith('.torrent')) {
@@ -410,7 +419,7 @@ async function downloadFiles(files) {
         datas.push(new Promise((resolve) => {
             let reader = new FileReader();
             reader.onload = (event) => {
-                let { result } = reader;
+                let result = reader.reader;
                 params.unshift(result.substring(result.indexOf(',') + 1));
                 resolve({ method: params });
             };
@@ -430,18 +439,20 @@ const downEvents = {
 };
 
 downPane.addEventListener('click', (event) => {
-    let { id, localName } = event.target;
-    if (id || localName === 'button') {
+    let entry = event.target;
+    let id = entry.id;
+    if (id || entry.localName === 'button') {
         downEvents[id](event);
     }
 });
 
 downPane.addEventListener('change', (event) => {
-    let { name, value, files } = event.target;
+    let entry = event.target;
+    let name = entry.name;
     if (name) {
-        aria2Config[name] = value;
+        aria2Config[name] = entry.value;
     } else if (files) {
-        downloadFiles(files);
+        downloadFiles(entry.files);
     }
 });
 
@@ -477,13 +488,12 @@ function getGlobalOption() {
         result['disk-cache'] = getFileSize(result['disk-cache']);
         result['min-split-size'] = getFileSize(result['min-split-size']);
         result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
-        for (let entries of remoteEntries) {
-            for (let entry of entries) {
-                let { name } = entry;
-                let value = result[name];
-                if (value) {
-                    entry.value = aria2Config[name] = value;
-                }
+        for (let i = 0, l = remoteEntries.length; i < l; i++) {
+            let entry = remoteEntries[i];
+            let name = entry.name;
+            let value = result[name];
+            if (value) {
+                entry.value = aria2Config[name] = value;
             }
         }
         downBtn.disabled = remoteBtn.disabled = false;
@@ -505,14 +515,28 @@ function optionsDispatch() {
 const i18nLang = new Set(['en-US', 'zh-CN']);
 
 async function i18nUserInterface(lang) {
-    let locale = await fetch(`i18n/${i18nLang.has(lang) ? lang : 'en-US'}.json`).then((res) => res.json());
+    const i18nText = document.querySelectorAll('[i18n]');
+    const i18nTips = document.querySelectorAll('[i18n-tips]');
 
-    for (let item of document.querySelectorAll('[i18n]')) {
-        item.textContent = locale[item.getAttribute('i18n')] ?? '';
+    const i18nFile = i18nLang.has(lang) ? 'i18n/' + lang + '.json' : 'i18n/en-us.json';
+    const i18nJSON = await fetch(i18nFile).then((response) => response.json());
+
+    for (let i = 0, l = i18nText.length; i < l; i++) {
+        let el = i18nText[i];
+        let key = el.getAttribute('i18n');
+        let i18n = i18nJSON[key];
+        if (key) {
+            el.textContent = i18n;
+        }
     }
 
-    for (let item of document.querySelectorAll('[i18n-tips]')) {
-        item.title = locale[item.getAttribute('i18n-tips')] ?? '';
+    for (let i = 0, l = i18nTips.length; i < l; i++) {
+        let el = i18nTips[i];
+        let key = el.getAttribute('i18n-tips')
+        let i18n = i18nJSON[key];
+        if (key) {
+            el.title = i18n;
+        }
     }
 
     i18nCss.textContent = `
@@ -587,15 +611,16 @@ async function i18nUserInterface(lang) {
     let locale = getOptionValue('locale');
     i18nEntry.value = locale;
     i18nUserInterface(locale);
-    let { onopen } = aria2RPC;
+    let old_onopen = aria2RPC.onopen;
     aria2RPC.onopen = () => {
-        onopen();
+        old_onopen();
         getGlobalOption();
     };
-    for (let entry of optionsEntries) {   
-        let { name, type } = entry;
+    for (let i = 0, l = optionsEntries.length; i < l; i++) {   
+        let entry = optionsEntries[i];
+        let name = entry.name;
         let value = entry.value = getOptionValue(name);
-        if (type === 'number') {
+        if (entry.type === 'number') {
            value = entry.value | 0;
         }
         aria2Storage.set(name, value);
