@@ -595,7 +595,7 @@ async function i18nUserInterface(lang) {
     let old_onopen = aria2RPC.onopen;
     aria2RPC.onopen = () => {
         old_onopen();
-        aria2RPC.call(method: 'aria2.getGlobalOption').then((response) => {
+        aria2RPC.call('aria2.getGlobalOption').then((response) => {
             let config = response.result;
             config['disk-cache'] = getFileSize(config['disk-cache']);
             config['min-split-size'] = getFileSize(config['min-split-size']);
