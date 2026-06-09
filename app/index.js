@@ -483,25 +483,6 @@ function getOptionValue(key) {
     return value;
 }
 
-function getGlobalOption() {
-    aria2RPC.call({ method: 'aria2.getGlobalOption' }).then(({ result }) => {
-        result['disk-cache'] = getFileSize(result['disk-cache']);
-        result['min-split-size'] = getFileSize(result['min-split-size']);
-        result['max-upload-limit'] = getFileSize(result['max-upload-limit']);
-        for (let i = 0, l = remoteEntries.length; i < l; i++) {
-            let entry = remoteEntries[i];
-            let name = entry.name;
-            let value = result[name];
-            if (value) {
-                entry.value = aria2Config[name] = value;
-            }
-        }
-        downBtn.disabled = remoteBtn.disabled = false;
-    }).catch(() => {
-        downBtn.disabled = remoteBtn.disabled = true;
-    });
-}
-
 function optionsDispatch() {
     aria2RPC.url = aria2Storage.get('url');
     aria2RPC.secret = aria2Storage.get('secret');
@@ -613,10 +594,24 @@ async function i18nUserInterface(lang) {
     i18nUserInterface(locale);
     let old_onopen = aria2RPC.onopen;
     aria2RPC.onopen = () => {
-    try {
         old_onopen();
-        getGlobalOption();
-        } catch (e) {console.log(e);}
+        aria2RPC.call(method: 'aria2.getGlobalOption').then((response) => {
+            let config = response.result;
+            config['disk-cache'] = getFileSize(config['disk-cache']);
+            config['min-split-size'] = getFileSize(config['min-split-size']);
+            config['max-upload-limit'] = getFileSize(config['max-upload-limit']);
+            for (let i = 0, l = remoteEntries.length; i < l; i++) {
+                let entry = remoteEntries[i];
+                let name = entry.name;
+                let value = config[name];
+                if (value) {
+                    entry.value = aria2Config[name] = value;
+                }
+            }
+            downBtn.disabled = remoteBtn.disabled = false;
+        }).catch(() => {
+            downBtn.disabled = remoteBtn.disabled = true;
+        });
     };
     for (let i = 0, l = optionsEntries.length; i < l; i++) {   
         let entry = optionsEntries[i];
