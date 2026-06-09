@@ -541,68 +541,68 @@ async function i18nUserInterface(lang) {
 
     i18nCss.textContent = `
 #menu::before {
-    content: "${locale.popup_menu}";
+    content: "${i18nJSON.popup_menu}";
 }
 
 #filter::before {
-    content: "${locale.popup_queue}";
+    content: "${i18nJSON.popup_queue}";
 }
 
 #system::before {
-    content: "${locale.popup_system}";
+    content: "${i18nJSON.popup_system}";
 }
 
 #version::before {
-    content: "${locale.popup_version}";
+    content: "${i18nJSON.popup_version}";
 }
 
 #download::before {
-    content: "${locale.popup_download}";
+    content: "${i18nJSON.popup_download}";
 }
 
 #upload::before {
-    content: "${locale.popup_upload}";
+    content: "${i18nJSON.popup_upload}";
 }
 
 #active::before {
-    content: "${locale.popup_active}";
+    content: "${i18nJSON.popup_active}";
 }
 
 #waiting::before {
-    content: "${locale.popup_waiting}";
+    content: "${i18nJSON.popup_waiting}";
 }
 
 #stopped::before {
-    content: "${locale.popup_stopped}";
+    content: "${i18nJSON.popup_stopped}";
 }
 
 .day:not(:empty)::after {
-    content: "${locale.time_day}";
+    content: "${i18nJSON.time_day}";
 }
 
 .hour:not(:empty)::after {
-    content: "${locale.time_hour}";
+    content: "${i18nJSON.time_hour}";
 }
 
 .minute:not(:empty)::after {
-    content: "${locale.time_minute}";
+    content: "${i18nJSON.time_minute}";
 }
 
 .second:not(:empty)::after {
-    content: "${locale.time_second}";
+    content: "${i18nJSON.time_second}";
 }
 
 .sample::before {
-    content: "${locale.options_sample}";
+    content: "${i18nJSON.options_sample}";
     text-decoration: underline;
 }
 
 .default::before {
-    content: "${locale.options_default} = ";
+    content: "${i18nJSON.options_default} = ";
 }
 
 .disabled::before {
-    content: "${locale.options_disabled} = ";
+    content: "${i18nJSON.options_disabled} = ";
 }
 `;
 }
@@ -613,8 +613,10 @@ async function i18nUserInterface(lang) {
     i18nUserInterface(locale);
     let old_onopen = aria2RPC.onopen;
     aria2RPC.onopen = () => {
+    try {
         old_onopen();
         getGlobalOption();
+        } catch (e) {console.log(e);}
     };
     for (let i = 0, l = optionsEntries.length; i < l; i++) {   
         let entry = optionsEntries[i];
