@@ -116,10 +116,10 @@ console.log(response.result) // All downloading sessions;
 ### multicall
 - send batch of messages to JSON-RPC
 ```javascript
-const response = aria2.multicall([ { methodName, params }, { method, params }, ... ]);
+const response = aria2.multicall([ { methodName, params }, ... ]);
 ```
 ```javascript
-const response = await aria2.multicall([ { methodName: 'aria2.getGlobalOption' }, { method: 'aria2.getVersion' } ]);
+const response = await aria2.multicall([ { methodName: 'aria2.getGlobalOption' }, { methodName: 'aria2.getVersion' } ]);
 const result = response.result;
 const globalOption = result[0][0];
 const version = result[1][0];
@@ -127,7 +127,7 @@ console.log(globalOption, version); // The options, version and enabled features
 ```
 - response
     - `Promise` object, return an array of resposne from JSON-RPC if fulfilled
-- [methodName](#method-1) or [method](#method-1)**required**
+- [methodName](#method-1) **required**
 - [params](#params) *optional*
 
 #### method
