@@ -327,7 +327,7 @@ let metaFiles = downPane.querySelector('input[type="file"]');
 let remoteEntries = [ ...jsonrpcPane.querySelectorAll('[name]'), ...downPane.querySelectorAll('[name]') ];
 
 taskFilters(
-    JSON.parse(localStorage.getItem('queue')) ?? [],
+    JSON.parse(localStorage.getItem('queue')) || [],
     (array) => localStorage.setItem('queue', JSON.stringify(array))
 );
 
