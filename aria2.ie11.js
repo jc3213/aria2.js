@@ -1,12 +1,5 @@
 var Aria2 = (function() {
     function initiator(url, secret) {
-        if (!url) {
-            url = 'http://localhost:6800/jsonrpc';
-        }
-        if (!secret) {
-            secret = '';
-        }
-        var rpc = url.split('#');
         this.props = {
             url: null,
             xml: null,
@@ -20,10 +13,20 @@ var Aria2 = (function() {
             onopen: null,
             onmessage: null,
             onclose: null,
-            calls: {}
         };
-        this.url = rpc[0];
-        this.secret = rpc[1] || secret;
+        if (!url) {
+            this.url = 'http://localhost:6800/jsonrpc';
+            this.secret = '';
+        } else {
+            let i = url.indexOf('#');
+            if (i !== -1) {
+                this.url = url.slice(0, i);
+                this.secret = url.slice(i + 1);
+            } else {
+                this.url = url;
+                this.secret = secret || '';
+            }
+        }
         this.props.call = this.post;
     }
 
@@ -108,7 +111,7 @@ var Aria2 = (function() {
     });
 
     initiator.prototype.send = function(json, callback) {
-        this.props.calls[json.id] = callback;
+        this.props[json.id] = callback;
         this.props.socket.send(JSON.stringify(json));
     }
 
@@ -171,7 +174,7 @@ var Aria2 = (function() {
                 if (typeof resolve === 'function') {
                     resolve(json);
                 }
-                delete self.props.calls[id];
+                delete self.props[id];
             }
         };
         self.props.socket.onclose = function(event) {

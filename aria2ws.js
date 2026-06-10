@@ -11,11 +11,21 @@ class Aria2 {
     #onclose = null;
     #call;
 
-    constructor(url = 'ws://localhost:6800/jsonrpc', secret = '') {
-        let rpc = url.split('#');
-        this.url = rpc[0];
-        this.secret = rpc[1] || secret;
-        this.#call = this.#send;
+    constructor(url, secret) {
+        if (!url) {
+            this.url = 'ws://localhost:6800/jsonrpc';
+            this.secret = '';
+        } else {
+            let i = url.indexOf('#');
+            if (i !== -1) {
+                this.url = url.slice(0, i);
+                this.secret = url.slice(i + 1);
+            } else {
+                this.url = url;
+                this.secret = secret || '';
+            }
+        }
+        this.#call = this.#post;
     }
 
     set url(string) {
