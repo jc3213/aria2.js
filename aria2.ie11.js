@@ -140,11 +140,7 @@ var Aria2 = (function() {
             var arg = args[i];
             var params = arg.params;
             if (params) {
-                var arr = [this.props.secret];
-                for (let j = 0, m = params.length; j < m; j++) {
-                    arr[j+1] = params[j];
-                }
-                params = arr;
+                params = [this.props.secret].concat(params);
             } else {
                 params = [this.props.secret];
             }

@@ -60,8 +60,13 @@ class Aria2 {
         throw new Error('Network error: ' + response.status + ' ' + response.statusText);
     }
 
-    call(method, params = []) {
-        return this.#call({ jsonrpc: '2.0', id: this.#id++, method, params: [ this.#secret, ...params ] });
+    call(method, params) {
+        if (params) {
+            params = [this.#secret].concat(params);
+        } else {
+            params = [this.#secret];
+        }
+        return this.#call({ jsonrpc: '2.0', id: this.#id++, method, params });
     }
 
     multicall(args) {
@@ -70,9 +75,9 @@ class Aria2 {
             let arg = args[i];
             let params = arg.params;
             if (params) {
-                params = [ this.#secret, ...arg.params ];
+                params = [this.#secret].concat(params);
             } else {
-                params = [ this.#secret ];
+                params = [this.#secret];
             }
             calls[i] = { methodName: arg.methodName, params };
         }
