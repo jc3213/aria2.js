@@ -125,12 +125,13 @@ var Aria2 = (function() {
 
     initiator.prototype.call = function(method, params, callback) {
         if (!params) {
-            params = [];
+            params = [this.props.secret];
         } else if (typeof params === 'function') {
             callback = params;
-            params = [];
+            params = [this.props.secret];
+        } else {
+            params = [this.props.secret].concat(params);
         }
-        params.unshift(this.props.secret);
         this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method, params }, callback);
     }
 
