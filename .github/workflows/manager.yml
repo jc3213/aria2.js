@@ -15,8 +15,25 @@ permissions:
   contents: write
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.filter.outputs.assets }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            assets:
+              - 'app/index.html'
+              - 'app/index.js'
+
   assets:
-    if: contains(github.event.head_commit.message, '[skip-sync]') == false
+    needs: check
+    if: needs.check.outputs.changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -39,7 +56,7 @@ jobs:
           git push
 
   prepare:
-    needs: assets
+    needs: check
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.pkg.outputs.version }}
