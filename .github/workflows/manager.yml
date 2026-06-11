@@ -89,7 +89,7 @@ jobs:
           gh release create "$VERSION" --title "$VERSION" --notes "Auto release $VERSION"
 
   build:
-    needs: prepare
+    needs: [assets, prepare]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
