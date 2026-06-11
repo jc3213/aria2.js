@@ -78,10 +78,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install NSIS (Windows)
-        if: runner.os == 'Windows'
-        run: choco install nsis -y
-
       - name: Build Electron App
         run: npm run dist
 
@@ -100,10 +96,28 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Write-Host "Uploading installers for $env:VERSION"
+          Write-Host "Preparing Windows installers for $env:VERSION"
 
-          Get-ChildItem -Recurse dist -Include *.exe, *.zip |
-            ForEach-Object {
-              Write-Host "Uploading $($_.FullName)"
-              gh release upload $env:VERSION $_.FullName --clobber
-            }
+          $dist = "dist"
+          $version = $env:VERSION
+
+          $zipName = "aria2-task-manager-$version-win64.zip"
+          Write-Host "Zipping win-unpacked/* to $zipName"
+          Compress-Archive -Path "$dist/win-unpacked/*" -DestinationPath "$zipName" -Force
+
+          $installer = Get-ChildItem -Recurse $dist -Filter "*Setup*.exe" | Select-Object -First 1
+          if ($installer) {
+            $installerOut = "aria2-task-manager-$version-win64.exe"
+            Write-Host "Renaming installer to $installerOut"
+            Copy-Item $installer.FullName $installerOut -Force
+          }
+
+          # 3. 上传绿色版 zip
+          Write-Host "Uploading $zipName"
+          gh release upload $version $zipName --clobber
+
+          # 4. 上传安装版 exe
+          if (Test-Path $installerOut) {
+            Write-Host "Uploading $installerOut"
+            gh release upload $version $installerOut --clobber
+          }
