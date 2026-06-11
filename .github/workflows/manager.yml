@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.pkg.outputs.version }}
-      skip: ${{ steps.check.outputs.skip }}
 
     steps:
       - name: Checkout repo
@@ -27,42 +26,39 @@ jobs:
           VERSION=$(jq -r .version package.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Check if release exists
-        id: check
+      - name: Delete old release if exists
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ steps.pkg.outputs.version }}"
 
+          echo "Checking release $VERSION"
+
           if gh release view "$VERSION" >/dev/null 2>&1; then
-            echo "skip=false" >> $GITHUB_OUTPUT
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "Deleting old release $VERSION"
+            gh release delete "$VERSION" -y || true
+            git push origin ":refs/tags/$VERSION" || true
           fi
 
-  delete_release:
-    needs: prepare
-    if: needs.prepare.outputs.skip == 'false'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Delete existing release & tag
+      - name: Create new empty release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-
-          echo "Deleting release $VERSION"
-
-          gh release delete "$VERSION" -y || true
-          git push origin ":refs/tags/$VERSION" || true
+          VERSION="${{ steps.pkg.outputs.version }}"
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --notes "Auto-generated release for version $VERSION"
 
   build:
-    needs: [prepare, delete_release]
-    if: needs.prepare.outputs.skip == 'false'
+    needs: prepare
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      VERSION: ${{ needs.prepare.outputs.version }}
 
     steps:
       - name: Checkout repo
@@ -85,38 +81,11 @@ jobs:
       - name: Build Electron App
         run: npm run dist
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-${{ matrix.os }}
-          path: dist/
-
-  release:
-    needs: [prepare, build]
-    runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: builds
-
-      - name: Create GitHub Release
+      - name: Upload installers directly to release
         run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
+          echo "Uploading installers for $VERSION"
 
-          gh release create "$VERSION" \
-            --title "$VERSION" \
-            --notes "Electron build for version $VERSION"
-
-      - name: Upload assets to release
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-
-          find builds -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.zip" \) | while read file; do
+          find dist -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.zip" \) | while read file; do
             echo "Uploading $file"
             gh release upload "$VERSION" "$file" --clobber
           done
-
