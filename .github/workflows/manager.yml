@@ -92,7 +92,7 @@ jobs:
           path: dist/
 
   release:
-    needs: build
+    needs: [prepare, build]
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
