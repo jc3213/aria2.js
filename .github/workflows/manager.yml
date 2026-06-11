@@ -21,7 +21,7 @@ jobs:
       changed: ${{ steps.filter.outputs.assets }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - uses: dorny/paths-filter@v3
         id: filter
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Fetch external JS/CSS
         run: |
@@ -63,7 +63,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Read version
         id: pkg
