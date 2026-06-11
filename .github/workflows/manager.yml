@@ -39,7 +39,7 @@ jobs:
           git push
 
   prepare:
-    needs: sync-assets
+    needs: assets
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.pkg.outputs.version }}
@@ -96,7 +96,6 @@ jobs:
       - name: Build Electron App
         run: npm run dist
 
-      # Linux/macOS 上传
       - name: Upload installers (Linux/macOS)
         if: runner.os != 'Windows'
         shell: bash
@@ -105,7 +104,6 @@ jobs:
             gh release upload "$VERSION" "$file" --clobber
           done
 
-      # Windows 上传
       - name: Upload installers (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
