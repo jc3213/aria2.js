@@ -78,10 +78,16 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install NSIS (Windows)
+        if: runner.os == 'Windows'
+        run: choco install nsis -y
+
       - name: Build Electron App
         run: npm run dist
 
-      - name: Upload installers directly to release
+      - name: Upload installers (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
         run: |
           echo "Uploading installers for $VERSION"
 
@@ -89,3 +95,15 @@ jobs:
             echo "Uploading $file"
             gh release upload "$VERSION" "$file" --clobber
           done
+
+      - name: Upload installers (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "Uploading installers for $env:VERSION"
+
+          Get-ChildItem -Recurse dist -Include *.exe, *.zip |
+            ForEach-Object {
+              Write-Host "Uploading $($_.FullName)"
+              gh release upload $env:VERSION $_.FullName --clobber
+            }
