@@ -87,7 +87,7 @@ jobs:
         run: |
           echo "Uploading installers for $VERSION"
 
-          find dist -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.zip" \) | while read file; do
+          find dist -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" \) | while read file; do
             echo "Uploading $file"
             gh release upload "$VERSION" "$file" --clobber
           done
@@ -96,28 +96,14 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Write-Host "Preparing Windows installers for $env:VERSION"
-
-          $dist = "dist"
           $version = $env:VERSION
 
-          $zipName = "aria2-task-manager-$version-win64.zip"
-          Write-Host "Zipping win-unpacked/* to $zipName"
-          Compress-Archive -Path "$dist/win-unpacked/*" -DestinationPath "$zipName" -Force
+          $zip = "aria2-task-manager-$version-win64.zip"
+          Compress-Archive "dist/win-unpacked/*" $zip -Force
 
-          $installer = Get-ChildItem -Recurse $dist -Filter "*Setup*.exe" | Select-Object -First 1
-          if ($installer) {
-            $installerOut = "aria2-task-manager-$version-win64.exe"
-            Write-Host "Renaming installer to $installerOut"
-            Copy-Item $installer.FullName $installerOut -Force
-          }
+          $setup = Get-ChildItem dist -Filter "*Setup*.exe" | Select-Object -First 1
+          $exe = "aria2-task-manager-$version-win64.exe"
+          Copy-Item $setup.FullName $exe -Force
 
-          # 3. 上传绿色版 zip
-          Write-Host "Uploading $zipName"
-          gh release upload $version $zipName --clobber
-
-          # 4. 上传安装版 exe
-          if (Test-Path $installerOut) {
-            Write-Host "Uploading $installerOut"
-            gh release upload $version $installerOut --clobber
-          }
+          gh release upload $version $zip --clobber
+          gh release upload $version $exe --clobber
