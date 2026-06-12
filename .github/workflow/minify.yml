@@ -1,0 +1,34 @@
+name: minify-aria2.js
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'aria2.js'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      - run: npm install -g terser
+
+      - run: npx terser aria2.js -o aria2.min.js
+
+      - run: |
+          HASH=$(git log -n 1 --pretty=format:%h -- aria2.js)
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add aria2.min.js
+          git diff --cached --quiet || git commit -m "Auto-generated aria2.min.js based on $HASH"
+          git push
