@@ -1,0 +1,127 @@
+# aria2.js/sharedworker
+
+| Class Type | SharedWorker Type | Extension | Web App |
+| - | - | - | - |
+| [aria2.js](//jc3213.github.io/aria2.js/src/) | | [aria2.js](//jc3213.github.io/aria2.js/sharedworker/) | [Download with Aria2](https://jc3213.github.io/download_with_aria2/) | [Task Manager](https://jc3213.github.io/aria2.app/) |
+
+## Download SharedWorker
+
+```bash
+curl -L -O https://jc3213.github.io/aria2.js/sharedworker/shared.js
+curl -L -O https://jc3213.github.io/aria2.js/sharedworker/worker.js
+```
+
+```powershell
+Invoke-WebRequest "https://jc3213.github.io/aria2.js/sharedworker/shared.js" -OutFile "shared.js"
+Invoke-WebRequest "https://jc3213.github.io/aria2.js/sharedworker/worker.js" -OutFile "worker.js"
+```
+
+## Syntax
+```html
+<script src="shared.js"></script>
+```
+
+```javascript
+const worker = new SharedWorker('shared.js');
+const port = worker.port;
+
+port.start();
+
+port.onmessage = function(event) {
+    const message = event.data;
+    const id = message.id;
+    const type = message.type;
+    const response = message.response;
+    console.log(id, type, response);
+};
+
+port.postMessage({ id, type, payload });
+```
+
+### id
+- `String` / `Number`
+    - Unique ID for the message
+    
+### type
+- `String`
+    - connect
+        - Set `WebSocket` url for aria2 JSON-RPC
+        - Set secret token for aria2 JSON-RPC
+        - Open `WebSocket`
+        - Read [payload](#payload)
+    - disconnect
+        - Close `WebSocket`
+    - call
+        - Send request to aria2 JSON-RPC
+        - Read [payload](#payload)
+    - multicall
+        - Send multiple messages to aria2 JSON-RPC
+        - Read [payload](#payload)
+    - websocket
+        - Handle messages from `WebSocket` JSON-RPC events
+        - Only work for `onmessage` event
+
+### payload
+    - connect
+        - `{ jsonrpc, secret }`
+        - [**jsonrpc**](#jsonrpc)
+        - [**secret**](#secret)
+    - call
+        - `{ method, params }`
+        - [**method**](#method)
+        - [**params**](#params)
+    - multicall
+        - `[ { methodName, params } ]`
+        - [**methodName**](#method)
+        - [**params**](#params)
+
+----
+
+```html
+<script src="shared.js"></script>
+<script src="worker.js"></script>
+```
+
+```javascript
+aria2.retries = 10; // Default
+aria2.timeout = 10; // Default
+
+aria2.onmessage = function(message) {
+    console.log(message);
+};
+
+await aria2.connect(jsonrpc, secret);
+```
+
+- [**jsonrpc**](#jsonrpc)  the url of aria2 JSON-RPC
+- [**secret**](#secret) the secret token of aria2 JSON-RPC
+
+```javascript
+let response = await aria2.call(method, params);
+```
+
+- [**method**](#method)
+- [**params**](#params)
+
+```javascript
+let response = await aria2.multicall([ { methodName, params } ]);
+```
+
+- [**methodName**](#method)
+- [**params**](#params)
+
+#### jsonrpc
+- `String`
+- The URL of JSON-RPC of aria2 download ultility
+
+#### secret
+- `String`
+- The secret token `secret=your-secret-token` in JSON-RPC configuration
+
+#### method
+- `String`
+- Read [RPC method calls](https://aria2.github.io/manual/en/html/aria2c.html#methods)
+
+#### params
+- `Array`
+- JSON-RPC method call parameters

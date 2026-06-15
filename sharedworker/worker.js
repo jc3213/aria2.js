@@ -2,10 +2,10 @@ const aria2 = (() => {
     let pending = {};
     let index = 0;
     let retries = 10;
-    let interval = 10000;
+    let timeout = 10000;
     let onmessage = null;
 
-    let shared = new URL('shared.js', document.currentScript.src).href;
+    let shared = document.currentScript.src.replace('worker.js', 'shared.js');
     let worker = new SharedWorker(shared, { name: 'aria2-download-utility' });
     let port = worker.port;
     port.start();
@@ -90,17 +90,17 @@ const aria2 = (() => {
         }
     });
 
-    Object.defineProperty(aria2, 'interval', {
+    Object.defineProperty(aria2, 'timeout', {
         get() {
-            return interval;
+            return timeout;
         },
         set(callback) {
-            if (interval > 1000) {
-                interval = interval;
-            } else if (interval > 3 && interval <= 60) {
-                interval = interval * 1000;
+            if (timeout > 1000) {
+                timeout = timeout;
+            } else if (timeout > 3 && timeout <= 60) {
+                timeout = timeout * 1000;
             } else {
-                interval = 10000;
+                timeout = 10000;
             }
         }
     });
