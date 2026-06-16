@@ -98,12 +98,6 @@ function disconnect(port, id, type) {
     port.close();
 }
 
-function unload(port, id, type) {
-    ports.delete(port);
-    port.postMessage({ id, type, response: { ok: true } });
-    port.close();
-}
-
 function websocket(port, id, type, action) {
     if (action === 'add') {
         ports.add(port);
