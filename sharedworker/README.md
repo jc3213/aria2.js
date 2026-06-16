@@ -60,20 +60,19 @@ port.postMessage({ id, type, payload });
         - Only work for `onmessage` event
 
 ### payload
-    - connect
-        - `{ jsonrpc, secret }`
-        - [**jsonrpc**](#jsonrpc)
-        - [**secret**](#secret)
-    - call
-        - `{ method, params }`
-        - [**method**](#method)
-        - [**params**](#params)
-    - multicall
-        - `[ { methodName, params } ]`
-        - [**methodName**](#method)
-        - [**params**](#params)
-
-----
+- connect
+    - `{ jsonrpc, secret }`
+    - [**jsonrpc**](#jsonrpc)
+    - [**secret**](#secret)
+- disconnect
+- call
+    - `{ method, params }`
+    - [**method**](#method)
+    - [**params**](#params)
+- multicall
+    - `[ { methodName, params } ]`
+    - [**methodName**](#method)
+    - [**params**](#params)
 
 ```html
 <script src="shared.js"></script>
