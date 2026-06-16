@@ -70,7 +70,7 @@ function connect(port, id, type, config) {
         let message = JSON.parse(event.data);
         if (message.method) {
             for (let port of ports) {
-                port.postMessage({ type: 'broadcast', response: message });
+                port.postMessage({ type: 'websocket', response: message });
             }
         } else {
             let id = message.id;
@@ -84,27 +84,22 @@ function connect(port, id, type, config) {
 }
 
 function disconnect(port, id, type) {
-    let result = ports.delete(port);
-    if (!result || ports.size > 0) {
+    if (socket && socket.readyState === 1) {
+        socket.close();
         port.postMessage({ id, type, response: { ok: true } });
     } else {
-        if (socket && socket.readyState === 1) {
-            socket.close();
-            port.postMessage({ id, type, response: { ok: true } });
-        } else {
-            port.postMessage({ id, type, response: { error: new Error('WebSocket connection is not opened') } });
-        }
+        port.postMessage({ id, type, response: { error: new Error('WebSocket connection is not opened') } });
     }
-    port.close();
 }
 
-function websocket(port, id, type, action) {
-    if (action === 'add') {
-        ports.add(port);
-    } else {
-        ports.delete(port);
-    }
-    port.postMessage({ id, type });
+function subscribe(port, id, type) {
+    ports.add(port);
+    port.postMessage({ id, type, response: { ok: true } });
+}
+
+function unsubscribe(port, id, type) {
+    let ok = ports.delete(port);
+    port.postMessage({ id, type, response: { ok } });    
 }
 
 self.addEventListener('connect', (event) => {

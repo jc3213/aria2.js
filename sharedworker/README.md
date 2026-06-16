@@ -42,53 +42,35 @@ port.postMessage({ id, type, payload });
     
 ### type
 - `String`
-- **connect**
-    - Set `WebSocket` url for aria2 JSON-RPC
-    - Set secret token for aria2 JSON-RPC
-    - Open `WebSocket` if not opened
-    - Open new `WebSocket` if opened
-    - Read [payload](#payload)
-- **disconnect**
-    - Close message port connected to `SharedWorker`
-    - Remove message port if in the broadcast lists
-    - Close `WebSocket` if all message ports are closed
-- **call**
-    - Send request to aria2 JSON-RPC
-    - Read [payload](#payload)
-- **multicall**
-    - Send multiple messages to aria2 JSON-RPC
-    - Read [payload](#payload)
-- **websocket**
-    - Add/Remove message port to/from the broadcast lists
-    - Read [payload](#payload)
-- **broadcast**
-    - Handle notification events from `WebSocket` JSON-RPC
-    - Only send messages to ports in the broadcast lists
-
-### payload
-- **connect**
-    - `Object`
-    - `{ jsonrpc, secret }`
-    - [**jsonrpc**](#jsonrpc)
-    - [**secret**](#secret)
-- **disconnect**
-- **call**
-    - `Object`
-    - `{ method, params }`
-    - [**method**](#method)
-    - [**params**](#params)
-- **multicall**
-    - `Array`
-    - `[ { methodName, params } ]`
-    - [**methodName**](#method)
-    - [**params**](#params)
-- **websocket**
-    - `String`
-    - **add**
-        - Add message port to broadcast lists
-    - **remove**
-        - Remove message port from broadcast lists
-- **broadcast**
+    - connect
+        - Set `WebSocket` url for aria2 JSON-RPC
+        - Set secret token for aria2 JSON-RPC
+        - Open `WebSocket` if not opened
+        - Open new `WebSocket` if opened
+        - ```payload = { jsonrpc, secret };```
+        - [**jsonrpc**](#jsonrpc)
+        - [**secret**](#secret)
+    - disconnect
+        - Close message port connected to `SharedWorker`
+        - Remove message port if in the broadcast lists
+        - Close `WebSocket` if all message ports are closed
+    - subscribe
+        - Add message port to the broadcast lists
+    - unsubscribe
+        - Remove message port from the broadcast lists
+    - **websocket**
+        - Handle notification events from `WebSocket` JSON-RPC
+        - Only send messages to ports in the broadcast lists
+    - call
+        - Send request to aria2 JSON-RPC
+        - ```payload = { method, params }```
+        - [**method**](#method)
+        - [**params**](#params)
+    - multicall
+        - Send multiple messages to aria2 JSON-RPC
+        - ```payload = [ { methodName, params } ]```
+        - [**methodName**](#method)
+        - [**params**](#params)
 
 ```html
 <script src="shared.js"></script>

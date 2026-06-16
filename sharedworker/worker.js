@@ -12,7 +12,7 @@ const aria2 = (() => {
     port.onmessage = (event) => {
         let data = event.data;
         let response = data.response;
-        if (data.type === 'broadcast') {
+        if (data.type === 'websocket') {
             if (onmessage) {
                 onmessage(response);
             }
@@ -69,12 +69,12 @@ const aria2 = (() => {
         async set(callback) {
             let action;
             if (typeof callback === 'function') {
-                action = 'add';
+                action = 'subscribe';
             } else {
-                action = 'remove';
+                action = 'unsubscribe';
                 callback = null;
             }
-            await broadcast('websocket', action);
+            await broadcast(action);
             onmessage = callback;
         }
     });
@@ -110,7 +110,7 @@ const aria2 = (() => {
     });
 
     window.addEventListener('unload', () => {
-        broadcast('disconnect');
+        broadcast('unsubscribe');
     });
 
     return aria2;
