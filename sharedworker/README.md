@@ -86,8 +86,10 @@ port.postMessage({ id, type, payload });
     - [**params**](#params)
 - **websocket**
     - `String`
-    - **add**: add message port to broadcast lists
-    - **remove**: remove message port to broadcast lists
+    - **add**
+        - Add message port to broadcast lists
+    - **remove**
+        - Remove message port from broadcast lists
 - **broadcast**
 
 ```html
