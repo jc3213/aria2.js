@@ -1,20 +1,10 @@
 let jsonrpc = null;
+let secret = 'token:';
 let socket = null;
-let secret = '';
-let broadcast = null;
 let pending = {};
 let ports = new Set();
 
-function post(json) {
-    return fetch(jsonrpc, { method: 'POST', body: JSON.stringify(json) }).then((response) => {
-        if (response.ok) {
-            return response.json();
-        }
-        throw new Error('Network error: ' + response.status + ' ' + response.statusText);
-    });
-}
-
-function send(json) {
+function broadcast(json) {
     return new Promise((resolve, reject) => {
         let id = json.id;
         pending[id] = resolve;
@@ -51,37 +41,36 @@ async function multicall(port, id, type, args) {
 }
 
 function connect(port, id, type, config) {
-    let pwd = config.secret;
-    if (pwd) {
-        secret = 'token:' + pwd;
+    let token = config.secret;
+    if (token) {
+        secret = 'token:' + token;
     }
     let url = config.jsonrpc;
-    let wsa;
     if (url.startsWith('http://') || url.startsWith('https://')) {
-        jsonrpc = url;
-        wsa = 'ws' + url.substring(4);
+        jsonrpc = 'ws' + url.substring(4);
     } else if (url.startsWith('ws://') || url.startsWith('wss://')) {
-        jsonrpc = 'http' + url.substring(2);
-        wsa = url;
+        jsonrpc = url;
     } else {
-        port.postMessage({id, type, response: { error: 'Invalid JSON-RPC Endpoint: expected http(s):// or ws(s)://' } });
+        port.postMessage({id, type, response: { error: new Error('Invalid "jsonrpc": expected http(s):// or ws(s)://') } });
         return;
     }
-    ports.add(port);
-    if (socket && socket.url === wsa && socket.readyState === 1) {
-        port.postMessage({ id, type, response: { ok: true } });
-        return;
+    if (socket && socket.readyState === 1) {
+        if (socket.url === jsonrpc ) {
+            port.postMessage({ id, type, response: { ok: true } });
+            return;
+        } else {
+            socket.close();
+        }
     }
-    socket = new WebSocket(wsa);
+    socket = new WebSocket(jsonrpc);
     socket.onopen = () => {
-        broadcast = send;
         port.postMessage({ id, type, response: { ok: true } });
     };
     socket.onmessage = (event) => {
         let message = JSON.parse(event.data);
         if (message.method) {
             for (let port of ports) {
-                port.postMessage({ type: 'websocket', response: message });
+                port.postMessage({ type: 'broadcast', response: message });
             }
         } else {
             let id = message.id;
@@ -89,24 +78,39 @@ function connect(port, id, type, config) {
             delete pending[id];
         }
     };
-    socket.onclose = (event) => {
-        broadcast = post;
-        port.postMessage({ id, type, response: { error: 'Failed to open WebSocket connection' } });
+    socket.onerror = (event) => {
+        port.postMessage({ id, type, response: { error: new Error('Failed to open WebSocket connection') } });
     };
 }
 
 function disconnect(port, id, type) {
-    ports.delete(port);
-    if (ports.size > 0) {
+    let result = ports.delete(port);
+    if (!result || ports.size > 0) {
         port.postMessage({ id, type, response: { ok: true } });
-        return;
+    } else {
+        if (socket && socket.readyState === 1) {
+            socket.close();
+            port.postMessage({ id, type, response: { ok: true } });
+        } else {
+            port.postMessage({ id, type, response: { error: new Error('WebSocket connection is not opened') } });
+        }
     }
-    socket.onclose = (event) => {
-        socket = null;
-        broadcast = post;
-        port.postMessage({ id, type, response: { ok: true } });
-    };
-    socket.close();
+    port.close();
+}
+
+function unload(port, id, type) {
+    ports.delete(port);
+    port.postMessage({ id, type, response: { ok: true } });
+    port.close();
+}
+
+function websocket(port, id, type, action) {
+    if (action === 'add') {
+        ports.add(port);
+    } else {
+        ports.delete(port);
+    }
+    port.postMessage({ id, type });
 }
 
 self.addEventListener('connect', (event) => {
@@ -116,8 +120,5 @@ self.addEventListener('connect', (event) => {
         let data = ev.data;
         let type = data.type;
         self[type](port, data.id, type, data.payload);
-    };
-    port.onclose = () => {
-        port = null;
     };
 });

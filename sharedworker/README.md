@@ -45,10 +45,13 @@ port.postMessage({ id, type, payload });
     - connect
         - Set `WebSocket` url for aria2 JSON-RPC
         - Set secret token for aria2 JSON-RPC
-        - Open `WebSocket`
+        - Open `WebSocket` if not opened
+        - Open new `WebSocket` if opened
         - Read [payload](#payload)
     - disconnect
-        - Close `WebSocket`
+        - Close message port connected to `SharedWorker`
+        - Remove message port if in the broadcast lists
+        - Close `WebSocket` if all message ports are closed
     - call
         - Send request to aria2 JSON-RPC
         - Read [payload](#payload)
@@ -56,8 +59,11 @@ port.postMessage({ id, type, payload });
         - Send multiple messages to aria2 JSON-RPC
         - Read [payload](#payload)
     - websocket
-        - Handle messages from `WebSocket` JSON-RPC events
-        - Only work for `onmessage` event
+        - Add/Remove message port to/from the broadcast lists
+        - Read [payload](#payload)
+    - broadcast
+        - Handle notification events from `WebSocket` JSON-RPC
+        - Only send messages to ports in the broadcast lists
 
 ### payload
 - connect
@@ -73,6 +79,11 @@ port.postMessage({ id, type, payload });
     - `[ { methodName, params } ]`
     - [**methodName**](#method)
     - [**params**](#params)
+- websocket
+    - `action`
+    - **add**: add message port to broadcast lists
+    - **remove**: remove message port to broadcast lists
+- broadcast
 
 ```html
 <script src="shared.js"></script>
