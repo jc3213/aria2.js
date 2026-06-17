@@ -48,8 +48,8 @@ port.postMessage({ id, type, payload });
         - Open `WebSocket` if not opened
         - Open new `WebSocket` if opened
         - ```payload = { jsonrpc, secret };```
-        - [**jsonrpc**](#jsonrpc)
-        - [**secret**](#secret)
+        - [jsonrpc](#jsonrpc)
+        - [secret](#secret)
     - disconnect
         - Close message port connected to `SharedWorker`
         - Remove message port if in the broadcast lists
@@ -64,13 +64,13 @@ port.postMessage({ id, type, payload });
     - call
         - Send request to aria2 JSON-RPC
         - ```payload = { method, params }```
-        - [**method**](#method)
-        - [**params**](#params)
+        - [method](#method)
+        - [params](#params)
     - multicall
         - Send multiple messages to aria2 JSON-RPC
         - ```payload = [ { methodName, params } ]```
-        - [**methodName**](#method)
-        - [**params**](#params)
+        - [methodName](#method)
+        - [params](#params)
 
 ```html
 <script src="shared.js"></script>
@@ -85,25 +85,27 @@ aria2.onmessage = function(message) {
     console.log(message);
 };
 
-await aria2.connect(jsonrpc, secret);
+await aria2.connect(jsonrpc, secret, callback);
 ```
 
-- [**jsonrpc**](#jsonrpc) *reqired*
-- [**secret**](#secret) *reqired*
+- [jsonrpc](#jsonrpc)
+- [secret](#secret)
+- callback
+    - Function runs when failed to open `Websocket` before retries
 
 ```javascript
 let response = await aria2.call(method, params);
 ```
 
-- [**method**](#method) *reqired*
-- [**params**](#params) *optional*
+- [method](#method)
+- [params](#params)
 
 ```javascript
 let response = await aria2.multicall([ { methodName, params } ]);
 ```
 
-- [**methodName**](#method) *reqired*
-- [**params**](#params) *optional*
+- [methodName](#method)
+- [params](#params)
 
 #### jsonrpc
 - `String`
