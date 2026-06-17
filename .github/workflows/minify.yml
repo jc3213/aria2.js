@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'aria2.js'
+      - 'src/aria2.js'
   workflow_dispatch:
 
 permissions:
