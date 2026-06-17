@@ -88,24 +88,24 @@ aria2.onmessage = function(message) {
 await aria2.connect(jsonrpc, secret, fallback);
 ```
 
-- [**jsonrpc**](#jsonrpc)
-- [**secret**](#secret)
-- **fallback**
+- [**jsonrpc**](#jsonrpc) *reqired*
+- [**secret**](#secret) *reqired*
+- **fallback** *optional*
     - Function callback runs when open `WebSocket` is failed before retries
 
 ```javascript
 let response = await aria2.call(method, params);
 ```
 
-- [**method**](#method)
-- [**params**](#params)
+- [**method**](#method) *reqired*
+- [**params**](#params) *optional*
 
 ```javascript
 let response = await aria2.multicall([ { methodName, params } ]);
 ```
 
-- [**methodName**](#method)
-- [**params**](#params)
+- [**methodName**](#method) *reqired*
+- [**params**](#params) *optional*
 
 #### jsonrpc
 - `String`
