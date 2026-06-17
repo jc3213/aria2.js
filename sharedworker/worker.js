@@ -32,7 +32,7 @@ const aria2 = (() => {
             index.toString(36).padStart(2, '0') +
             '-' +
             Math.random().toString(36).substring(2);
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             pending[id] = resolve;
             port.postMessage({ id, type, payload });
         });
