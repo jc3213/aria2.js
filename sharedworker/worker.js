@@ -39,7 +39,7 @@ const aria2 = (() => {
         });
     }
 
-    async function connect(jsonrpc, secret, fallback) {
+    async function connect(jsonrpc, secret, callback) {
         let id = ++connection;
         for (let i = 0; i <= retries; i++) {
             if (id !== connection) {
@@ -49,8 +49,8 @@ const aria2 = (() => {
             if (result.ok) {
                 return true;
             }
-            if (typeof fallback === 'function') {
-                fallback()
+            if (typeof callback === 'function') {
+                callback()
             }
             await new Promise((resolve) => setTimeout(resolve, timeout));
         }

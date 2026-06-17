@@ -54,13 +54,12 @@ function connect(port, id, type, config) {
         port.postMessage({id, type, response: { error: new Error('Invalid "jsonrpc": expected http(s):// or ws(s)://') } });
         return;
     }
-    if (socket && socket.readyState === 1) {
-        if (socket.url === jsonrpc ) {
+    if (socket) {
+        if (socket.readyState === 1 && socket.url === jsonrpc ) {
             port.postMessage({ id, type, response: { ok: true } });
             return;
-        } else {
-            socket.close();
         }
+        socket.close();
     }
     socket = new WebSocket(jsonrpc);
     socket.onopen = () => {
