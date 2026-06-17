@@ -4,7 +4,6 @@ const aria2 = (() => {
     let retries = 10;
     let timeout = 10000;
     let onmessage = null;
-    let connection = 0;
 
     let shared = document.currentScript.src.replace('worker.js', 'shared.js');
     let worker = new SharedWorker(shared, { name: 'aria2-download-utility' });
@@ -39,24 +38,6 @@ const aria2 = (() => {
         });
     }
 
-    async function connect(jsonrpc, secret, fallback) {
-        let id = ++connection;
-        for (let i = 0; i <= retries; i++) {
-            if (id !== connection) {
-                return false;
-            }
-            let result = await broadcast('connect', { jsonrpc, secret });
-            if (result.ok) {
-                return true;
-            }
-            if (typeof fallback === 'function') {
-                fallback();
-            }
-            await new Promise((resolve) => setTimeout(resolve, timeout));
-        }
-        return false;
-    }
-
     let aria2 = {
         call(method, params) {
             return broadcast('call', { method, params });
@@ -64,7 +45,9 @@ const aria2 = (() => {
         multicall(details) {
             return broadcast('multicall', details);
         },
-        connect,
+        connect(jsonrpc, secret) {
+            return broadcast('connect', { jsonrpc, secret });
+        },
         disconnect() {
             return broadcast('disconnect');
         }
