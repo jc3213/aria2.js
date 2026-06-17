@@ -85,11 +85,13 @@ aria2.onmessage = function(message) {
     console.log(message);
 };
 
-await aria2.connect(jsonrpc, secret);
+await aria2.connect(jsonrpc, secret, fallback);
 ```
 
-- [**jsonrpc**](#jsonrpc)  the url of aria2 JSON-RPC
-- [**secret**](#secret) the secret token of aria2 JSON-RPC
+- [**jsonrpc**](#jsonrpc)
+- [**secret**](#secret)
+- **fallback**
+    - Function callback runs when open `WebSocket` is failed before retries
 
 ```javascript
 let response = await aria2.call(method, params);
