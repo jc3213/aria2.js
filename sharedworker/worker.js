@@ -57,8 +57,8 @@ const aria2 = (() => {
             return broadcast('multicall', details);
         },
         connect,
-        disconnect(details) {
-            return broadcast('disconnect', details);
+        disconnect() {
+            return broadcast('disconnect');
         }
     };
 
