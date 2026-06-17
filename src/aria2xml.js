@@ -25,8 +25,10 @@ class Aria2 {
     set url(string) {
         if (string.startsWith('http://') || string.startsWith('https://')) {
             this.#url = string;
+        } else if (string.startsWith('ws://') || string.startsWith('wss://')) {
+            this.#url = 'http' + string.substring(2);
         } else {
-            throw new TypeError('Invalid JSON-RPC Endpoint: expected http(s)://');
+            throw new TypeError('Invalid URL: expected a valid http(s):// URL');
         }
     }
     get url() {
@@ -47,7 +49,7 @@ class Aria2 {
         } else if (method === 'GET') {
             this.#call = this.#get;
         } else {
-            throw new TypeError('Invalid method: expected "POST" or "GET".');
+            throw new TypeError('Invalid method: expected "POST" or "GET"');
         }
         this.#method = method;
     }
@@ -81,13 +83,14 @@ class Aria2 {
 
     multicall(args) {
         let calls = [];
+        let secret = this.#secret;
         for (let i = 0, l = args.length; i < l; i++) {
             let arg = args[i];
             let params = arg.params;
             if (params) {
-                params = [this.#secret].concat(params);
+                params = [secret].concat(params);
             } else {
-                params = [this.#secret];
+                params = [secret];
             }
             calls[i] = { methodName: arg.methodName, params };
         }

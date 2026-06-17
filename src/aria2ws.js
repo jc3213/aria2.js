@@ -9,7 +9,6 @@ class Aria2 {
     #onopen = null;
     #onmessage = null;
     #onclose = null;
-    #call;
 
     constructor(url, secret) {
         if (!url) {
@@ -25,14 +24,15 @@ class Aria2 {
                 this.secret = secret || '';
             }
         }
-        this.#call = this.#post;
     }
 
     set url(string) {
-        if (string.startsWith('ws://') || string.startsWith('wss://')) {
+        if (string.startsWith('http://') || string.startsWith('https://')) {
+            this.#url = 'ws' + string.substring(4);
+        } else if (string.startsWith('ws://') || string.startsWith('wss://')) {
             this.#url = string;
         } else {
-            throw new TypeError('Invalid JSON-RPC Endpoint: expected ws(s)://');
+            throw new TypeError('Invalid URL: expected a valid ws(s):// URL');
         }
     }
     get url() {
@@ -105,9 +105,10 @@ class Aria2 {
 
     #send(json) {
         return new Promise((resolve, reject) => {
+            let socket = this.#socket;
             this[json.id] = resolve;
-            this.#socket.onerror = reject;
-            this.#socket.send(JSON.stringify(json));
+            socket.onerror = reject;
+            socket.send(JSON.stringify(json));
         });
     }
 
@@ -117,37 +118,51 @@ class Aria2 {
         } else {
             params = [this.#secret];
         }
-        return this.#call({ jsonrpc: '2.0', id: this.#id++, method, params });
+        return this.#send({ jsonrpc: '2.0', id: this.#id++, method, params });
     }
 
     multicall(args) {
         let calls = [];
+        let secret = this.#secret;
         for (let i = 0, l = args.length; i < l; i++) {
             let arg = args[i];
             let params = arg.params;
             if (params) {
-                params = [this.#secret].concat(params);
+                params = [secret].concat(params);
             } else {
-                params = [this.#secret];
+                params = [secret];
             }
             calls[i] = { methodName: arg.methodName, params };
         }
-        return this.#call({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
+        return this.#send({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
     }
 
     connect() {
-        this.#socket = new WebSocket(this.#url);
-        this.#socket.onopen = (event) => {
+        let socket = this.#socket;
+        let url = this.#url;
+        if (socket) {
+            let readyState = socket.readyState;
+            if (readyState === 0) {
+                throw new Error('WebSocket error: connection is still in CONNECTING state');
+            }
+            if (readyState === 1 && socket.url === url) {
+                return;
+            }
+        }
+        socket = new WebSocket(url);
+        socket.onopen = (event) => {
             this.#tries = 0;
-            if (this.#onopen) {
-                this.#onopen(event);
+            let onopen = this.#onopen;
+            if (onopen) {
+                onopen(event);
             }
         };
-        this.#socket.onmessage = (event) => {
+        socket.onmessage = (event) => {
             let json = JSON.parse(event.data);
             if (json.method) {
-                if (this.#onmessage) {
-                    this.#onmessage(json);
+                let onmessage = this.#onmessage;
+                if (onmessage) {
+                    onmessage(json);
                 }
             } else {
                 let id = json.id;
@@ -156,8 +171,9 @@ class Aria2 {
             }
         };
         this.#socket.onclose = (event) => {
-            if (this.#onclose) {
-                this.#onclose(event);
+            let onclose = this.#onclose;
+            if (onclose) {
+                onclose(event);
             }
             if (this.#tries++ < this.#retries) {
                 setTimeout(() => this.connect(), this.#timeout);
@@ -165,10 +181,14 @@ class Aria2 {
                 this.#tries = 0;
             }
         };
+        this.#socket = socket;
     }
 
     disconnect() {
-        this.#tries = Infinity;
-        this.#socket.close();
+        let socket = this.#socket;
+        if (socket && socket.readyState === 1) {
+            this.#tries = Infinity;
+            this.#socket.close();
+        }
     }
 }

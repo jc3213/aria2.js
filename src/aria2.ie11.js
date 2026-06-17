@@ -1,121 +1,23 @@
-var Aria2 = (function() {
-    function initiator(url, secret) {
-        this.props = {
-            url: null,
-            xml: null,
-            wsa: null,
-            secret: '',
-            socket: null,
-            id: 0,
-            tries: 0,
-            retries: 10,
-            timeout: 10000,
-            onopen: null,
-            onmessage: null,
-            onclose: null,
-        };
-        if (!url) {
-            this.url = 'http://localhost:6800/jsonrpc';
-            this.secret = '';
-        } else {
-            let i = url.indexOf('#');
-            if (i !== -1) {
-                this.url = url.substring(0, i);
-                this.secret = url.substring(i + 1);
-            } else {
-                this.url = url;
-                this.secret = secret || '';
-            }
-        }
-        this.props.call = this.post;
+var aria2 = (function() {
+    var url = 'http://localhost:6800/jsonrpc';
+    var xml = 'http://localhost:6800/jsonrpc';
+    var wsa = 'ws://localhost:6800/jsonrpc';
+    var secret = '';
+    var socket = null;
+    var id = 0;
+    var tries = 0;
+    var retries = 10;
+    var timeout = 10000;
+    var onopen = null;
+    var onmessage = null;
+    var onclose = null;
+
+    function send(json, callback) {
+        $calls[json.id] = callback;
+        socket.send(JSON.stringify(json));
     }
 
-    Object.defineProperty(initiator.prototype, 'url', {
-        set: function(string) {
-            if (string.indexOf('http://') === 0 || string.indexOf('https://') === 0) {
-                this.props.url = this.props.xml = string;
-                this.props.wsa = string.replace('http', 'ws');
-            } else if (string.indexOf('ws://') === 0 || string.indexOf('wss://') === 0) {
-                this.props.xml = string.replace('ws', 'http');
-                this.props.url = this.props.wsa = string;
-            } else {
-                throw new TypeError('Invalid JSON-RPC Endpoint: expected http(s):// or ws(s)://');
-            }
-        },
-        get: function() {
-            return this.props.url;
-        },
-        enumerable: true
-    });
-
-    Object.defineProperty(initiator.prototype, 'secret', {
-        set: function(string) {
-            this.props.secret = 'token:' + string;
-        },
-        get: function() {
-            return this.props.substring(6);
-        },
-        enumerable: true
-    });
-
-    Object.defineProperty(initiator.prototype, 'retries', {
-        set: function(number) {
-            var n = number | 0;
-            this.props.retries = n >= 0 ? n : Infinity;
-        },
-        get: function() {
-            return this.props.retries;
-        },
-        enumerable: true
-    });
-
-    Object.defineProperty(initiator.prototype, 'timeout', {
-        set: function(number) {
-            var n = number | 0;
-            this.props.timeout = n <= 1 ? 1000 : n * 1000;
-        },
-        get: function() {
-            return this.props.timeout / 1000;
-        },
-        enumerable: true
-    });
-
-    Object.defineProperty(initiator.prototype, 'onopen', {
-        set: function(callback) {
-            this.props.onopen = typeof callback === 'function' ? callback : null;
-        },
-        get: function() {
-            return this.props.onopen;
-        },
-        enumerable: true
-    });
-
-    Object.defineProperty(initiator.prototype, 'onmessage', {
-        set: function(callback) {
-            this.props.onmessage = typeof callback === 'function' ? callback : null;
-        },
-        get: function() {
-            return this.props.onmessage;
-        },
-        enumerable: true
-    });
-
-    Object.defineProperty(initiator.prototype, 'onclose', {
-        set: function(callback) {
-            this.props.onclose = typeof callback === 'function' ? callback : null;
-        },
-        get: function() {
-            return this.props.onclose;
-        },
-        enumerable: true
-    });
-
-    initiator.prototype.send = function(json, callback) {
-        this.props[json.id] = callback;
-        this.props.socket.send(JSON.stringify(json));
-    }
-
-    initiator.prototype.post = function(json, callback) {
+    function post(json, callback) {
         var xhr = new XMLHttpRequest();
         xhr.open('POST', xml, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -126,76 +28,189 @@ var Aria2 = (function() {
         xhr.send(JSON.stringify(json));
     }
 
-    initiator.prototype.call = function(method, params, callback) {
+    function call(method, params, callback) {
         if (!params) {
-            params = [this.props.secret];
+            params = [secret];
         } else if (typeof params === 'function') {
             callback = params;
-            params = [this.props.secret];
+            params = [secret];
         } else {
-            params = [this.props.secret].concat(params);
+            params = [secret].concat(params);
         }
-        this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method, params }, callback);
+        $call({ jsonrpc: '2.0', id: id++, method, params }, callback);
     }
 
-    initiator.prototype.multicall = function(args, callback) {
+    function multicall(args, callback) {
         var calls = [];
         for (var i = 0, l = args.length; i < l; i++) {
             var arg = args[i];
             var params = arg.params;
             if (params) {
-                params = [this.props.secret].concat(params);
+                params = [secret].concat(params);
             } else {
-                params = [this.props.secret];
+                params = [secret];
             }
             calls[i] = { methodName: arg.methodName, params };
         }
-        this.props.call.call(this, { jsonrpc: '2.0', id: this.props.id++, method: 'system.multicall', params: [calls] }, callback);
+        $call({ jsonrpc: '2.0', id: id++, method: 'system.multicall', params: [calls] }, callback);
     }
 
-    initiator.prototype.connect = function() {
-        var self = this;
-        self.props.socket = new WebSocket(self.props.wsa);
-        self.props.socket.onopen = function(event) {
-            self.props.call = self.send;
-            self.props.tries = 0;
-            if (typeof self.props.onopen === 'function') {
-                self.props.onopen(event);
+    function connect() {
+        if (socket) {
+            let readyState = socket.readyState;
+            if (readyState === 0) {
+                throw new Error('WebSocket error: connection is still in CONNECTING state');
+            }
+            if (readyState === 1 && socket.url === wsa) {
+                return;
+            }
+        }
+        socket = new WebSocket(wsa);
+        socket.onopen = function(event) {
+            $call = send;
+            tries = 0;
+            if (typeof onopen === 'function') {
+                onopen(event);
             }
         };
-        self.props.socket.onmessage = function(event) {
+        socket.onmessage = function(event) {
             var json = JSON.parse(event.data);
             if (json.method) {
-                if (typeof self.props.onmessage === 'function') {
-                    self.props.onmessage(json);
+                if (typeof onmessage === 'function') {
+                    onmessage(json);
                 }
-            } else {
-                var resolve = self.props.call[json.id];
-                if (typeof resolve === 'function') {
-                    resolve(json);
-                }
-                delete self.props[id];
+                return;
             }
+            var id = json.id;
+            var resolve = $calls[id];
+            if (typeof resolve === 'function') {
+                resolve(json);
+            }
+            delete $calls[id];
         };
-        self.props.socket.onclose = function(event) {
-            self.props.call = self.post;
-            if (typeof self.props.onclose === 'function') {
-                self.props.onclose(event);
+        socket.onclose = function(event) {
+            $call = post;
+            if (typeof onclose === 'function') {
+                onclose(event);
             }
-            if (self.props.tries++ < self.props.retries) {
+            if (tries++ < retries) {
                 setTimeout(function() {
-                    self.connect();
-                }, self.props.timeout);
+                    connect();
+                }, timeout);
             } else {
-                self.props.tries = 0;
+                tries = 0;
             }
         };
     };
 
-    initiator.prototype.disconnect = function() {
-        this.props.tries = Infinity;
-        this.props.socket.close();
+    function disconnect() {
+        if (socket && socket.readyState === 1) {
+            tries = Infinity;
+            socket.close();
+        }
     }
 
-    return initiator;
+    var $call = post;
+    var $calls = {};
+    var aria2 = {
+        call: call,
+        multicall: multicall,
+        connect: connect,
+        disconnect: disconnect
+    };
+
+    Object.defineProperty(aria2, 'url', {
+        set: function(string) {
+            if (string.indexOf('http://') === 0 || string.indexOf('https://') === 0) {
+                url = xml = string;
+                wsa = string.replace('http', 'ws');
+            } else if (string.indexOf('ws://') === 0 || string.indexOf('wss://') === 0) {
+                xml = string.replace('ws', 'http');
+                url = wsa = string;
+            } else {
+                throw new TypeError('Invalid URL: expected a valid http(s):// or ws(s):// URL');
+            }
+        },
+        get: function() {
+            return url;
+        }
+    });
+
+    Object.defineProperty(aria2, 'secret', {
+        set: function(string) {
+            secret = 'token:' + string;
+        },
+        get: function() {
+            return secret.substring(6);
+        }
+    });
+
+    Object.defineProperty(aria2, 'retries', {
+        set: function(number) {
+            var n = parseInt(number);
+            if (n >= 0) {
+                retries = n;
+            } else {
+                retries = Infinity;
+            }
+        },
+        get: function() {
+            return retries;
+        }
+    });
+
+    Object.defineProperty(aria2, 'timeout', {
+        set: function(number) {
+            var n = parseInt(number);
+            if (n > 5) {
+                timeout = n * 1000;
+            } else {
+                timeout = 5000;
+            }
+        },
+        get: function() {
+            return timeout / 1000;
+        }
+    });
+
+    Object.defineProperty(aria2, 'onopen', {
+        set: function(callback) {
+            if (typeof callback === 'function') {
+                onopen = callback;
+            } else {
+                onopen = null;
+            }
+        },
+        get: function() {
+            return onopen;
+        }
+    });
+
+    Object.defineProperty(aria2, 'onmessage', {
+        set: function(callback) {
+            if (typeof callback === 'function') {
+                onmessage = callback;
+            } else {
+                onmessage = null;
+            }
+        },
+        get: function() {
+            return onmessage;
+        }
+    });
+
+    Object.defineProperty(aria2, 'onclose', {
+        set: function(callback) {
+            if (typeof callback === 'function') {
+                onclose = callback;
+            } else {
+                onclose = null;
+            }
+        },
+        get: function() {
+            return onclose;
+        }
+    });
+
+    return aria2;
 })();
