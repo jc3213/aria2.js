@@ -21,10 +21,12 @@ var aria2 = (function() {
         var xhr = new XMLHttpRequest();
         xhr.open('POST', xml, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
+
         xhr.onload = function() {
             var json = JSON.parse(xhr.responseText);
             callback(json);
         };
+
         xhr.send(JSON.stringify(json));
     }
 
@@ -37,62 +39,80 @@ var aria2 = (function() {
         } else {
             params = [secret].concat(params);
         }
+
         $call({ jsonrpc: '2.0', id: id++, method, params }, callback);
     }
 
     function multicall(args, callback) {
         var calls = [];
+
         for (var i = 0, l = args.length; i < l; i++) {
             var arg = args[i];
             var params = arg.params;
+
             if (params) {
                 params = [secret].concat(params);
             } else {
                 params = [secret];
             }
+
             calls[i] = { methodName: arg.methodName, params };
         }
+
         $call({ jsonrpc: '2.0', id: id++, method: 'system.multicall', params: [calls] }, callback);
     }
 
     function connect() {
         if (socket) {
             let readyState = socket.readyState;
+
             if (readyState === 0) {
                 throw new Error('WebSocket error: connection is still in CONNECTING state');
             }
+
             if (readyState === 1 && socket.url === wsa) {
                 return;
             }
         }
+
         socket = new WebSocket(wsa);
+
         socket.onopen = function(event) {
             $call = send;
             tries = 0;
+
             if (typeof onopen === 'function') {
                 onopen(event);
             }
         };
+
         socket.onmessage = function(event) {
             var json = JSON.parse(event.data);
+
             if (json.method) {
                 if (typeof onmessage === 'function') {
                     onmessage(json);
                 }
                 return;
             }
+
             var id = json.id;
             var resolve = $calls[id];
+
             if (typeof resolve === 'function') {
                 resolve(json);
             }
+
             delete $calls[id];
         };
+
         socket.onclose = function(event) {
             $call = post;
+
             if (typeof onclose === 'function') {
                 onclose(event);
             }
+
             if (tries++ < retries) {
                 setTimeout(function() {
                     connect();
@@ -112,6 +132,7 @@ var aria2 = (function() {
 
     var $call = post;
     var $calls = {};
+
     var aria2 = {
         call: call,
         multicall: multicall,
@@ -148,10 +169,11 @@ var aria2 = (function() {
     Object.defineProperty(aria2, 'retries', {
         set: function(number) {
             var n = parseInt(number);
-            if (n >= 0) {
-                retries = n;
-            } else {
+
+            if (n < 0) {
                 retries = Infinity;
+            } else {
+                retries = n;
             }
         },
         get: function() {
@@ -162,10 +184,11 @@ var aria2 = (function() {
     Object.defineProperty(aria2, 'timeout', {
         set: function(number) {
             var n = parseInt(number);
-            if (n > 5) {
+
+            if (n > 1) {
                 timeout = n * 1000;
             } else {
-                timeout = 5000;
+                timeout = 1000;
             }
         },
         get: function() {

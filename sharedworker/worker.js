@@ -9,30 +9,36 @@ const aria2 = (() => {
     let shared = document.currentScript.src.replace('worker.js', 'shared.js');
     let worker = new SharedWorker(shared, { name: 'aria2-download-utility' });
     let port = worker.port;
+
     port.start();
+
     port.onmessage = (event) => {
         let data = event.data;
         let response = data.response;
+
         if (data.type === 'websocket') {
             if (onmessage) {
                 onmessage(response);
             }
             return;
         }
+
         let id = data.id;
+
         pending[id](response);
         delete pending[id];
     };
     
     function broadcast(type, payload) {
-        let id = index++;
-        id = type + 
+        let i = index++;
+        let id = type + 
             '-' + 
             Date.now().toString(36) +
             '-' +
-            index.toString(36).padStart(2, '0') +
+            i.toString(36).padStart(2, '0') +
             '-' +
             Math.random().toString(36).substring(2);
+
         return new Promise((resolve) => {
             pending[id] = resolve;
             port.postMessage({ id, type, payload });
@@ -41,19 +47,25 @@ const aria2 = (() => {
 
     async function connect(jsonrpc, secret, callback) {
         let id = ++connection;
+
         for (let i = 0; i <= retries; i++) {
             if (id !== connection) {
                 return false;
             }
+
             let result = await broadcast('connect', { jsonrpc, secret });
+
             if (result.ok) {
                 return true;
             }
+
             if (typeof callback === 'function') {
                 callback()
             }
+
             await new Promise((resolve) => setTimeout(resolve, timeout));
         }
+
         return false;
     }
 
@@ -90,12 +102,12 @@ const aria2 = (() => {
             return retries;
         },
         set(number) {
-            if (number >= 0) {
-                retries = number;
-            } else if (number < 0) {
+            let n = number | 0;
+
+            if (number < 0) {
                 retries = Infinity;
             } else {
-                retries = 10;
+                retries = number;
             }
         }
     });
@@ -104,13 +116,13 @@ const aria2 = (() => {
         get() {
             return timeout;
         },
-        set(callback) {
-            if (timeout > 1000) {
-                timeout = timeout;
-            } else if (timeout > 3 && timeout <= 60) {
-                timeout = timeout * 1000;
+        set(number) {
+            let n = number | 0;
+
+            if (n > 1) {
+                timeout = n * 1000;
             } else {
-                timeout = 10000;
+                timeout = 1000;
             }
         }
     });

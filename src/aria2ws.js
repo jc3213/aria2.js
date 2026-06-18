@@ -48,10 +48,10 @@ class Aria2 {
 
     set retries(number) {
         let n = number | 0;
-        if (n >= 0) {
-            this.#retries = n;
-        } else {
+        if (n < 0) {
             this.#retries = Infinity;
+        } else {
+            this.#retries = n;
         }
     }
     get retries() {
@@ -60,10 +60,11 @@ class Aria2 {
 
     set timeout(number) {
         let n = number | 0;
-        if (n <= 1) {
-            this.#timeout = 1000;
-        } else {
+
+        if (n > 1) {
             this.#timeout = n * 1000;
+        } else {
+            this.#timeout = 1000;
         }
     }
     get timeout() {
@@ -118,38 +119,49 @@ class Aria2 {
         } else {
             params = [this.#secret];
         }
+
         return this.#send({ jsonrpc: '2.0', id: this.#id++, method, params });
     }
 
     multicall(args) {
         let calls = [];
         let secret = this.#secret;
+
         for (let i = 0, l = args.length; i < l; i++) {
             let arg = args[i];
             let params = arg.params;
+
             if (params) {
                 params = [secret].concat(params);
             } else {
                 params = [secret];
             }
+
             calls[i] = { methodName: arg.methodName, params };
         }
+
         return this.#send({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
     }
 
     connect() {
         let socket = this.#socket;
         let url = this.#url;
+
         if (socket) {
             let readyState = socket.readyState;
+
             if (readyState === 0) {
                 throw new Error('WebSocket error: connection is still in CONNECTING state');
             }
+
             if (readyState === 1 && socket.url === url) {
                 return;
             }
         }
+
         socket = new WebSocket(url);
+        this.#socket = socket;
+
         socket.onopen = (event) => {
             this.#tries = 0;
             let onopen = this.#onopen;
@@ -157,6 +169,7 @@ class Aria2 {
                 onopen(event);
             }
         };
+
         socket.onmessage = (event) => {
             let json = JSON.parse(event.data);
             if (json.method) {
@@ -170,7 +183,8 @@ class Aria2 {
                 delete this[id];
             }
         };
-        this.#socket.onclose = (event) => {
+
+        socket.onclose = (event) => {
             let onclose = this.#onclose;
             if (onclose) {
                 onclose(event);
@@ -181,11 +195,11 @@ class Aria2 {
                 this.#tries = 0;
             }
         };
-        this.#socket = socket;
     }
 
     disconnect() {
         let socket = this.#socket;
+
         if (socket && socket.readyState === 1) {
             this.#tries = Infinity;
             this.#socket.close();

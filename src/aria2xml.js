@@ -19,7 +19,8 @@ class Aria2 {
                 this.secret = secret || '';
             }
         }
-        this.#call = this.#post;
+
+        this.method = 'POST';
     }
 
     set url(string) {
@@ -44,6 +45,7 @@ class Aria2 {
 
     set method(string) {
         let method = string.toUpperCase();
+
         if (method === 'POST') {
             this.#call = this.#post;
         } else if (method === 'GET') {
@@ -51,6 +53,7 @@ class Aria2 {
         } else {
             throw new TypeError('Invalid method: expected "POST" or "GET"');
         }
+
         this.#method = method;
     }
     get method() {
@@ -69,6 +72,7 @@ class Aria2 {
         if (response.ok) {
             return response.json();
         }
+
         throw new Error('Network error: ' + response.status + ' ' + response.statusText);
     }
 
@@ -78,22 +82,27 @@ class Aria2 {
         } else {
             params = [this.#secret];
         }
+
         return this.#call({ jsonrpc: '2.0', id: this.#id++, method, params });
     }
 
     multicall(args) {
         let calls = [];
         let secret = this.#secret;
+
         for (let i = 0, l = args.length; i < l; i++) {
             let arg = args[i];
             let params = arg.params;
+
             if (params) {
                 params = [secret].concat(params);
             } else {
                 params = [secret];
             }
+
             calls[i] = { methodName: arg.methodName, params };
         }
+
         return this.#call({ jsonrpc: '2.0', id: this.#id++, method: 'system.multicall', params: [calls] });
     }
 }
