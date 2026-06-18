@@ -1,11 +1,12 @@
-name: minify-aria2.js
+name: minify-js
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'src/aria2.js'
+      - 'src/*.js'
+      - 'sharedworker/*.js'
   workflow_dispatch:
 
 permissions:
@@ -19,16 +20,23 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: '24'
+          node-version: 24
 
       - run: npm install -g terser
 
-      - run: npx terser aria2.js -o aria2.min.js
+      - name: Minify JS files
+        run: |
+          mkdir -p min
+          for file in src/*.js sharedworker/*.js; do
+            [ -f "$file" ] || continue
+            base=$(basename "$file" .js)
+            npx terser "$file" -o "min/${base}.min.js"
+          done
 
-      - run: |
-          HASH=$(git log -n 1 --pretty=format:%h -- aria2.js)
+      - name: Commit minified files
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add aria2.min.js
-          git diff --cached --quiet || git commit -m "Auto-generated aria2.min.js based on $HASH"
+          git add min/*.min.js
+          git diff --cached --quiet || git commit -m "Auto-minified JS files"
           git push
