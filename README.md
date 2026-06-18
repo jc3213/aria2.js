@@ -8,7 +8,7 @@
 ```
 
 ```HTML
-<script src="https://jc3213.github.io/aria2.js/src/aria2.min.js"></script>
+<script src="https://jc3213.github.io/aria2.js/min/aria2.min.js"></script>
 ```
 
 ### TamperMonkey
@@ -17,7 +17,7 @@
 ```
 
 ```javascript
-// @require https://jc3213.github.io/aria2.js/aria2.min.js
+// @require https://jc3213.github.io/aria2.js/min/aria2.min.js
 ```
 
 ## Syntax
