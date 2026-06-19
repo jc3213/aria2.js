@@ -57,10 +57,10 @@ class Aria2 {
     set retries(number) {
         let n = number | 0;
 
-        if (n >= 0) {
-            this.#retries = n;
-        } else {
+        if (n < 0) {
             this.#retries = Infinity;
+        } else {
+            this.#retries = n;
         }
     }
     get retries() {
@@ -184,7 +184,9 @@ class Aria2 {
         socket.onopen = (event) => {
             this.#call = this.#send;
             this.#tries = 0;
+
             let onopen = this.#onopen;
+
             if (onopen) {
                 onopen(event);
             }
@@ -195,6 +197,7 @@ class Aria2 {
 
             if (json.method) {
                 let onmessage = this.#onmessage;
+
                 if (onmessage) {
                     onmessage(json);
                 }

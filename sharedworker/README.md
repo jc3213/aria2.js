@@ -4,13 +4,13 @@
 
 ## Download SharedWorker
 
-**Bash**
+### Bash
 ```bash
 curl -L -O https://jc3213.github.io/aria2.js/sharedworker/shared.js
 curl -L -O https://jc3213.github.io/aria2.js/sharedworker/worker.js
 ```
 
-**Powershell**
+### Powershell
 ```powershell
 Invoke-WebRequest "https://jc3213.github.io/aria2.js/sharedworker/shared.js" -OutFile "shared.js"
 Invoke-WebRequest "https://jc3213.github.io/aria2.js/sharedworker/worker.js" -OutFile "worker.js"

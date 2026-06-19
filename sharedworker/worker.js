@@ -86,13 +86,13 @@ const aria2 = (() => {
         get() {
             return onmessage;
         },
-        async set(callback) {
+        set(callback) {
             if (typeof callback === 'function') {
-                await broadcast('subscribe');
                 onmessage = callback;
+                broadcast('subscribe');
             } else {
-                await broadcast('unsubscribe');
                 onmessage = null;
+                broadcast('unsubscribe');
             }
         }
     });

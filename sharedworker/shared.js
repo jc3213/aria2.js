@@ -107,14 +107,12 @@ function disconnect(port, id, type) {
     }
 }
 
-function subscribe(port, id, type) {
+function subscribe(port) {
     ports.add(port);
-    port.postMessage({ id, type, response: { ok: true } });
 }
 
-function unsubscribe(port, id, type) {
+function unsubscribe(port) {
     let ok = ports.delete(port);
-    port.postMessage({ id, type, response: { ok } });    
 }
 
 self.addEventListener('connect', (event) => {

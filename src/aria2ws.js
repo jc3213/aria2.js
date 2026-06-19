@@ -164,7 +164,9 @@ class Aria2 {
 
         socket.onopen = (event) => {
             this.#tries = 0;
+
             let onopen = this.#onopen;
+
             if (onopen) {
                 onopen(event);
             }
@@ -172,8 +174,10 @@ class Aria2 {
 
         socket.onmessage = (event) => {
             let json = JSON.parse(event.data);
+
             if (json.method) {
                 let onmessage = this.#onmessage;
+
                 if (onmessage) {
                     onmessage(json);
                 }

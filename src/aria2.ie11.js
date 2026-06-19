@@ -81,7 +81,7 @@ var aria2 = (function() {
             $call = send;
             tries = 0;
 
-            if (typeof onopen === 'function') {
+            if (onopen) {
                 onopen(event);
             }
         };
@@ -90,7 +90,7 @@ var aria2 = (function() {
             var json = JSON.parse(event.data);
 
             if (json.method) {
-                if (typeof onmessage === 'function') {
+                if (onmessage) {
                     onmessage(json);
                 }
                 return;
@@ -109,7 +109,7 @@ var aria2 = (function() {
         socket.onclose = function(event) {
             $call = post;
 
-            if (typeof onclose === 'function') {
+            if (onclose) {
                 onclose(event);
             }
 
