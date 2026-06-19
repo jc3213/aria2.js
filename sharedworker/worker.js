@@ -20,6 +20,7 @@ const aria2 = (() => {
             if (onmessage) {
                 onmessage(response);
             }
+
             return;
         }
 
@@ -60,7 +61,7 @@ const aria2 = (() => {
             }
 
             if (typeof callback === 'function') {
-                callback()
+                callback();
             }
 
             await new Promise((resolve) => setTimeout(resolve, timeout));
