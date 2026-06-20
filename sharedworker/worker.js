@@ -115,7 +115,7 @@ const aria2 = (() => {
 
     Object.defineProperty(aria2, 'timeout', {
         get() {
-            return timeout;
+            return timeout / 1000;
         },
         set(number) {
             let n = number | 0;
