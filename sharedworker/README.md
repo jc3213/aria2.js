@@ -50,15 +50,13 @@ port.postMessage({ id, type, payload });
     - connect
         - Set `WebSocket` url for aria2 JSON-RPC
         - Set secret token for aria2 JSON-RPC
-        - Open `WebSocket` if not opened
-        - Open new `WebSocket` if opened
-        - ```payload = { jsonrpc, secret };```
+        - Open `WebSocket` connection if not
+        - Open new `WebSocket` connection if opened
+        - ```payload = { jsonrpc, secret }```
         - [jsonrpc](#jsonrpc)
         - [secret](#secret)
     - disconnect
-        - Close message port connected to `SharedWorker`
-        - Remove message port if in the broadcast lists
-        - Close `WebSocket` if all message ports are closed
+        - Close `WebSocket` connection
     - subscribe
         - Add message port to the broadcast lists
     - unsubscribe
@@ -73,7 +71,7 @@ port.postMessage({ id, type, payload });
         - [params](#params)
     - multicall
         - Send multiple messages to aria2 JSON-RPC
-        - ```payload = [ { methodName, params } ]```
+        - ```payload = [ { methodName, params }, ... ]```
         - [methodName](#method)
         - [params](#params)
 
@@ -108,7 +106,7 @@ let response = await aria2.call(method, params);
 - [params](#params)
 
 ```javascript
-let response = await aria2.multicall([ { methodName, params } ]);
+let response = await aria2.multicall([ { methodName, params }, ... ]);
 ```
 
 - [methodName](#method)
