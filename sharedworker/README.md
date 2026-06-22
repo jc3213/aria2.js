@@ -17,10 +17,13 @@ Invoke-WebRequest "https://jc3213.github.io/aria2.js/sharedworker/worker.js" -Ou
 ```
 
 ## Syntax
+
+### HTML
 ```html
 <script src="shared.js"></script>
 ```
 
+### Javascript
 ```javascript
 const worker = new SharedWorker('shared.js');
 const port = worker.port;
@@ -74,11 +77,13 @@ port.postMessage({ id, type, payload });
         - [methodName](#method)
         - [params](#params)
 
+### HTML
 ```html
 <script src="shared.js"></script>
 <script src="worker.js"></script>
 ```
 
+### Javascript
 ```javascript
 aria2.retries = 10; // Default
 aria2.timeout = 10; // Default
