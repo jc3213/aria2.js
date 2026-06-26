@@ -89,7 +89,7 @@ var aria2 = (function() {
         socket.onmessage = function(event) {
             var json = JSON.parse(event.data);
 
-            if (json.method) {
+            if ('method' in json) {
                 if (onmessage) {
                     onmessage(json);
                 }
