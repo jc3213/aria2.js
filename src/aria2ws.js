@@ -175,7 +175,7 @@ class Aria2 {
         socket.onmessage = (event) => {
             let json = JSON.parse(event.data);
 
-            if (json.method) {
+            if ('method' in json) {
                 let onmessage = this.#onmessage;
 
                 if (onmessage) {
