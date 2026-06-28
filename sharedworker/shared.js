@@ -1,11 +1,11 @@
 let jsonrpc = null;
 let secret = 'token:';
 
-let wsSock = null;
-let wsReady = false;
-
 let pending = {};
 let ports = new Set();
+
+let wsSock = null;
+let wsReady = false;
 
 function wsOpen() {
     for (let port of ports) {
@@ -51,7 +51,7 @@ function wsSend(json) {
     });
 }
 
-function connect(config) {
+function connect(port, id, config) {
     let token = config.secret;
 
     if (token) {
@@ -108,7 +108,7 @@ function unsubscribe(port) {
     return { ok };
 }
 
-async function call(id, arg) {
+async function call(port, id, arg) {
     let params = arg.params;
 
     if (params) {
@@ -120,7 +120,7 @@ async function call(id, arg) {
     return wsSend({ jsonrpc: '2.0', id, method: arg.method, params });
 }
 
-async function multicall(id, args) {
+async function multicall(port, id, args) {
     let calls = [];
 
     for (let i = 0, l = args.length; i < l; i++) {
@@ -146,35 +146,15 @@ self.addEventListener('connect', (event) => {
 
     port.onmessage = async (ev) => {
         let data = ev.data;
-        let id = data.id;
         let type = data.type;
-        let payload = data.payload;
-        let result;
+        let func = self[type];
 
-        if (type === 'connect') {
-            result = await connect(payload);
+        if (!func) {
+            return;
         }
 
-        if (type === 'disconnect') {
-            result = disconnect();
-        }
-
-        if (type === 'subscribe') {
-            result = subscribe(port);
-        }
-
-        if (type === 'unsubscribe') {
-            result = unsubscribe(port);
-        }
-
-        if (type === 'call') {
-            result = await call(id, payload);
-        }
-
-        if (type === 'multicall') {
-            result = await multicall(id, payload);
-        }
-
+        let id = data.id;
+        let result = await func(port, id, data.payload);
         port.postMessage({ id, type, result });
     };
 });

@@ -15,18 +15,18 @@ const aria2 = (() => {
 
     port.onmessage = (event) => {
         let data = event.data;
-        let resolve = events[data.type];
+        let func = events[data.type];
 
-        if (resolve) {
-            resolve(data.details);
+        if (func) {
+            func(data.details);
             return;
         }
 
         let id = data.id;
-        resolve = pending[id];
+        func = pending[id];
 
-        if (resolve) {
-            resolve(data.result);
+        if (func) {
+            func(data.result);
             delete pending[id];
         }
     };
