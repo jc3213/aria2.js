@@ -32,12 +32,11 @@ const aria2 = (() => {
     };
 
     function broadcast(type, payload) {
-        let i = index++;
         let id = type + 
+            '-' +
+            index++ +
             '-' + 
             Date.now().toString(36) +
-            '-' +
-            i.toString(36).padStart(2, '0') +
             '-' +
             Math.random().toString(36).substring(2);
 
