@@ -61,9 +61,6 @@ port.postMessage({ id, type, payload });
         - Add message port to the broadcast lists
     - unsubscribe
         - Remove message port from the broadcast lists
-    - **websocket**
-        - Handle notification events from `WebSocket` JSON-RPC
-        - Only send messages to ports in the broadcast lists
     - call
         - Send request to aria2 JSON-RPC
         - ```payload = { method, params }```
@@ -74,6 +71,15 @@ port.postMessage({ id, type, payload });
         - ```payload = [ { methodName, params }, ... ]```
         - [methodName](#method)
         - [params](#params)
+    - **ws:open**
+        - Triggers when `WebSocket` connection is opened
+        - Only send messages to ports in the broadcast lists
+    - **ws:close**
+        - Handle notification events from `WebSocket` JSON-RPC
+        - Only send messages to ports in the broadcast lists
+    - **ws:message**
+        - Triggers when `WebSocket` connection is closed
+        - Only send messages to ports in the broadcast lists
 
 ### HTML
 ```html
@@ -86,10 +92,19 @@ port.postMessage({ id, type, payload });
 aria2.retries = 10; // Default
 aria2.timeout = 10; // Default
 
-aria2.onmessage = function(message) {
-    console.log(message);
+aria2.onopen = function() {
+    console.log("WebSocket connection is opened");
 };
 
+aria2.onclose = function() {
+    console.log("WebSocket connection is closed");
+};
+
+aria2.onmessage = function(message) {
+    console.log("Notification recieved from JSON-RPC", message);
+};
+
+await aria2.subscribe();
 await aria2.connect(jsonrpc, secret, callback);
 ```
 

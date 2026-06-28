@@ -11,6 +11,7 @@ var aria2 = (function() {
     var onopen = null;
     var onmessage = null;
     var onclose = null;
+    var ready = false;
 
     function send(json, callback) {
         $calls[json.id] = callback;
@@ -80,6 +81,7 @@ var aria2 = (function() {
         socket.onopen = function(event) {
             $call = send;
             tries = 0;
+            ready = true;
 
             if (onopen) {
                 onopen(event);
@@ -108,6 +110,7 @@ var aria2 = (function() {
 
         socket.onclose = function(event) {
             $call = post;
+            ready = false;
 
             if (onclose) {
                 onclose(event);
@@ -124,7 +127,7 @@ var aria2 = (function() {
     };
 
     function disconnect() {
-        if (socket && socket.readyState === 1) {
+        if (ready) {
             tries = Infinity;
             socket.close();
         }

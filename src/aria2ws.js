@@ -9,6 +9,7 @@ class Aria2 {
     #onopen = null;
     #onmessage = null;
     #onclose = null;
+    #ready = false;
 
     constructor(url, secret) {
         if (!url) {
@@ -105,10 +106,13 @@ class Aria2 {
     }
 
     #send(json) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
+            if (!this.#ready) {
+                throw new Error('WebSocket error: failed to send message');
+            }
+
             let socket = this.#socket;
             this[json.id] = resolve;
-            socket.onerror = reject;
             socket.send(JSON.stringify(json));
         });
     }
@@ -164,6 +168,7 @@ class Aria2 {
 
         socket.onopen = (event) => {
             this.#tries = 0;
+            this.#ready = true;
 
             let onopen = this.#onopen;
 
@@ -189,10 +194,14 @@ class Aria2 {
         };
 
         socket.onclose = (event) => {
+            this.#ready = false;
+
             let onclose = this.#onclose;
+
             if (onclose) {
                 onclose(event);
             }
+
             if (this.#tries++ < this.#retries) {
                 setTimeout(() => this.connect(), this.#timeout);
             } else {
@@ -202,9 +211,7 @@ class Aria2 {
     }
 
     disconnect() {
-        let socket = this.#socket;
-
-        if (socket && socket.readyState === 1) {
+        if (this.#ready) {
             this.#tries = Infinity;
             this.#socket.close();
         }
