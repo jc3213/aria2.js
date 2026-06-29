@@ -34,8 +34,8 @@ port.onmessage = function(event) {
     const message = event.data;
     const id = message.id;
     const type = message.type;
-    const response = message.response;
-    console.log(id, type, response);
+    const result = message.result;
+    console.log(id, type, result);
 };
 
 port.postMessage({ id, type, payload });
@@ -105,13 +105,11 @@ aria2.onmessage = function(message) {
 };
 
 await aria2.subscribe();
-await aria2.connect(jsonrpc, secret, callback);
+await aria2.connect(jsonrpc, secret);
 ```
 
 - [jsonrpc](#jsonrpc)
 - [secret](#secret)
-- callback
-    - Function runs when failed to open `Websocket` before retries
 
 ```javascript
 let response = await aria2.call(method, params);
