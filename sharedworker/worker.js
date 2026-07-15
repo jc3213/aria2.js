@@ -1,10 +1,8 @@
 const aria2 = (() => {
     let pending = {};
     let index = 0;
-    let connectId = 0;
-
     let retries = 10;
-    let timeout = 10000;
+    let timeout = 10;
     let events = {};
 
     let shared = document.currentScript.src.replace('worker.js', 'shared.js');
@@ -15,15 +13,15 @@ const aria2 = (() => {
 
     port.onmessage = (event) => {
         let data = event.data;
-        let func = events[data.type];
+        let cast = events[data.type];
 
-        if (func) {
-            func(data.details);
+        if (cast) {
+            cast(data.details);
             return;
         }
 
         let id = data.id;
-        func = pending[id];
+        let func = pending[id];
 
         if (func) {
             func(data.result);
@@ -46,26 +44,6 @@ const aria2 = (() => {
         });
     }
 
-    async function connect(jsonrpc, secret) {
-        let id = ++connectId;
-
-        for (let i = 0; i <= retries; i++) {
-            if (id !== connectId) {
-                throw new Error('Connection aborted: operation cancelled');
-            }
-
-            let result = await broadcast('connect', { jsonrpc, secret });
-
-            if (result.ok) {
-                return true;
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, timeout));
-        }
-
-        throw new Error('Connection failed: retries exhausted');
-    }
-
     let aria2 = {
         call(method, params) {
             return broadcast('call', { method, params });
@@ -73,7 +51,9 @@ const aria2 = (() => {
         multicall(requests) {
             return broadcast('multicall', requests);
         },
-        connect,
+        connect(jsonrpc, secret) {
+            return broadcast('connect', { jsonrpc, secret });
+        },
         disconnect() {
             return broadcast('disconnect');
         },
@@ -128,29 +108,29 @@ const aria2 = (() => {
         get() {
             return retries;
         },
-        set(number) {
-            let n = number | 0;
+        async set(number) {
+            let result = await broadcast('retries', number);
 
-            if (number < 0) {
-                retries = Infinity;
-            } else {
-                retries = number;
+            if (result.error) {
+                throw new Error(result.error);
             }
+
+            retries = result.ok;
         }
     });
 
     Object.defineProperty(aria2, 'timeout', {
         get() {
-            return timeout / 1000;
+            return timeout;
         },
-        set(number) {
-            let n = number | 0;
+        async set(number) {
+            let result = await broadcast('timeout', number);
 
-            if (n > 1) {
-                timeout = n * 1000;
-            } else {
-                timeout = 1000;
+            if (result.error) {
+                throw new Error(result.error);
             }
+
+            timeout = result.ok;
         }
     });
 

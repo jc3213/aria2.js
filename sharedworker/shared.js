@@ -1,5 +1,8 @@
 let jsonrpc = null;
 let secret = 'token:';
+let current = 0;
+let maximum = 10;
+let interval = 10;
 
 let pending = {};
 let ports = new Set();
@@ -8,34 +11,51 @@ let wsSock = null;
 let wsReady = false;
 
 function wsOpen() {
-    for (let port of ports) {
-        port.postMessage({ type: 'ws:open' });
-    }
+    wsSock = new WebSocket(jsonrpc);
 
-    wsReady = true;
-    return { ok: true };
-}
+    wsSock.onmessage = (event) => {
+        let json = JSON.parse(event.data);
 
-function wsMessage(event) {
-    let json = JSON.parse(event.data);
-
-    if ('method' in json) {
-        for (let port of ports) {
-            port.postMessage({ type: 'ws:message', details: json });
+        if (json.method) {
+            for (let port of ports) {
+                port.postMessage({ type: 'ws:message', details: json });
+            }
+        } else {
+            let id = json.id;
+            pending[id](json);
+            delete pending[id];
         }
-    } else {
-        let id = json.id;
-        pending[id](json);
-        delete pending[id];
-    }
-}
+    };
 
-function wsClose() {
-    for (let port of ports) {
-        port.postMessage({ type: 'ws:close' });
-    }
+    wsSock.onclose = () => {
+        for (let port of ports) {
+            port.postMessage({ type: 'ws:close' });
+        }
 
-    wsReady = false;
+        if (current++ < maximum) {
+            setTimeout(wsOpen, interval * 1000);
+        } else {
+            current = 0;
+        }
+
+        wsReady = false;
+    };
+
+    return new Promise((resolve) => {
+        wsSock.onopen = () => {
+            for (let port of ports) {
+                port.postMessage({ type: 'ws:open' });
+            }
+
+            current = 0;
+            wsReady = true;
+            resolve({ ok: true });
+        };
+
+        wsSock.onerror = () => {
+            resolve({ error: 'Failed to open WebSocket connection' });
+        };
+    });
 }
 
 function wsSend(json) {
@@ -49,6 +69,39 @@ function wsSend(json) {
         pending[id] = resolve;
         wsSock.send(JSON.stringify(json));
     });
+}
+
+function retries(port, id, number) {
+    if (number == null) {
+        return { ok: maximum };
+    }
+
+    if (isNaN(number)) {
+        return { error: 'Invalid "retries": must be a number' };
+    }
+
+    let n = number | 0;
+
+    if (number < 0) {
+        maximum = Infinity;
+    } else {
+        maximum = n;
+    }
+
+    return { ok: maximum };
+}
+
+function timeout(port, id, number) {
+    if (number == null) {
+        return { ok: interval };
+    }
+
+    if (isNaN(number)) {
+        return { error: 'Invalid "retries": must be a number' };
+    }
+
+    interval = number | 0;
+    return { ok: interval };
 }
 
 function connect(port, id, config) {
@@ -76,17 +129,12 @@ function connect(port, id, config) {
         wsSock.close();
     }
 
-    return new Promise((resolve) => {
-        wsSock = new WebSocket(jsonrpc);
-        wsSock.onopen = () => resolve(wsOpen());
-        wsSock.onmessage = wsMessage;
-        wsSock.onerror = () => resolve({ error: 'Failed to open WebSocket connection' });
-        wsSock.onclose = wsClose;
-    });
+    return wsOpen();
 }
 
 function disconnect() {
     if (wsReady) {
+        current = Infinity;
         wsSock.close();
         return { ok: true };
     }
