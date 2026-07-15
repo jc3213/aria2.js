@@ -100,7 +100,14 @@ function timeout(port, id, number) {
         return { error: 'Invalid "retries": must be a number' };
     }
 
-    interval = number | 0;
+    let n = number | 0;
+
+    if (n > 0) {
+        interval = n;
+    } else {
+        interval = 1;
+    }
+
     return { ok: interval };
 }
 
