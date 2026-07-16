@@ -2,6 +2,7 @@ const aria2 = (() => {
     let pending = {};
     let hash = Date.now().toString(36) + '-' + Math.random().toString(36).substring(2);
     let index = 0;
+
     let retries = 10;
     let timeout = 10;
     let events = {};
