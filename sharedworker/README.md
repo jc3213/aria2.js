@@ -21,6 +21,8 @@ Invoke-WebRequest "https://jc3213.github.io/aria2.js/sharedworker/aria2-wrapper.
 ### File System
 ```
 /aria2-socket-worker.js
+/index.html
+/index.js
 ```
 
 ### Javascript
@@ -85,6 +87,8 @@ port.postMessage({ id, type, payload });
 ```
 /aria2-socket-worker.js
 /aria2-wrapper.js
+/index.html
+/index.js
 ```
 
 ### HTML
