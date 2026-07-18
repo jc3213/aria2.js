@@ -1,6 +1,6 @@
 | Library | SharedWorker | Browser Extension | Web UI & Electron App |
 | - | - | - | - |
-| [aria2.js](//jc3213.github.io/aria2.js/) | [shared.js](//jc3213.github.io/aria2.js/sharedworker/) | [Download with Aria2](https://jc3213.github.io/download_with_aria2/) | [Aria2 Task Manager](https://jc3213.github.io/aria2.app/) |
+| [aria2.js](//jc3213.github.io/aria2.js/) | [aria2-socket-worker.js](//jc3213.github.io/aria2.js/sharedworker/) | [Download with Aria2](https://jc3213.github.io/download_with_aria2/) | [Aria2 Task Manager](https://jc3213.github.io/aria2.app/) |
 
 ### HTML
 ```HTML
