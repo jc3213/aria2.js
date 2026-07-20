@@ -2,12 +2,9 @@ const aria2 = (() => {
     let pending = {};
     let hash = Date.now().toString(36) + '-' + Math.random().toString(36).substring(2);
     let index = 0;
-
-    let retries = 10;
-    let timeout = 10;
     let events = {};
 
-    let shared = document.currentScript.src.replace('shared-wrapper.js', 'aria2-socket-worker.js');
+    let shared = document.currentScript.src.replace('worker-client.js', 'socket-worker.js');
     let worker = new SharedWorker(shared, { name: 'aria2-socket-worker' });
     let port = worker.port;
 
@@ -100,33 +97,31 @@ const aria2 = (() => {
         }
     });
 
+    async function options(props, number) {
+        let result = await broadcast(props, number);
+
+        if (result.error) {
+            throw new Error(result.error);
+        }
+
+        return result.ok;
+    }
+
     Object.defineProperty(aria2, 'retries', {
         get() {
-            return retries;
+            return options('retries');
         },
-        async set(number) {
-            let result = await broadcast('retries', number);
-
-            if (result.error) {
-                throw new Error(result.error);
-            }
-
-            retries = result.ok;
+        set(number) {
+            return options('retries', number);
         }
     });
 
     Object.defineProperty(aria2, 'timeout', {
         get() {
-            return timeout;
+            return options('timeout');
         },
-        async set(number) {
-            let result = await broadcast('timeout', number);
-
-            if (result.error) {
-                throw new Error(result.error);
-            }
-
-            timeout = result.ok;
+        set(number) {
+            return options('timeout', number);
         }
     });
 
