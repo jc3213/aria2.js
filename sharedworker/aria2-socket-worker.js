@@ -76,14 +76,14 @@ function retries(port, id, value) {
         return { ok: maximum };
     }
 
-    if (isNaN(value)) {
-        return { error: 'Invalid "retries": must be a number' };
+    if (!Number.isInteger(value)) {
+        return { error: 'Invalid "retries": must be an integer' };
     }
 
-    maximum = value | 0;
-
-    if (maximum < 0) {
+    if (value < 0) {
         maximum = Infinity;
+    } else {
+        maximum = value;
     }
 
     return { ok: maximum };
@@ -94,13 +94,13 @@ function timeout(port, id, value) {
         return { ok: interval };
     }
 
-    if (isNaN(value)) {
-        return { error: 'Invalid "retries": must be a number' };
+    if (!Number.isInteger(value)) {
+        return { error: 'Invalid "retries": must be an integer' };
     }
 
-    interval = number | 0;
-
-    if (interval < 1) {
+    if (value > 0) {
+        interval = value;
+    } else {
         interval = 1;
     }
 
