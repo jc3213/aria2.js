@@ -97,8 +97,8 @@ const aria2 = (() => {
         }
     });
 
-    async function options(props, number) {
-        let result = await broadcast(props, number);
+    async function options(props, value) {
+        let result = await broadcast(props, value);
 
         if (result.error) {
             throw new Error(result.error);
@@ -111,8 +111,8 @@ const aria2 = (() => {
         get() {
             return options('retries');
         },
-        set(number) {
-            return options('retries', number);
+        set(value) {
+            return options('retries', value);
         }
     });
 
@@ -120,8 +120,8 @@ const aria2 = (() => {
         get() {
             return options('timeout');
         },
-        set(number) {
-            return options('timeout', number);
+        set(value) {
+            return options('timeout', value);
         }
     });
 
