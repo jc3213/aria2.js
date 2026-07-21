@@ -71,40 +71,36 @@ function wsSend(json) {
     });
 }
 
-function retries(port, id, number) {
-    if (number == null) {
+function retries(port, id, value) {
+    if (value == null) {
         return { ok: maximum };
     }
 
-    if (isNaN(number)) {
+    if (isNaN(value)) {
         return { error: 'Invalid "retries": must be a number' };
     }
 
-    let n = number | 0;
+    maximum = value | 0;
 
-    if (number < 0) {
+    if (maximum < 0) {
         maximum = Infinity;
-    } else {
-        maximum = n;
     }
 
     return { ok: maximum };
 }
 
-function timeout(port, id, number) {
-    if (number == null) {
+function timeout(port, id, value) {
+    if (value == null) {
         return { ok: interval };
     }
 
-    if (isNaN(number)) {
+    if (isNaN(value)) {
         return { error: 'Invalid "retries": must be a number' };
     }
 
-    let n = number | 0;
+    interval = number | 0;
 
-    if (n > 0) {
-        interval = n;
-    } else {
+    if (interval < 1) {
         interval = 1;
     }
 
