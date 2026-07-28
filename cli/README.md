@@ -1,5 +1,5 @@
 ## First of all
-- Download the latest [aria2c](https://github.com/aria2/aria2/releases/latest)
+- Download the latest [aria2c](https://github.com/jc3213/aria2.js/releases/latest)
     - X:\aria2c.cmd
     - X:\aria2c.conf
     - X:\aria2c.session
