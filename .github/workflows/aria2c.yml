@@ -1,0 +1,87 @@
+name: aria2-nightly-build
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check-upstream:
+    runs-on: ubuntu-22.04
+    outputs:
+      skip: ${{ steps.compare.outputs.skip }}
+      tag: ${{ steps.info.outputs.tag }}
+      filename: ${{ steps.info.outputs.filename }}
+      hash: ${{ steps.info.outputs.hash }}
+
+    steps:
+    - name: 📥 Checkout upstream
+      uses: actions/checkout@v7
+      with:
+        repository: aria2/aria2
+        fetch-depth: 1
+
+    - name: 🔍 Get latest commit info
+      id: info
+      run: |
+        HASH=$(git rev-parse --short HEAD)
+        DATE=$(git show -s --format=%cd --date=format:%Y%m%d HEAD)
+
+        TAG="${DATE}-${HASH}"
+        FILENAME="aria2c-${TAG}.exe"
+
+        echo "hash=$HASH" >> $GITHUB_OUTPUT
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+
+    - name: 🔍 Check if release exists
+      id: compare
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        if gh release view "${{ steps.info.outputs.tag }}" >/dev/null 2>&1; then
+          echo "skip=true" >> $GITHUB_OUTPUT
+        else
+          echo "skip=false" >> $GITHUB_OUTPUT
+        fi
+
+  build-binaries:
+    needs: check-upstream
+    if: needs.check-upstream.outputs.skip == 'false'
+    runs-on: ubuntu-22.04
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: ${{ needs.check-upstream.outputs.tag }}
+      FILENAME: ${{ needs.check-upstream.outputs.filename }}
+      HASH: ${{ needs.check-upstream.outputs.hash }}
+
+    steps:
+    - name: 📥 Checkout current
+      uses: actions/checkout@v7
+
+    - name: 📥 Clone upstream source
+      run: |
+        git clone --depth=1 https://github.com/aria2/aria2.git upstream-aria2
+        cd upstream-aria2
+
+    - name: 🔧 Patch Dockerfile.mingw
+      run: |
+        sed -i 's|https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz|https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz|' upstream-aria2/Dockerfile.mingw
+
+    - name: 🏗️ Build Windows binary
+      run: |
+        docker build -f upstream-aria2/Dockerfile.mingw -t aria2-mingw upstream-aria2
+        cid=$(docker create aria2-mingw)
+        docker cp "$cid":/aria2/src/aria2c.exe "./${FILENAME}"
+        docker rm "$cid"
+
+    - name: 🚀 Publish Release
+      run: |
+        gh release create "${TAG}" \
+          "${FILENAME}" \
+          --title "${TAG}" \
+          --notes "Automated aria2 Windows build from commit [${HASH}](https://github.com/aria2/aria2/commit/${HASH})"
