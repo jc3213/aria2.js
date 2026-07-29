@@ -42,7 +42,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        if gh release view "${{ steps.info.outputs.tag }}" >/dev/null 2>&1; then
+        if gh release view "${{ steps.info.outputs.tag }}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
           echo "skip=true" >> $GITHUB_OUTPUT
         else
           echo "skip=false" >> $GITHUB_OUTPUT
