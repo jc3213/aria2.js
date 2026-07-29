@@ -81,6 +81,6 @@ jobs:
       run: |
         gh release create "${TAG}" \
           "${FILENAME}" \
-          --repo "${GITHUB_REPOSITORY}"
+          --repo "${GITHUB_REPOSITORY}" \
           --title "${TAG}" \
           --notes "Automated aria2 Windows build from commit [${HASH}](https://github.com/aria2/aria2/commit/${HASH})"
