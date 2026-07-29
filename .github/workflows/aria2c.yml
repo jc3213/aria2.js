@@ -60,21 +60,19 @@ jobs:
       HASH: ${{ needs.check-upstream.outputs.hash }}
 
     steps:
-    - name: 📥 Checkout current
+    - name: 📥 Checkout upstream
       uses: actions/checkout@v7
-
-    - name: 📥 Clone upstream source
-      run: |
-        git clone --depth=1 https://github.com/aria2/aria2.git upstream-aria2
-        cd upstream-aria2
-
+      with:
+        repository: aria2/aria2
+        fetch-depth: 1
+    
     - name: 🔧 Patch Dockerfile.mingw
       run: |
-        sed -i 's|https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz|https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz|' upstream-aria2/Dockerfile.mingw
+        sed -i 's|https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz|https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz|' Dockerfile.mingw
 
     - name: 🏗️ Build Windows binary
       run: |
-        docker build -f upstream-aria2/Dockerfile.mingw -t aria2-mingw upstream-aria2
+        docker build -f Dockerfile.mingw -t aria2-mingw .
         cid=$(docker create aria2-mingw)
         docker cp "$cid":/aria2/src/aria2c.exe "./${FILENAME}"
         docker rm "$cid"
@@ -83,5 +81,6 @@ jobs:
       run: |
         gh release create "${TAG}" \
           "${FILENAME}" \
+          --repo "${GITHUB_REPOSITORY}"
           --title "${TAG}" \
           --notes "Automated aria2 Windows build from commit [${HASH}](https://github.com/aria2/aria2/commit/${HASH})"
