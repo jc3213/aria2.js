@@ -4,7 +4,7 @@ let current = 0;
 let maximum = 10;
 let interval = 10;
 
-let pending = {};
+let pending = new Map();
 let ports = new Set();
 
 let wsSock = null;
@@ -15,19 +15,29 @@ function wsOpen() {
 
     wsSock.onmessage = (event) => {
         let json = JSON.parse(event.data);
+        let id = json.id;
 
-        if (json.method) {
+        if (id !== undefined) {
+            let session = pending.get(id);
+
+            if (session) {
+                pending.delete(id);
+                session.resolve(json);
+            }
+        } else {
             for (let port of ports) {
                 port.postMessage({ type: 'ws:message', details: json });
             }
-        } else {
-            let id = json.id;
-            pending[id](json);
-            delete pending[id];
         }
     };
 
     wsSock.onclose = () => {
+        for (let session of pending.values()) {
+            session.reject(new Error('WebSocket connection closed'));
+        }
+
+        pending.clear();
+
         for (let port of ports) {
             port.postMessage({ type: 'ws:close' });
         }
@@ -66,7 +76,7 @@ function wsSend(json) {
         }
 
         let id = json.id;
-        pending[id] = resolve;
+        pending.set(id, { resolve, reject });
         wsSock.send(JSON.stringify(json));
     });
 }

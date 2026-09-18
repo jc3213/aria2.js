@@ -6,6 +6,7 @@ class Aria2 {
     #tries = 0;
     #retries = 10;
     #timeout = 10000;
+    #pending = new Map();
     #onopen = null;
     #onmessage = null;
     #onclose = null;
@@ -106,14 +107,13 @@ class Aria2 {
     }
 
     #send(json) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             if (!this.#ready) {
                 throw new Error('WebSocket error: failed to send message');
             }
 
-            let socket = this.#socket;
-            this[json.id] = resolve;
-            socket.send(JSON.stringify(json));
+            this.#pending.set(json.id, { resolve, reject });
+            this.#socket.send(JSON.stringify(json));
         });
     }
 
@@ -179,22 +179,36 @@ class Aria2 {
 
         socket.onmessage = (event) => {
             let json = JSON.parse(event.data);
+            let id = json.id;
 
-            if (json.method) {
+            if (id !== undefined) {
+                let pending = this.#pending;
+                let resolve = pending.get(id);
+
+                if (resolve) {
+                    pending.delete(id);
+                    resolve(json);
+                }
+            } else {
                 let onmessage = this.#onmessage;
 
                 if (onmessage) {
                     onmessage(json);
                 }
-            } else {
-                let id = json.id;
-                this[id](json);
-                delete this[id];
             }
         };
 
         socket.onclose = (event) => {
+            this.#call = this.#post;
             this.#ready = false;
+
+            let pending = this.#pending;
+
+            for (let session of pending.values()) {
+                session.reject(new Error('WebSocket connection closed'));
+            }
+
+            this.#pending.clear();
 
             let onclose = this.#onclose;
 

@@ -1,8 +1,8 @@
 const aria2 = (() => {
-    let pending = {};
     let hash = Date.now().toString(36) + '-' + Math.random().toString(36).substring(2);
     let index = 0;
     let events = {};
+    let pending = new Map();
 
     let shared = document.currentScript.src.replace('worker-client.js', 'socket-worker.js');
     let worker = new SharedWorker(shared, { name: 'aria2-socket-worker' });
@@ -12,19 +12,21 @@ const aria2 = (() => {
 
     port.onmessage = (event) => {
         let data = event.data;
-        let cast = events[data.type];
+        let id = data.id;
 
-        if (cast) {
-            cast(data.details);
+        let func = pending.get(id);
+
+        if (func) {
+            pending.delete(id);
+            func(data.result);
             return;
         }
 
-        let id = data.id;
-        let func = pending[id];
+        let post = events[data.type];
 
-        if (func) {
-            func(data.result);
-            delete pending[id];
+        if (post) {
+            post(data.details);
+            return;
         }
     };
 
@@ -32,7 +34,7 @@ const aria2 = (() => {
         let id = hash + '-' + index++ + '-' + type;
 
         return new Promise((resolve) => {
-            pending[id] = resolve;
+            pending.set(id, resolve);
             port.postMessage({ id, type, payload });
         });
     }
