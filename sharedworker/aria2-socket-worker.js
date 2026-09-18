@@ -71,7 +71,7 @@ function wsOpen() {
 function wsSend(json) {
     return new Promise((resolve, reject) => {
         if (!wsReady) {
-            reject({ error: 'Failed to send message to JSON-RPC' });
+            reject({ error: 'Failed to send message via WebSocket' });
             return;
         }
 
@@ -152,7 +152,7 @@ function disconnect() {
         return { ok: true };
     }
 
-    return { error: 'WebSocket connection is not opened' };
+    return { error: 'WebSocket connection is closed' };
 }
 
 function subscribe(port) {
