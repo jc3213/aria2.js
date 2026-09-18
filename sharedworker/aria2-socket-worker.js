@@ -32,11 +32,15 @@ function wsOpen() {
     };
 
     wsSock.onclose = () => {
-        for (let session of pending.values()) {
-            session.reject(new Error('WebSocket connection closed'));
-        }
+        wsReady = false;
 
-        pending.clear();
+        if (pending.size > 0) {
+            for (let session of pending.values()) {
+                session.reject(new Error('WebSocket connection closed'));
+            }
+
+            pending.clear();
+        }
 
         for (let port of ports) {
             port.postMessage({ type: 'ws:close' });
@@ -47,18 +51,17 @@ function wsOpen() {
         } else {
             current = 0;
         }
-
-        wsReady = false;
     };
 
     return new Promise((resolve) => {
         wsSock.onopen = () => {
+            current = 0;
+            wsReady = true;
+
             for (let port of ports) {
                 port.postMessage({ type: 'ws:open' });
             }
 
-            current = 0;
-            wsReady = true;
             resolve({ ok: true });
         };
 
