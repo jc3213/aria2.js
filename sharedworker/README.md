@@ -101,7 +101,7 @@ port.postMessage({ id, type, payload });
 await aria2.retries(10); // Default
 await aria2.timeout(10); // Default
 
-console.log(await aria2.get('retries'), await aria2.get('timeout'));
+console.log(await aria2.retries(), await aria2.timeout());
 
 aria2.onopen = function() {
     console.log("WebSocket connection is opened");
