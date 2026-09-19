@@ -6,6 +6,7 @@ class Aria2 {
     #tries = 0;
     #retries = 10;
     #timeout = 10000;
+    #timer;
     #pending = new Map();
     #onopen = null;
     #onmessage = null;
@@ -106,6 +107,90 @@ class Aria2 {
         return this.#onclose;
     }
 
+    #open() {
+        let socket = this.#socket;
+        let url = this.#url;
+
+        if (socket) {
+            let readyState = socket.readyState;
+
+            if (socket.url === url) {
+                if (readyState === 0) {
+                    throw new Error('WebSocket error: connection is still in CONNECTING state');
+                }
+                if (readyState === 1) {
+                    return;
+                }
+            }
+
+            socket.onopen = null;
+            socket.onmessage = null;
+            socket.onclose = null;
+            socket.close();
+        }
+
+        socket = new WebSocket(url);
+        this.#socket = socket;
+
+        socket.onopen = (event) => {
+            this.#ready = true;
+            this.#tries = 0;
+
+            let onopen = this.#onopen;
+
+            if (onopen) {
+                onopen(event);
+            }
+        };
+
+        socket.onmessage = (event) => {
+            let json = JSON.parse(event.data);
+            let id = json.id;
+
+            if (id !== undefined) {
+                let pending = this.#pending;
+                let session = pending.get(id);
+
+                if (session) {
+                    pending.delete(id);
+                    session.resolve(json);
+                }
+            } else {
+                let onmessage = this.#onmessage;
+
+                if (onmessage) {
+                    onmessage(json);
+                }
+            }
+        };
+
+        socket.onclose = (event) => {
+            this.#ready = false;
+
+            let pending = this.#pending;
+
+            if (pending.size > 0) {
+                for (let session of pending.values()) {
+                    session.reject(new Error('WebSocket error: connection closed'));
+                }
+
+                pending.clear();
+            }
+
+            let onclose = this.#onclose;
+
+            if (onclose) {
+                onclose(event);
+            }
+
+            if (this.#tries++ < this.#retries) {
+                this.#timer = setTimeout(() => this.#open(), this.#timeout);
+            } else {
+                this.#tries = 0;
+            }
+        };
+    }
+
     #send(json) {
         return new Promise((resolve, reject) => {
             if (!this.#ready) {
@@ -148,87 +233,16 @@ class Aria2 {
     }
 
     connect() {
-        let socket = this.#socket;
-        let url = this.#url;
-
-        if (socket) {
-            let readyState = socket.readyState;
-
-            if (readyState === 0) {
-                throw new Error('WebSocket error: connection is still in CONNECTING state');
-            }
-
-            if (readyState === 1 && socket.url === url) {
-                return;
-            }
-        }
-
-        socket = new WebSocket(url);
-        this.#socket = socket;
-
-        socket.onopen = (event) => {
-            this.#tries = 0;
-            this.#ready = true;
-
-            let onopen = this.#onopen;
-
-            if (onopen) {
-                onopen(event);
-            }
-        };
-
-        socket.onmessage = (event) => {
-            let json = JSON.parse(event.data);
-            let id = json.id;
-
-            if (id !== undefined) {
-                let pending = this.#pending;
-                let resolve = pending.get(id);
-
-                if (resolve) {
-                    pending.delete(id);
-                    resolve(json);
-                }
-            } else {
-                let onmessage = this.#onmessage;
-
-                if (onmessage) {
-                    onmessage(json);
-                }
-            }
-        };
-
-        socket.onclose = (event) => {
-            this.#call = this.#post;
-            this.#ready = false;
-
-            let pending = this.#pending;
-
-            if (pending.size > 0) {
-                for (let session of pending.values()) {
-                    session.reject(new Error('WebSocket error: connection closed'));
-                }
-
-                pending.clear();
-            }
-
-            let onclose = this.#onclose;
-
-            if (onclose) {
-                onclose(event);
-            }
-
-            if (this.#tries++ < this.#retries) {
-                setTimeout(() => this.connect(), this.#timeout);
-            } else {
-                this.#tries = 0;
-            }
-        };
+        clearTimeout(this.#timer);
+        this.#tries = 0;
+        this.#open();
     }
 
     disconnect() {
+        clearTimeout(this.#timer);
+        this.#tries = Infinity;
+
         if (this.#ready) {
-            this.#tries = Infinity;
             this.#socket.close();
         }
     }
