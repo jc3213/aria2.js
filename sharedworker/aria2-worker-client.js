@@ -2,45 +2,79 @@ const aria2 = (() => {
     let hash = Date.now().toString(36) + '-' + Math.random().toString(36).substring(2);
     let index = 0;
 
+    let events = {};
+    let options = new Set(['retries', 'timeout'])
     let pending = new Map();
-    let handlers = {};
 
-    let options = new Set(['retries', 'timeout']);
-    let events = new Set(['open', 'message', 'close']);
+    let port = new Promise(async (resolve, reject) => {
+        if (typeof window !== 'undefined' && typeof SharedWorker !== 'undefined') {
+            let worker = new SharedWorker('/aria2-socket-worker.js', { name: 'aria2-socket-worker' });
+            let port = worker.port;
+            port.start();
 
-    let shared = document.currentScript.src.replace('worker-client.js', 'socket-worker.js');
-    let worker = new SharedWorker(shared, { name: 'aria2-socket-worker' });
-    let port = worker.port;
+            window.addEventListener('pagehide', () => {
+                aria2.unsubscribe();
+            });
 
-    port.start();
-
-    port.onmessage = (event) => {
-        let data = event.data;
-        let id = data.id;
-
-        let func = pending.get(id);
-
-        if (func) {
-            pending.delete(id);
-            func(data.result);
+            resolve(port);
             return;
         }
 
-        let post = handlers[data.type];
+        if (typeof chrome !== 'undefined' && chrome.offscreen !== 'undefined') {
+            let offscreen = chrome.runtime.getURL('/offscreen.html');
 
-        if (post) {
-            post(data.details);
+            chrome.runtime.onConnect.addListener((port) => {
+                if (port.name === 'offscreen') {
+                    resolve(port);
+                }
+            });
+
+            chrome.offscreen.createDocument({
+                url: offscreen,
+                reasons: ['WORKERS'],
+                justification: 'Host of SharedWorker'
+            }).catch(reject);
+
             return;
         }
-    };
 
-    function broadcast(type, payload) {
-        let id = hash + '-' + index++ + '-' + type;
+        reject(new Error('Unsupported runtime environment'));
+    });
+    
+    let message = port.then((port) => {
+        port.onmessage = (event) => {
+            let data = event.data;
+            let id = data.id;
 
-        return new Promise((resolve) => {
-            pending.set(id, resolve);
-            port.postMessage({ id, type, payload });
-        });
+            let func = pending.get(id);
+
+            if (func) {
+                pending.delete(id);
+                func(data.result);
+                return;
+            }
+
+            let post = events[data.type];
+
+            if (post) {
+                post(data.details);
+                return;
+            }
+        };
+
+        return function(type, payload) {
+            let id = hash + '-' + index++ + '-' + type;
+
+            return new Promise((resolve) => {
+                pending.set(id, resolve);
+                port.postMessage({ id, type, payload });
+            });
+        };
+    });
+
+    async function broadcast(type, payload) {
+        broadcast = await message;
+        return broadcast(type, payload);
     }
 
     let aria2 = {
@@ -63,41 +97,50 @@ const aria2 = (() => {
             return broadcast('unsubscribe');
         },
         set(key, value) {
-            if (!options.has(key)) {
-                throw new Error('Invalid option key');
-            }
-
             return broadcast(key, value);
         },
         get(key) {
-            if (!options.has(key)) {
-                throw new Error('Invalid option key');
-            }
-
             return broadcast(key);
-        },
-        on(type, callback) {
-            if (!events.has(type)) {
-                throw new Error('Invalid event type');
-            }
-
-            if (typeof callback === 'function') {
-                handlers['ws:' + type] = callback;
-            } else {
-                handlers['ws:' + type] = null;
-            }
-        },
-        has(type) {
-            if (!events.has(type)) {
-                throw new Error('Invalid event type');
-            }
-
-            return handlers['ws:' + type];
         }
     };
 
-    window.addEventListener('pagehide', (event) => {
-        aria2.unsubscribe();
+    Object.defineProperty(aria2, 'onopen', {
+        get() {
+            return events['ws:open'];
+        },
+        set(callback) {
+            if (typeof callback === 'function') {
+                events['ws:open'] = callback;
+            } else {
+                events['ws:open'] = null;
+            }
+        }
+    });
+
+    Object.defineProperty(aria2, 'onclose', {
+        get() {
+            return events['ws:close'];
+        },
+        set(callback) {
+            if (typeof callback === 'function') {
+                events['ws:close'] = callback;
+            } else {
+                events['ws:close'] = null;
+            }
+        }
+    });
+
+    Object.defineProperty(aria2, 'onmessage', {
+        get() {
+            return events['ws:message'];
+        },
+        set(callback) {
+            if (typeof callback === 'function') {
+                events['ws:message'] = callback;
+            } else {
+                events['ws:message'] = null;
+            }
+        }
     });
 
     return aria2;
