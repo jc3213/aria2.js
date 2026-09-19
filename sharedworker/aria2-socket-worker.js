@@ -142,6 +142,10 @@ function connect(port, id, config) {
             return { ok: true };
         }
 
+        wsSock.onopen = null;
+        wsSock.onmessage = null;
+        wsSock.onerror = null;
+        wsSock.onclose = null;
         wsSock.close();
     }
 
