@@ -57,6 +57,12 @@ const aria2 = (() => {
         },
         unsubscribe() {
             return broadcast('unsubscribe');
+        },
+        set(key, value) {
+            return broadcast(key, value);
+        },
+        get(key) {
+            return broadcast(key);
         }
     };
 
@@ -96,34 +102,6 @@ const aria2 = (() => {
             } else {
                 events['ws:message'] = null;
             }
-        }
-    });
-
-    async function options(props, value) {
-        let result = await broadcast(props, value);
-
-        if (result.error) {
-            throw new Error(result.error);
-        }
-
-        return result.ok;
-    }
-
-    Object.defineProperty(aria2, 'retries', {
-        get() {
-            return options('retries');
-        },
-        set(value) {
-            return options('retries', value);
-        }
-    });
-
-    Object.defineProperty(aria2, 'timeout', {
-        get() {
-            return options('timeout');
-        },
-        set(value) {
-            return options('timeout', value);
         }
     });
 
