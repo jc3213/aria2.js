@@ -77,6 +77,14 @@ const aria2 = (() => {
         return broadcast(type, payload);
     }
 
+    function eventHandler(type, callback) {
+        if (typeof callback === 'function') {
+            events[type] = callback;
+        } else {
+            events[type] = null;
+        }
+    }
+
     let aria2 = {
         call(method, params) {
             return broadcast('call', { method, params });
@@ -90,54 +98,37 @@ const aria2 = (() => {
         disconnect() {
             return broadcast('disconnect');
         },
-        subscribe() {
-            return broadcast('subscribe');
-        },
-        unsubscribe() {
-            return broadcast('unsubscribe');
-        },
         retries(value) {
             return broadcast('retries', value);
         },
         timeout(value) {
             return broadcast('timeout', value);
-        }
-    };
-
-    function eventListener(type, callback) {
-        if (typeof callback === 'function') {
-            events[type] = callback;
-        } else {
-            events[type] = null;
-        }
-    }
-
-    Object.defineProperty(aria2, 'onopen', {
-        get() {
+        },
+        set onopen(callback) {
+            eventHandler('ws:open', callback);
+        },
+        get onopen() {
             return events['ws:open'];
         },
-        set(callback) {
-            eventListener('ws:open', callback);
-        }
-    });
-
-    Object.defineProperty(aria2, 'onclose', {
-        get() {
+        set onclose(callback) {
+            eventHandler('ws:close', callback);
+        },
+        get onclose() {
             return events['ws:close'];
         },
-        set(callback) {
-            eventListener('ws:close', callback);
-        }
-    });
-
-    Object.defineProperty(aria2, 'onmessage', {
-        get() {
+        set onmessage(callback) {
+            eventHandler('ws:message', callback);
+        },
+        get onmessage() {
             return events['ws:message'];
         },
-        set(callback) {
-            eventListener('ws:message', callback);
+        subscribe() {
+            return broadcast('subscribe');
+        },
+        unsubscribe() {
+            return broadcast('unsubscribe');
         }
-    });
+    };
 
     return aria2;
 })();
