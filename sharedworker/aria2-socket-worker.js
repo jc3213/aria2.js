@@ -145,6 +145,7 @@ function connect(port, id, config) {
         wsSock.close();
     }
 
+    current = 0;
     return wsOpen();
 }
 
