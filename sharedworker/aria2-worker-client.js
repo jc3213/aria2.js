@@ -1,8 +1,12 @@
 const aria2 = (() => {
     let hash = Date.now().toString(36) + '-' + Math.random().toString(36).substring(2);
     let index = 0;
-    let events = {};
+
     let pending = new Map();
+    let handlers = {};
+
+    let options = new Set(['retries', 'timeout']);
+    let events = new Set(['open', 'message', 'close']);
 
     let shared = document.currentScript.src.replace('worker-client.js', 'socket-worker.js');
     let worker = new SharedWorker(shared, { name: 'aria2-socket-worker' });
@@ -22,7 +26,7 @@ const aria2 = (() => {
             return;
         }
 
-        let post = events[data.type];
+        let post = handlers[data.type];
 
         if (post) {
             post(data.details);
@@ -59,51 +63,38 @@ const aria2 = (() => {
             return broadcast('unsubscribe');
         },
         set(key, value) {
+            if (!options.has(key)) {
+                throw new Error('Invalid option key');
+            }
+
             return broadcast(key, value);
         },
         get(key) {
+            if (!options.has(key)) {
+                throw new Error('Invalid option key');
+            }
+
             return broadcast(key);
+        },
+        on(type, callback) {
+            if (!events.has(type)) {
+                throw new Error('Invalid event type');
+            }
+
+            if (typeof callback === 'function') {
+                handlers['ws:' + type] = callback;
+            } else {
+                handlers['ws:' + type] = null;
+            }
+        },
+        has(type) {
+            if (!events.has(type)) {
+                throw new Error('Invalid event type');
+            }
+
+            return handlers['ws:' + type];
         }
     };
-
-    Object.defineProperty(aria2, 'onopen', {
-        get() {
-            return events['ws:open'];
-        },
-        set(callback) {
-            if (typeof callback === 'function') {
-                events['ws:open'] = callback;
-            } else {
-                events['ws:open'] = null;
-            }
-        }
-    });
-
-    Object.defineProperty(aria2, 'onclose', {
-        get() {
-            return events['ws:close'];
-        },
-        set(callback) {
-            if (typeof callback === 'function') {
-                events['ws:close'] = callback;
-            } else {
-                events['ws:close'] = null;
-            }
-        }
-    });
-
-    Object.defineProperty(aria2, 'onmessage', {
-        get() {
-            return events['ws:message'];
-        },
-        set(callback) {
-            if (typeof callback === 'function') {
-                events['ws:message'] = callback;
-            } else {
-                events['ws:message'] = null;
-            }
-        }
-    });
 
     window.addEventListener('pagehide', (event) => {
         aria2.unsubscribe();
