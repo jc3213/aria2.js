@@ -127,5 +127,9 @@ const aria2 = (() => {
         }
     });
 
+    window.addEventListener('pagehide', (event) => {
+        aria2.unsubscribe();
+    });
+
     return aria2;
 })();
