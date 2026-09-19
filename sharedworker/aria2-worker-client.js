@@ -96,24 +96,28 @@ const aria2 = (() => {
         unsubscribe() {
             return broadcast('unsubscribe');
         },
-        set(key, value) {
-            return broadcast(key, value);
+        retries(value) {
+            return broadcast('retries', value);
         },
-        get(key) {
-            return broadcast(key);
+        timeout(value) {
+            return broadcast('timeout', value);
         }
     };
+
+    function eventListener(type, callback) {
+        if (typeof callback === 'function') {
+            events[type] = callback;
+        } else {
+            events[type] = null;
+        }
+    }
 
     Object.defineProperty(aria2, 'onopen', {
         get() {
             return events['ws:open'];
         },
         set(callback) {
-            if (typeof callback === 'function') {
-                events['ws:open'] = callback;
-            } else {
-                events['ws:open'] = null;
-            }
+            eventListener('ws:open', callback);
         }
     });
 
@@ -122,11 +126,7 @@ const aria2 = (() => {
             return events['ws:close'];
         },
         set(callback) {
-            if (typeof callback === 'function') {
-                events['ws:close'] = callback;
-            } else {
-                events['ws:close'] = null;
-            }
+            eventListener('ws:close', callback);
         }
     });
 
@@ -135,11 +135,7 @@ const aria2 = (() => {
             return events['ws:message'];
         },
         set(callback) {
-            if (typeof callback === 'function') {
-                events['ws:message'] = callback;
-            } else {
-                events['ws:message'] = null;
-            }
+            eventListener('ws:message', callback);
         }
     });
 
