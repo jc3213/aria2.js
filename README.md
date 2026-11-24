@@ -40,6 +40,7 @@ aria2.secret = 'mysecret';
 - [secret](#secret)
 - [retries](#retries)
 - [timeout](#timeout)
+- [ready](#ready)
 
 ### url
 - `String`
@@ -86,6 +87,14 @@ aria2.timeout = timeout;
 - `Integer`
 - `10`: Default, equivalent to **10000** millisecond
 - It is recommended to use numbers larger than `3`
+
+### ready
+- `Boolean`
+- status of `Websocket` connection
+- **Readonly**
+```javascript
+const isReady = aria2.ready;
+```
 
 ## Method
 - [connect](#connect)
