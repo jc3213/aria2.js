@@ -74,6 +74,10 @@ class Aria2 {
         return this.#timeout / 1000;
     }
 
+    get ready() {
+        return this.#ready;
+    }
+
     set onopen(callback) {
         if (typeof callback === 'function') {
             this.#onopen = callback;
