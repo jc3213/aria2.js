@@ -74,7 +74,13 @@ class Aria2 {
     }
 
     get ready() {
-        return this.#socket.readyState === WebSocket.OPEN;
+        let socket = this.#socket;
+
+        if (!socket) {
+            return false;
+        }
+
+        return socket.readyState === WebSocket.OPEN;
     }
 
     set onopen(callback) {
@@ -247,7 +253,7 @@ class Aria2 {
         let socket = this.#socket;
 
         if (socket.readyState === WebSocket.OPEN) {
-            this.#socket.close();
+            socket.close();
         }
     }
 }

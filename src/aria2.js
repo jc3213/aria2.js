@@ -275,7 +275,7 @@ class Aria2 {
         let socket = this.#socket;
 
         if (socket.readyState === WebSocket.OPEN) {
-            this.#socket.close();
+            socket.close();
         }
     }
 }
