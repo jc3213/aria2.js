@@ -1,33 +1,33 @@
 | Library | Windows CLI | SharedWorker | Browser Extension | Web UI & Electron App |
 | - | - | - | - | - |
-| [aria2.js](//jc3213.github.io/aria2.js/) | [aria2c.cmd](//jc3213.github.io/aria2.js/cli) | [aria2-socket-worker.js](//jc3213.github.io/aria2.js/sharedworker/) | [Download with Aria2](https://jc3213.github.io/download_with_aria2/) | [Aria2 Task Manager](https://jc3213.github.io/aria2.app/) |
+| [aria2.js](//jc3213.github.io/aria2.js/) | [aria2c.cmd](//jc3213.github.io/aria2.js/cli) | [aria2.sw.js](//jc3213.github.io/aria2.js/sharedworker/) | [Download with Aria2](https://jc3213.github.io/download_with_aria2/) | [Aria2 Task Manager](https://jc3213.github.io/aria2.app/) |
 
 ## Download SharedWorker
 
 ### Bash
 ```bash
-curl -L -O https://jc3213.github.io/aria2.js/sharedworker/aria2-socket-worker.js
-curl -L -O https://jc3213.github.io/aria2.js/sharedworker/aria2-worker-client.js
+curl -L -O https://jc3213.github.io/aria2.js/sharedworker/aria2.sw.js
+curl -L -O https://jc3213.github.io/aria2.js/sharedworker/aria2.sw.proxy.js
 ```
 
 ### Powershell
 ```powershell
-Invoke-WebRequest "https://jc3213.github.io/aria2.js/sharedworker/aria2-socket-worker.js" -OutFile "aria2-socket-worker.js"
-Invoke-WebRequest "https://jc3213.github.io/aria2.js/sharedworker/aria2-worker-client.js" -OutFile "aria2-worker-client.js"
+Invoke-WebRequest "https://jc3213.github.io/aria2.js/sharedworker/aria2.sw.js" -OutFile "aria2.sw.js"
+Invoke-WebRequest "https://jc3213.github.io/aria2.js/sharedworker/aria2.sw.proxy.js" -OutFile "aria2.sw.proxy.js"
 ```
 
 ## Syntax
 
 ### File System
 ```
-/aria2-socket-worker.js
+/aria2.sw.js
 /index.html
 /index.js
 ```
 
 ### Javascript
 ```javascript
-const worker = new SharedWorker('/aria2-socket-worker.js');
+const worker = new SharedWorker('/aria2.sw.js');
 const port = worker.port;
 
 port.start();
@@ -85,15 +85,15 @@ port.postMessage({ id, type, payload });
 
 ### File System
 ```
-/aria2-socket-worker.js
-/aria2-worker-client.js
+/aria2.sw.js
+/aria2.sw.proxy.js
 /index.html
 /index.js
 ```
 
 ### HTML
 ```html
-<script src="/aria2-worker-client.js"></script>
+<script src="/aria2.sw.proxy.js"></script>
 ```
 
 ### Javascript
