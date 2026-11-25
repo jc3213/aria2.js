@@ -8,7 +8,7 @@ class Aria2 {
     #tries = 0;
     #retries = 10;
     #timeout = 10000;
-    #timer;
+    #tick;
     #pending = new Map();
     #onopen = null;
     #onmessage = null;
@@ -202,7 +202,7 @@ class Aria2 {
             }
 
             if (this.#tries++ < this.#retries) {
-                this.#timer = setTimeout(() => this.#open(), this.#timeout);
+                this.#tick = setTimeout(() => this.#open(), this.#timeout);
             } else {
                 this.#tries = 0;
             }
@@ -263,13 +263,13 @@ class Aria2 {
     }
 
     connect() {
-        clearTimeout(this.#timer);
+        clearTimeout(this.#tick);
         this.#tries = 0;
         this.#open();
     }
 
     disconnect() {
-        clearTimeout(this.#timer);
+        clearTimeout(this.#tick);
         this.#tries = Infinity;
 
         let socket = this.#socket;
