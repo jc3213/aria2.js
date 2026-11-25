@@ -7,6 +7,7 @@ on:
     paths:
       - 'src/*.js'
       - 'sharedworker/*.js'
+      - 'singleton/*.js'
   workflow_dispatch:
 
 permissions:
@@ -27,7 +28,7 @@ jobs:
       - name: Minify JS files
         run: |
           mkdir -p min
-          for file in src/*.js sharedworker/*.js; do
+          for file in src/*.js sharedworker/*.js singleton/*.js; do
             [ -f "$file" ] || continue
             base=$(basename "$file" .js)
             npx terser "$file" -o "min/${base}.min.js"
