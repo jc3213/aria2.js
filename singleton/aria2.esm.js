@@ -11,7 +11,44 @@ let onopen = null;
 let onmessage = null;
 let onclose = null;
 
+function abort() {
+    if (pending.size === 0) {
+        return;
+    }
+
+    for (let session of pending.values()) {
+        session.reject(new Error('WebSocket error: connection closed'));
+    }
+
+    pending.clear();
+}
+
 function connect() {
+    if (socket) {
+        if (socket.url === url) {
+            let state = socket.readyState;
+
+            if (state === WebSocket.OPEN) {
+                if (onopen) {
+                    onopen();
+                }
+
+                return;
+            }
+
+            if (state === WebSocket.CONNECTING) {
+                throw new Error('WebSocket error: still in CONNECTING state');
+            }
+
+            socket.onopen = null;
+            socket.onmessage = null;
+            socket.onclose = null;
+            socket.onerror = null;
+        } else {
+            disconnect();
+        }
+    }
+
     socket = new WebSocket(url);
 
     socket.onopen = (event) => {
@@ -41,13 +78,7 @@ function connect() {
     };
 
     socket.onclose = (event) => {
-        if (pending.size > 0) {
-            for (let session of pending.values()) {
-                session.reject(new Error('WebSocket error: connection closed'));
-            }
-
-            pending.clear();
-        }
+        abort();
 
         if (onclose) {
             onclose(event);
@@ -68,15 +99,13 @@ function disconnect() {
 
     let state = socket.readyState;
 
-    if (state !== WebSocket.CLOSED) {
+    if (state === WebSocket.OPEN || state === WebSocket.CONNECTING) {
         socket.onopen = null;
         socket.onmessage = null;
         socket.onclose = null;
         socket.onerror = null;
-    }
-
-    if (state === WebSocket.OPEN || state === WebSocket.CONNECTING) {
         socket.close();
+        abort();
     }
 }
 

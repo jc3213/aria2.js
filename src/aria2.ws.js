@@ -117,8 +117,51 @@ class Aria2 {
         return this.#onclose;
     }
 
+    #abort() {
+        let pending = this.#pending;
+
+        if (pending.size === 0) {
+            return;
+        }
+
+        for (let session of pending.values()) {
+            session.reject(new Error('WebSocket error: connection closed'));
+        }
+
+        pending.clear();
+    }
+
     #open() {
-        let socket = new WebSocket(url);
+        let socket = this.#socket;
+
+        if (socket) {
+            if (socket.url === url) {
+                let state = socket.readyState;
+
+                if (state === WebSocket.OPEN) {
+                    let onopen = this.#onopen;
+
+                    if (onopen) {
+                        onopen();
+                    }
+
+                    return;
+                }
+
+                if (state === WebSocket.CONNECTING) {
+                    throw new Error('WebSocket error: still in CONNECTING state');
+                }
+
+                socket.onopen = null;
+                socket.onmessage = null;
+                socket.onclose = null;
+                socket.onerror = null;
+            } else {
+                this.#close();
+            }
+        }
+
+        socket = new WebSocket(url);
         this.#socket = socket;
 
         socket.onopen = (event) => {
@@ -153,15 +196,7 @@ class Aria2 {
         };
 
         socket.onclose = (event) => {
-            let pending = this.#pending;
-
-            if (pending.size > 0) {
-                for (let session of pending.values()) {
-                    session.reject(new Error('WebSocket error: connection closed'));
-                }
-
-                pending.clear();
-            }
+            this.#abort();
 
             let onclose = this.#onclose;
 
@@ -186,15 +221,13 @@ class Aria2 {
 
         let state = socket.readyState;
 
-        if (state !== WebSocket.CLOSED) {
+        if (state === WebSocket.OPEN || state === WebSocket.CONNECTING) {
             socket.onopen = null;
             socket.onmessage = null;
             socket.onclose = null;
             socket.onerror = null;
-        }
-
-        if (state === WebSocket.OPEN || state === WebSocket.CONNECTING) {
             socket.close();
+            this.#abort();
         }
     }
 
