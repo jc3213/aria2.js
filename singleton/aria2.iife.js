@@ -55,7 +55,7 @@ const aria2 = (() => {
             }
 
             if (tries++ < retries) {
-                tick = setTimeout(open, timeout);
+                tick = setTimeout(connect, timeout);
             } else {
                 tries = 0;
             }
