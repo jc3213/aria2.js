@@ -132,6 +132,7 @@ class Aria2 {
     }
 
     #open() {
+        let url = this.#url;
         let socket = this.#socket;
 
         if (socket) {
