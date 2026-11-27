@@ -118,28 +118,7 @@ class Aria2 {
     }
 
     #open() {
-        let socket = this.#socket;
-        let url = this.#url;
-
-        if (socket) {
-            let readyState = socket.readyState;
-
-            if (socket.url === url) {
-                if (readyState === 0) {
-                    throw new Error('WebSocket error: connection is still in CONNECTING state');
-                }
-                if (readyState === 1) {
-                    return;
-                }
-            }
-
-            socket.onopen = null;
-            socket.onmessage = null;
-            socket.onclose = null;
-            socket.close();
-        }
-
-        socket = new WebSocket(url);
+        let socket = new WebSocket(url);
         this.#socket = socket;
 
         socket.onopen = (event) => {
@@ -198,6 +177,27 @@ class Aria2 {
         };
     }
 
+    #close() {
+        let socket = this.#socket;
+
+        if (!socket) {
+            return;
+        }
+
+        let state = socket.readyState;
+
+        if (state !== WebSocket.CLOSED) {
+            socket.onopen = null;
+            socket.onmessage = null;
+            socket.onclose = null;
+            socket.onerror = null;
+        }
+
+        if (state === WebSocket.OPEN || state === WebSocket.CONNECTING) {
+            socket.close();
+        }
+    }
+
     #send(json) {
         return new Promise((resolve, reject) => {
             let socket = this.#socket;
@@ -250,11 +250,6 @@ class Aria2 {
     disconnect() {
         clearTimeout(this.#tick);
         this.#tries = Infinity;
-
-        let socket = this.#socket;
-
-        if (socket.readyState === WebSocket.OPEN) {
-            socket.close();
-        }
+        this.#close();
     }
 }
